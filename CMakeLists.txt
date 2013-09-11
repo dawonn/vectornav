@@ -51,7 +51,7 @@ find_package(catkin REQUIRED tf)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES vectornav
-   CATKIN_DEPENDS roscpp sensor_msgs tf
+   CATKIN_DEPENDS roscpp sensor_msgs geometry_msgs tf
 #  DEPENDS system_lib
 )
 
