@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package>
+  <name>vectornav</name>
+  <version>0.0.1</version>
+  <description>ROS interface for the VectorNav IMU/GPS</description>
+
+  <maintainer email="dereck@gmail.com">Dereck Wonnacott</maintainer>
+
+  <license>BSD</license>
+
+  <!-- <url type="website">http://ros.org/wiki/vectornav</url> -->
+
+  <author email="dereck@gmail.com">Dereck Wonnacott</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>roscpp</build_depend>  
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>tf</build_depend>
+  
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>nav_msgs</run_depend>
+  <run_depend>tf</run_depend>
+  
+  <!-- Maintainer Note:
+      The vnccpplib directory is from http://www.vectornav.com/support/downloads
+      I removed the version string from the directory and changed file permissions
+      but the contents were not modified.
+   -->
+</package>

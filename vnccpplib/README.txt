@@ -1,0 +1,1 @@
+Please open the file html_help/index.html in a web browser (usually by double-clicking the file) to view all of the documentation for using the VectorNav C/C++ library.
