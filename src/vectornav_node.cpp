@@ -36,8 +36,11 @@
 #include <geometry_msgs/PoseStamped.h> // Should this even be here?
 
 
-std::string port;
-int baud;
+// Parameters
+std::string imu_frame_id, gps_frame_id, gps_time_source;
+double time_offset;
+
+// Publishers
 ros::Publisher pub_imu;
 ros::Publisher pub_magnetic;
 ros::Publisher pub_temp;
@@ -46,6 +49,7 @@ ros::Publisher pub_pressure;
 ros::Publisher pub_gps;
 ros::Publisher pub_gps_time;
 
+// Device Handle
 Vn200 vn200;
 
 
@@ -62,7 +66,7 @@ void poll_timerCB(const ros::TimerEvent&)
     
     static int seq = 0;
     seq++;
-    ros::Time timestamp =  ros::Time::now(); 
+    ros::Time timestamp =  ros::Time::now() + ros::Duration(time_offset); 
     
     
     // INS & GPS Shared Data
@@ -111,7 +115,7 @@ void poll_timerCB(const ros::TimerEvent&)
     sensor_msgs::NavSatFix msg_gps;
     msg_gps.header.seq = seq;
     msg_gps.header.stamp = timestamp;
-    msg_gps.header.frame_id = "gps";  // GPS Antenna frame
+    msg_gps.header.frame_id = gps_frame_id;  // GPS Antenna frame
     
     if (status & 0x4)
       msg_gps.status.status = sensor_msgs::NavSatStatus::STATUS_NO_FIX;
@@ -142,12 +146,16 @@ void poll_timerCB(const ros::TimerEvent&)
     // GPS Time
     sensor_msgs::TimeReference msg_gps_time;
     msg_gps_time.header = msg_gps.header;
-        
-    msg_gps_time.time_ref.sec  = 315964800 + (604800 * gpsWeek) + gpsTime;
+    
+    if ( gps_time_source == "GPS" )   
+      msg_gps_time.time_ref.sec  = (604800 * gpsWeek) + gpsTime;
+    else
+      // TODO: When gpsWeek rolls over, this will fail
+      msg_gps_time.time_ref.sec  = 315964800 + (604800 * gpsWeek) + gpsTime;
+
     msg_gps_time.time_ref.nsec = (gpsTime - (long)gpsTime) * 1000000000; 
-    
+    msg_gps_time.source = gps_time_source;
     pub_gps_time.publish(msg_gps_time);
-    
     
     //   
     // IMU Data
@@ -170,8 +178,9 @@ void poll_timerCB(const ros::TimerEvent&)
       sensor_msgs::Imu msg_imu;
       msg_imu.header.seq = seq;
       msg_imu.header.stamp = timestamp;
-      msg_imu.header.frame_id = "imu"; // IMU sensor frame
+      msg_imu.header.frame_id = imu_frame_id; // IMU sensor frame
       
+      // TODO: If INS solution is unavailable, fall back to naive algorithm
       tf::Quaternion q = tf::createQuaternionFromRPY( M_PI * ypr.c0/180, 
                                                       M_PI * ypr.c1/180, 
                                                       M_PI * ypr.c2/180 );
@@ -227,12 +236,20 @@ int main( int argc, char* argv[] )
   ros::NodeHandle n;
   ros::NodeHandle n_("~");
   
-  int poll_rate;
-  
   // Read Parameters
-  n_.param<std::string>("port"     , port     , "/dev/ttyUSB0");
-  n_.param<int>(        "baud"     , baud     , 115200);
-  n_.param<int>(        "poll_rate", poll_rate, 40);
+  int poll_rate;
+  std::string port;
+  int baud;
+  
+  n_.param<std::string>("serial_port" , port     , "/dev/ttyUSB0");
+  n_.param<int>(        "serial_baud" , baud     , 115200);
+  n_.param<int>(        "poll_rate"   , poll_rate, 40);
+  
+  n_.param<std::string>("imu/frame_id", imu_frame_id, "imu");
+  n_.param<std::string>("gps/frame_id", gps_frame_id, "gps");
+  
+  n_.param<std::string>("time_reference_source", gps_time_source, "UTC");
+  n_.param<double>(     "time_offset"          , time_offset    , 0.0);
   
   ROS_DEBUG("%s %d %d Hz", port.c_str(), baud, poll_rate);
   
@@ -252,6 +269,7 @@ int main( int argc, char* argv[] )
 	// Polling loop
 	ros::Timer poll_timer = n.createTimer(ros::Duration(1.0/(double)poll_rate), poll_timerCB);
 	
+	// TODO?: If only one data type is requested, use ASYC method.
 	// Note: While the VN200 has an Async interface, it can only aquire one 'type' of 
 	//       data at a time, which means that you cannot get both the IMU and INS data at 
 	//       the same time. The Async method allows a 50Hz update rate. 

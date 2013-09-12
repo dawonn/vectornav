@@ -7,9 +7,15 @@
 	  <remap from="gps/fix"         to="gps/fix" />
 	  <remap from="gps/time"        to="gps/time" />	  
 	  
-	  <param name="port"      type="string" value="/dev/ttyUSB0" />
-	  <param name="baud"      type="int"    value="115200" />
-	  <param name="poll_rate" type="int"    value="40" />
+	  <param name="serial_port" type="string" value="/dev/ttyUSB0" />
+	  <param name="serial_baud" type="int"    value="115200" />
+	  <param name="poll_rate"   type="int"    value="40" />
+	  
+	  <param name="imu/frame_id" type="string" value="imu" />
+	  <param name="gps/frame_id" type="string" value="gps" />
+	  
+	  <param name="time_reference_source" type="string" value="UTC" />
+	  <param name="time_offset"           type="double" value="0.0" />
 	</node>	
 	
 </launch>
