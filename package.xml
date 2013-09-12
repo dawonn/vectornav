@@ -6,8 +6,8 @@
 
   <maintainer email="dereck@gmail.com">Dereck Wonnacott</maintainer>
 
-  <license>Apache</license>
-  <license>BSD</license>
+  <license>Apache</license> <!-- ROS Components-->
+  <license>BSD</license>    <!-- vnccpplib -->
 
   <!-- <url type="website">http://ros.org/wiki/vectornav</url> -->
 
@@ -17,12 +17,10 @@
   
   <build_depend>roscpp</build_depend>  
   <build_depend>sensor_msgs</build_depend>
-  <build_depend>geometry_msgs</build_depend>
   <build_depend>tf</build_depend>
   
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
-  <run_depend>geometry_msgs</run_depend>
   <run_depend>tf</run_depend>
   
   <!-- Maintainer Note:

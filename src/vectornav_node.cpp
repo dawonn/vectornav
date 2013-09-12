@@ -33,8 +33,6 @@
 #include <sensor_msgs/NavSatFix.h>
 #include <sensor_msgs/TimeReference.h>
 
-#include <geometry_msgs/PoseStamped.h> // Should this even be here?
-
 
 // Parameters
 std::string imu_frame_id, gps_frame_id, gps_time_source;
