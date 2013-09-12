@@ -6,8 +6,7 @@
 
   <maintainer email="dereck@gmail.com">Dereck Wonnacott</maintainer>
 
-  <license>Apache 2.0</license> <!-- ROS Components-->
-  <license>MIT</license>    <!-- vnccpplib -->
+  <license>MIT</license>
 
   <!-- <url type="website">http://ros.org/wiki/vectornav</url> -->
 
