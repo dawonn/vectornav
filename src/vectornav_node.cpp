@@ -25,6 +25,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <tf/tf.h>
 
 
 ros::Publisher pub_imu;
@@ -234,11 +235,18 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
   msg_imu.header.stamp = timestamp;
   msg_imu.header.frame_id = "imu";
 
+  /*
   msg_imu.orientation.x = data->quaternion.x;
   msg_imu.orientation.y = data->quaternion.y;
   msg_imu.orientation.x = data->quaternion.z;
   msg_imu.orientation.w = data->quaternion.w;
-
+  */
+  
+  tf::Quaternion q = tf::createQuaternionFromRPY( M_PI * data->ypr.yaw/180, 
+                                                  M_PI * data->ypr.pitch/180, 
+                                                  M_PI * data->ypr.roll/180 );
+  tf::quaternionTFToMsg(q, msg_imu.orientation);
+    
   pub_imu.publish(msg_imu);
 
 
@@ -269,7 +277,11 @@ int main( int argc, char* argv[] )
   // Initialize VectorNav
 	Vn200 vn200;
 	vn200_connect(&vn200, COM_PORT, BAUD_RATE);
-  vn200_setAsynchronousDataOutputType(&vn200, 19, true); //19, 20, 22
+	
+	// 19 IMU
+	// 20 GPS
+	// 22 INS
+  vn200_setAsynchronousDataOutputType(&vn200, 22, true);
 	sleep(1);
 	vn200_registerAsyncDataReceivedListener(&vn200, &asyncDataListener);
   
