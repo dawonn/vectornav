@@ -76,7 +76,6 @@ int main( int argc, char* argv[] )
 	Vn200 vn200;
 	vn200_connect(&vn200, port.c_str(), baud);
 	
-	
 	// Polling loop (TODO: convert to timer event)
   ros::Rate loop_rate(50);
   while (ros::ok())
@@ -134,7 +133,48 @@ int main( int argc, char* argv[] )
                           &attitudeUncertainty,
                           &positionUncertainty,
                           &velocityUncertainty );            
-                
+    
+    // GPS Fix
+    sensor_msgs::NavSatFix msg_gps;
+    msg_gps.header.seq = seq;
+    msg_gps.header.stamp = timestamp;
+    msg_gps.header.frame_id = "gps";  // GPS Antenna frame
+    
+    if (status & 0x4)
+      msg_gps.status.status = sensor_msgs::NavSatStatus::STATUS_NO_FIX;
+    else
+      msg_gps.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
+
+    msg_gps.latitude  = LLA.c0;
+    msg_gps.longitude = LLA.c1;
+    msg_gps.altitude  = LLA.c2;
+   
+    msg_gps.position_covariance[0] = positionUncertainty;
+    msg_gps.position_covariance[1] = 0;
+    msg_gps.position_covariance[2] = 0;
+    
+    msg_gps.position_covariance[3] = 0;
+    msg_gps.position_covariance[4] = positionUncertainty;
+    msg_gps.position_covariance[5] = 0;
+    
+    msg_gps.position_covariance[6] = 0;
+    msg_gps.position_covariance[7] = 0;
+    msg_gps.position_covariance[8] = positionUncertainty;
+    
+    msg_gps.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_APPROXIMATED;
+    
+    pub_gps.publish(msg_gps);
+
+    // GPS Time
+    sensor_msgs::TimeReference msg_gps_time;
+    msg_gps_time.header = msg_gps.header;
+        
+    msg_gps_time.time_ref.sec  = (604800 * gpsWeek) + gpsTime;
+    msg_gps_time.time_ref.nsec = (gpsTime - (long)gpsTime) * 1000000000; 
+    
+    pub_gps_time.publish(msg_gps_time);
+    
+       
     // IMU Data
     VnVector3 magnetic, acceleration, angularRate;
     float temperature, pressure;
@@ -200,47 +240,7 @@ int main( int argc, char* argv[] )
       pub_pressure.publish(msg_pressure);
        
     }
-
-    // GPS Fix
-    sensor_msgs::NavSatFix msg_gps;
-    msg_gps.header.seq = seq;
-    msg_gps.header.stamp = timestamp;
-    msg_gps.header.frame_id = "gps";  // GPS Antenna frame
     
-    if (status & 0x4)
-      msg_gps.status.status = sensor_msgs::NavSatStatus::STATUS_NO_FIX;
-    else
-      msg_gps.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
-
-    msg_gps.latitude  = LLA.c0;
-    msg_gps.longitude = LLA.c1;
-    msg_gps.altitude  = LLA.c2;
-   
-    msg_gps.position_covariance[0] = positionUncertainty;
-    msg_gps.position_covariance[1] = 0;
-    msg_gps.position_covariance[2] = 0;
-    
-    msg_gps.position_covariance[3] = 0;
-    msg_gps.position_covariance[4] = positionUncertainty;
-    msg_gps.position_covariance[5] = 0;
-    
-    msg_gps.position_covariance[6] = 0;
-    msg_gps.position_covariance[7] = 0;
-    msg_gps.position_covariance[8] = positionUncertainty;
-    
-    msg_gps.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_APPROXIMATED;
-    
-    pub_gps.publish(msg_gps);
-
-
-    // GPS Time
-    sensor_msgs::TimeReference msg_gps_time;
-    msg_gps_time.header = msg_gps.header;
-        
-    msg_gps_time.time_ref.sec  = (604800 * gpsWeek) + gpsTime;
-    msg_gps_time.time_ref.nsec = (gpsTime - (long)gpsTime) * 1000000000; 
-    
-    pub_gps_time.publish(msg_gps_time);    
   }
 	
   vn200_disconnect(&vn200);
