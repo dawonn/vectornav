@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <package>
   <name>vectornav</name>
-  <version>0.0.1</version>
+  <version>0.1.0</version>
   <description>ROS interface for the VectorNav IMU/GPS</description>
 
   <maintainer email="dereck@gmail.com">Dereck Wonnacott</maintainer>
 
+  <license>Apache</license>
   <license>BSD</license>
 
   <!-- <url type="website">http://ros.org/wiki/vectornav</url> -->
@@ -26,7 +27,7 @@
   
   <!-- Maintainer Note:
       The vnccpplib directory is from http://www.vectornav.com/support/downloads
-      I removed the version string from the directory and changed file permissions
-      but the contents were not modified.
+      I removed the version string from the directory, sanitized file permissions,
+      and removed all but the src and include directories.
    -->
 </package>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Dereck Wonnacott
+ * Copyright 2013 Dereck Wonnacott <dereck@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,69 +36,40 @@
 #include <geometry_msgs/PoseStamped.h> // Should this even be here?
 
 
+std::string port;
+int baud;
+ros::Publisher pub_imu;
+ros::Publisher pub_magnetic;
+ros::Publisher pub_temp;
+ros::Publisher pub_pressure;
+
+ros::Publisher pub_gps;
+ros::Publisher pub_gps_time;
+
+Vn200 vn200;
 
 
-/////////////////////////////////////////////////
-int main( int argc, char* argv[] )
+void poll_timerCB(const ros::TimerEvent&)
 {
-  // Initialize ROS;
-  ros::init(argc, argv, "vectornav");
-  ros::NodeHandle n;
-  ros::NodeHandle n_;
-  
-  // Parameters
-  std::string port;
-  int baud;
-  
-  n_.param<std::string>("port", port, "//dev//ttyUSB0");
-  n_.param<int>(        "baud", baud, 115200);
-  
-  
-  // Publishers
-  ros::Publisher pub_imu;
-  ros::Publisher pub_magnetic;
-  ros::Publisher pub_temp;
-  ros::Publisher pub_pressure;
 
-  ros::Publisher pub_gps;
-  ros::Publisher pub_gps_time;
-  
-  pub_imu         = n.advertise<sensor_msgs::Imu>          ("imu/data"        , 1000);
-  pub_magnetic    = n.advertise<sensor_msgs::MagneticField>("imu/magnetic"    , 1000);
-  pub_temp        = n.advertise<sensor_msgs::Temperature>  ("imu/temperature" , 1000);
-  pub_pressure    = n.advertise<sensor_msgs::FluidPressure>("imu/pressure"    , 1000);
-  
-  pub_gps         = n.advertise<sensor_msgs::NavSatFix>    ("gps/fix"         , 1000);
-  pub_gps_time    = n.advertise<sensor_msgs::TimeReference>("gps/time"        , 1000);
-  
-  
-  // Initialize VectorNav
-	Vn200 vn200;
-	vn200_connect(&vn200, port.c_str(), baud);
-	
-	// Polling loop (TODO: convert to timer event)
-  ros::Rate loop_rate(50);
-  while (ros::ok())
-  {
-    ros::spinOnce();
-    loop_rate.sleep();
-    
     // Only bother if we have subscribers
     if (pub_imu.getNumSubscribers()  <= 0 && pub_magnetic.getNumSubscribers() <= 0 &&
         pub_temp.getNumSubscribers() <= 0 && pub_pressure.getNumSubscribers() <= 0 &&
         pub_gps.getNumSubscribers()  <= 0 && pub_gps_time.getNumSubscribers() <= 0)
     {
-      continue;
+      return;
     }
     
     static int seq = 0;
     seq++;
     ros::Time timestamp =  ros::Time::now(); 
     
+    
     // INS & GPS Shared Data
     double gpsTime;
     unsigned short gpsWeek;
     VnVector3 LLA, nedVelocity;
+
 
     // GPS Data (5Hz MAX)
     /*
@@ -118,6 +89,7 @@ int main( int argc, char* argv[] )
                           &timeAccuracy ); 
     */
     
+    
     // INS Solution Data 
     unsigned short  status;
     VnVector3 ypr;
@@ -133,6 +105,7 @@ int main( int argc, char* argv[] )
                           &attitudeUncertainty,
                           &positionUncertainty,
                           &velocityUncertainty );            
+    
     
     // GPS Fix
     sensor_msgs::NavSatFix msg_gps;
@@ -165,17 +138,20 @@ int main( int argc, char* argv[] )
     
     pub_gps.publish(msg_gps);
 
+
     // GPS Time
     sensor_msgs::TimeReference msg_gps_time;
     msg_gps_time.header = msg_gps.header;
         
-    msg_gps_time.time_ref.sec  = (604800 * gpsWeek) + gpsTime;
+    msg_gps_time.time_ref.sec  = 315964800 + (604800 * gpsWeek) + gpsTime;
     msg_gps_time.time_ref.nsec = (gpsTime - (long)gpsTime) * 1000000000; 
     
     pub_gps_time.publish(msg_gps_time);
     
-       
+    
+    //   
     // IMU Data
+    //
     VnVector3 magnetic, acceleration, angularRate;
     float temperature, pressure;
     
@@ -190,7 +166,6 @@ int main( int argc, char* argv[] )
                                               &temperature,
                                               &pressure );
     
-      // Publish Messages
       // IMU
       sensor_msgs::Imu msg_imu;
       msg_imu.header.seq = seq;
@@ -213,6 +188,7 @@ int main( int argc, char* argv[] )
       
       pub_imu.publish(msg_imu);
       
+      
       // Magnetic
       sensor_msgs::MagneticField msg_magnetic;
       msg_magnetic.header = msg_imu.header;
@@ -223,6 +199,7 @@ int main( int argc, char* argv[] )
       
       pub_magnetic.publish(msg_magnetic);
       
+      
       // Temperature
       sensor_msgs::Temperature msg_temp;
       msg_temp.header = msg_imu.header;
@@ -231,6 +208,7 @@ int main( int argc, char* argv[] )
       
       pub_temp.publish(msg_temp);
 
+
       // Pressure
       sensor_msgs::FluidPressure msg_pressure;
       msg_pressure.header = msg_imu.header;
@@ -238,10 +216,49 @@ int main( int argc, char* argv[] )
       msg_pressure.fluid_pressure = pressure / 1000.0; // kPa -> Pascals
       
       pub_pressure.publish(msg_pressure);
-       
     }
-    
-  }
+}
+
+/////////////////////////////////////////////////
+int main( int argc, char* argv[] )
+{
+  // Initialize ROS;
+  ros::init(argc, argv, "vectornav");
+  ros::NodeHandle n;
+  ros::NodeHandle n_("~");
+  
+  int poll_rate;
+  
+  // Read Parameters
+  n_.param<std::string>("port"     , port     , "/dev/ttyUSB0");
+  n_.param<int>(        "baud"     , baud     , 115200);
+  n_.param<int>(        "poll_rate", poll_rate, 40);
+  
+  ROS_DEBUG("%s %d %d Hz", port.c_str(), baud, poll_rate);
+  
+  // Initialize Publishers  
+  pub_imu         = n_.advertise<sensor_msgs::Imu>          ("imu/data"        , 1000);
+  pub_magnetic    = n_.advertise<sensor_msgs::MagneticField>("imu/magnetic"    , 1000);
+  pub_temp        = n_.advertise<sensor_msgs::Temperature>  ("imu/temperature" , 1000);
+  pub_pressure    = n_.advertise<sensor_msgs::FluidPressure>("imu/pressure"    , 1000);
+  
+  pub_gps         = n_.advertise<sensor_msgs::NavSatFix>    ("gps/fix"         , 1000);
+  pub_gps_time    = n_.advertise<sensor_msgs::TimeReference>("gps/time"        , 1000);
+  
+  
+  // Initialize VectorNav
+	vn200_connect(&vn200, port.c_str(), baud);
+		
+	// Polling loop
+	ros::Timer poll_timer = n.createTimer(ros::Duration(1.0/(double)poll_rate), poll_timerCB);
+	
+	// Note: While the VN200 has an Async interface, it can only aquire one 'type' of 
+	//       data at a time, which means that you cannot get both the IMU and INS data at 
+	//       the same time. The Async method allows a 50Hz update rate. 
+	//       It should be reasonbly trivial to rewrite this node to use ASYNC mode, and 
+	//       fall back to polling mode when multiple data types are requested.
+	
+  ros::spin();
 	
   vn200_disconnect(&vn200);
   return 0;

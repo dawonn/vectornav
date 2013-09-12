@@ -1,14 +1,15 @@
 <launch>
 
-	<node pkg="vectornav" type="vectornav_node" name="vectorNav" >
+	<node pkg="vectornav" type="vectornav_node" name="vectorNav"  output="screen" >
 	  <remap from="imu/data"        to="imu/data" />
 	  <remap from="imu/magnetic"    to="imu/magnetic" />
 	  <remap from="imu/temperature" to="imu/temperature" />
 	  <remap from="gps/fix"         to="gps/fix" />
 	  <remap from="gps/time"        to="gps/time" />	  
 	  
-	  <param name="port" type="string" value="/dev/ttyUSB0" />
-	  <param name="baud" type="int"    value="115200" />
+	  <param name="port"      type="string" value="/dev/ttyUSB0" />
+	  <param name="baud"      type="int"    value="115200" />
+	  <param name="poll_rate" type="int"    value="40" />
 	</node>	
 	
 </launch>
