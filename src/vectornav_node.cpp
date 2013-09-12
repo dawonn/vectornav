@@ -179,9 +179,11 @@ void poll_timerCB(const ros::TimerEvent&)
       msg_imu.header.frame_id = imu_frame_id; // IMU sensor frame
       
       // TODO: If INS solution is unavailable, fall back to naive algorithm
-      tf::Quaternion q = tf::createQuaternionFromRPY( M_PI * ypr.c0/180, 
-                                                      M_PI * ypr.c1/180, 
-                                                      M_PI * ypr.c2/180 );
+      
+      // ROS uses North-East-Up, Vector Nav uses North-East-Down
+      tf::Quaternion q = tf::createQuaternionFromRPY( M_PI * ypr.c0/180.0 + M_PI, 
+                                                      M_PI * ypr.c1/180.0, 
+                                                      M_PI * ypr.c2/180.0 - M_PI/2.0);
 
       tf::quaternionTFToMsg(q, msg_imu.orientation);
       
