@@ -75,7 +75,7 @@ add_library(vncp_services
 )
 
 ## Declare a cpp executable
-add_executable(vectornav_node src/vectornav_node.cpp 
+add_executable(vn200_node     src/vn200_node.cpp 
                               vnccpplib/src/arch/linux/vncp_services.c
                               vnccpplib/src/vn200.c)
 
@@ -88,7 +88,7 @@ add_executable(vectornav_node src/vectornav_node.cpp
    pthread 
  )
  
- target_link_libraries(vectornav_node
+ target_link_libraries(vn200_node
    ${catkin_LIBRARIES}
    vncp_services
    vn200
@@ -109,7 +109,7 @@ add_executable(vectornav_node src/vectornav_node.cpp
 # )
 
 ## Mark executables and/or libraries for installation
- install(TARGETS vectornav_node
+ install(TARGETS vn200_node
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

@@ -1,6 +1,6 @@
 <launch>
 
-	<node pkg="vectornav" type="vectornav_node" name="vectorNav"  output="screen" >
+	<node pkg="vectornav" type="vn200_node" name="vectornav"  output="screen" >
 	  <remap from="imu/data"        to="imu/data" />
 	  <remap from="imu/magnetic"    to="imu/magnetic" />
 	  <remap from="imu/temperature" to="imu/temperature" />
