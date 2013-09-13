@@ -190,9 +190,9 @@ void poll_timerCB(const ros::TimerEvent&)
       // TODO: If INS solution is unavailable, fall back to naive algorithm
       
       // ROS uses North-East-Up, Vector Nav uses North-East-Down
-      tf::Quaternion q = tf::createQuaternionFromRPY( M_PI * ypr.c0/180.0 + M_PI, 
-                                                      M_PI * ypr.c1/180.0, 
-                                                      M_PI * ypr.c2/180.0 - M_PI/2.0);
+      tf::Quaternion q = tf::createQuaternionFromRPY(  M_PI * ypr.c2/180.0, // + M_PI, 
+                                                      -M_PI * ypr.c1/180.0, 
+                                                      -M_PI * ypr.c0/180.0 ); // - M_PI/2.0);
 
       tf::quaternionTFToMsg(q, msg_imu.orientation);
       
