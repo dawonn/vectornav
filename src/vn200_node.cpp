@@ -34,29 +34,19 @@
 #include <tf/tf.h>
 
 // Message Types
-#include <sensor_msgs/Imu.h>
-#include <sensor_msgs/MagneticField.h>
-#include <sensor_msgs/Temperature.h>
-#include <sensor_msgs/FluidPressure.h>
+#include <vectornav/gps.h>
+#include <vectornav/ins.h>
+#include <vectornav/sensors.h>
 
-#include <sensor_msgs/NavSatFix.h>
-#include <sensor_msgs/TimeReference.h>
-
-
-// Parameters
-std::string imu_frame_id, gps_frame_id, gps_time_source;
-double time_offset;
+// Params
+std::string imu_frame_id, gps_frame_id;
 
 // Publishers
-ros::Publisher pub_imu;
-ros::Publisher pub_magnetic;
-ros::Publisher pub_temp;
-ros::Publisher pub_pressure;
-
+ros::Publisher pub_ins;
 ros::Publisher pub_gps;
-ros::Publisher pub_gps_time;
+ros::Publisher pub_sensors;
 
-// Device Handle
+// Device
 Vn200 vn200;
 
 void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
@@ -119,203 +109,149 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
   ROS_INFO("\nASYNC Data:\n"
 	  "  YPR.Yaw:                %+#7.2f\n"
 	  "  YPR.Pitch:              %+#7.2f\n"
-	  "  YPR.Roll:               %+#7.2f\n"
-
+	  "  YPR.Roll:               %+#7.2f\n" ,
+	  data->ypr.yaw,
+    data->ypr.pitch,
+    data->ypr.roll);
+    
+    ROS_INFO(
 	  "  quaternion.X:           %+#7.2f\n"
 	  "  quaternion.Y:           %+#7.2f\n"
 	  "  quaternion.Z:           %+#7.2f\n"
-	  "  quaternion.W:           %+#7.2f\n"
-
-	  "                          {Value, Voltage}\n"
-	  "  magnetic X:             %+#7.2f, %+#7.2f\n"
-	  "  magnetic Y:             %+#7.2f, %+#7.2f\n"
-	  "  magnetic Z:             %+#7.2f, %+#7.2f\n"
-
-	  "  acceleration X:         %+#7.2f, %+#7.2f\n"
-	  "  acceleration Y:         %+#7.2f, %+#7.2f\n"
-	  "  acceleration Z:         %+#7.2f, %+#7.2f\n"
-
-	  "                          {Value, Voltage, Bias, BiasVariance}\n"
-	  "  angularRate X:          %+#7.2f, %+#7.2f, %+#7.2f, %+#7.2f\n"
-	  "  angularRate Y:          %+#7.2f, %+#7.2f, %+#7.2f, %+#7.2f\n"
-	  "  angularRate Z:          %+#7.2f, %+#7.2f, %+#7.2f, %+#7.2f\n"
-
-	  "  Attitude Variance X:    %+#7.2f\n"
-	  "  Attitude Variance Y:    %+#7.2f\n"
-	  "  Attitude Variance Z:    %+#7.2f\n"
-
-	  "  Direction Cosine Matrix:\n"
-	  "    %+#7.2f, %+#7.2f, %+#7.2f\n"
-	  "    %+#7.2f, %+#7.2f, %+#7.2f\n"
-	  "    %+#7.2f, %+#7.2f, %+#7.2f\n"
-
-	  "  Temperature:            %+#7.2f\n"
-	  "  Temperature Voltage:    %+#7.2f\n"
-	  "  Pressure:               %+#7.2f\n"
-
-	  "  GPS Time:               %+#7.2f\n"
-	  "  GPS Week:               %u\n"
-	  "  GPS Fix:                %s (%u)\n"
-	  "  GPS Satellites:         %u\n"
-
-	  "  LLA.Lattitude:          %+#7.2f\n"
-	  "  LLA.Longitude:          %+#7.2f\n"
-	  "  LLA.Altitude:           %+#7.2f\n"
-
-	  "  Velocity.North:         %+#7.2f\n"
-	  "  Velocity.East:          %+#7.2f\n"
-	  "  Velocity.Down:          %+#7.2f\n"
-
-	  "  Position Accuracy X:    %+#7.2f\n"
-	  "  Position Accuracy Y:    %+#7.2f\n"
-	  "  Position Accuracy Z:    %+#7.2f\n"
-
-	  "  Speed Accuracy:         %+#7.2f\n"
-	  "  Time Accuracy:          %+#7.2f\n"
-
-	  "  INS Status:             %7.4X\n"
-	  "    %s\n"
-	  "    %s\n"
-	  "    %s\n"
-
-	  "  Attitude Uncertainty:   %+#7.2f\n"
-	  "  Position Uncertainty:   %+#7.2f\n"
-	  "  Velocity Uncertainty:   %+#7.2f\n"
-	  ,
-
-	  data->ypr.yaw,
-    data->ypr.pitch,
-    data->ypr.roll,
-    
+	  "  quaternion.W:           %+#7.2f\n",
 	  data->quaternion.x,
 	  data->quaternion.y,
 	  data->quaternion.z,
-	  data->quaternion.w,
-
+	  data->quaternion.w);
+	  
+    ROS_INFO(
+	  "                          {Value, Voltage}\n"
+	  "  magnetic X:             %+#7.2f, %+#7.2f\n"
+	  "  magnetic Y:             %+#7.2f, %+#7.2f\n"
+	  "  magnetic Z:             %+#7.2f, %+#7.2f\n",
 	  data->magnetic.c0, data->magneticVoltage.c0, 
 	  data->magnetic.c1, data->magneticVoltage.c1, 
-	  data->magnetic.c2, data->magneticVoltage.c2,
+	  data->magnetic.c2, data->magneticVoltage.c2);
 
+    ROS_INFO(
+	  "  acceleration X:         %+#7.2f, %+#7.2f\n"
+	  "  acceleration Y:         %+#7.2f, %+#7.2f\n"
+	  "  acceleration Z:         %+#7.2f, %+#7.2f\n",
 	  data->acceleration.c0, data->accelerationVoltage.c0, 
 	  data->acceleration.c1, data->accelerationVoltage.c1, 
-	  data->acceleration.c2, data->accelerationVoltage.c2,
+	  data->acceleration.c2, data->accelerationVoltage.c2);
 
+    ROS_INFO(
+	  "                          {Value, Voltage, Bias, BiasVariance}\n"
+	  "  angularRate X:          %+#7.2f, %+#7.2f, %+#7.2f, %+#7.2f\n"
+	  "  angularRate Y:          %+#7.2f, %+#7.2f, %+#7.2f, %+#7.2f\n"
+	  "  angularRate Z:          %+#7.2f, %+#7.2f, %+#7.2f, %+#7.2f\n",
 	  data->angularRate.c0,     data->angularRateVoltage.c0, 
 	  data->angularRateBias.c0, data->angularRateBiasVariance.c0, 
 	  data->angularRate.c1,     data->angularRateVoltage.c1, 
 	  data->angularRateBias.c1, data->angularRateBiasVariance.c1, 
 	  data->angularRate.c2,     data->angularRateVoltage.c2,
-	  data->angularRateBias.c2, data->angularRateBiasVariance.c2, 
+	  data->angularRateBias.c2, data->angularRateBiasVariance.c2);
 
+    ROS_INFO(
+	  "  Attitude Variance X:    %+#7.2f\n"
+	  "  Attitude Variance Y:    %+#7.2f\n"
+	  "  Attitude Variance Z:    %+#7.2f\n",
 	  data->attitudeVariance.c0, 
 	  data->attitudeVariance.c1, 
-	  data->attitudeVariance.c2, 
+	  data->attitudeVariance.c2);
 
+    ROS_INFO(
+	  "  Direction Cosine Matrix:\n"
+	  "    %+#7.2f, %+#7.2f, %+#7.2f\n"
+	  "    %+#7.2f, %+#7.2f, %+#7.2f\n"
+	  "    %+#7.2f, %+#7.2f, %+#7.2f\n",
 	  data->dcm.c00, data->dcm.c01, data->dcm.c02,
 	  data->dcm.c10, data->dcm.c11, data->dcm.c12,
-	  data->dcm.c20, data->dcm.c21, data->dcm.c22,
+	  data->dcm.c20, data->dcm.c21, data->dcm.c22);
 
+    ROS_INFO(
+	  "  Temperature:            %+#7.2f\n"
+	  "  Temperature Voltage:    %+#7.2f\n"
+	  "  Pressure:               %+#7.2f\n",
 	  data->temperature,
 	  data->temperatureVoltage, 
-	  data->pressure,    
+	  data->pressure);
 
+    ROS_INFO(
+	  "  GPS Time:               %+#7.2f\n"
+	  "  GPS Week:               %u\n"
+	  "  GPS Fix:                %s (%u)\n"
+	  "  GPS Satellites:         %u\n",
 	  data->gpsTimeOfWeek,
 	  data->gpsWeek,
 	  gpsFix.c_str(), data->gpsFix,
-	  data->numberOfSatellites,
+	  data->numberOfSatellites);
 
+    ROS_INFO(
+	  "  LLA.Lattitude:          %+#7.2f\n"
+	  "  LLA.Longitude:          %+#7.2f\n"
+	  "  LLA.Altitude:           %+#7.2f\n",
 	  data->latitudeLongitudeAltitude.c0,
 	  data->latitudeLongitudeAltitude.c1,
-	  data->latitudeLongitudeAltitude.c2,
+	  data->latitudeLongitudeAltitude.c2);
 
+    ROS_INFO(
+	  "  Velocity.North:         %+#7.2f\n"
+	  "  Velocity.East:          %+#7.2f\n"
+	  "  Velocity.Down:          %+#7.2f\n",
 	  data->velocity.c0,
 	  data->velocity.c1,
-	  data->velocity.c2,
+	  data->velocity.c2);
 
+    ROS_INFO(
+	  "  Position Accuracy X:    %+#7.2f\n"
+	  "  Position Accuracy Y:    %+#7.2f\n"
+	  "  Position Accuracy Z:    %+#7.2f\n",
 	  data->positionAccuracy.c0,
 	  data->positionAccuracy.c1,
-	  data->positionAccuracy.c2,
+	  data->positionAccuracy.c2);
 
+    ROS_INFO(
+	  "  Speed Accuracy:         %+#7.2f\n"
+	  "  Time Accuracy:          %+#7.2f\n",
 	  data->speedAccuracy,
-	  data->timeAccuracy,
+	  data->timeAccuracy);
 
+    ROS_INFO(
+	  "  INS Status:             %7.4X\n"
+	  "    %s\n"
+	  "    %s\n"
+	  "    %s\n",
 	  data->insStatus,
 	  INSmode.c_str(),
     INSgpsFix.c_str(),
-    INSerror.c_str(),
-  
+    INSerror.c_str());
+
+    ROS_INFO(
+	  "  Attitude Uncertainty:   %+#7.2f\n"
+	  "  Position Uncertainty:   %+#7.2f\n"
+	  "  Velocity Uncertainty:   %+#7.2f\n",
 	  data->attitudeUncertainty,
 	  data->positionUncertainty,
-	  data->velocityUncertainty
-	  );
-
-      
-    // IMU
-    sensor_msgs::Imu msg_imu;
-    msg_imu.header.seq = seq;
-    msg_imu.header.stamp = timestamp;
-    msg_imu.header.frame_id = imu_frame_id; // IMU sensor frame
-    
-    // Orientation is is unavailable from the device when connected to
-    // the ASYNC IMU Sensor packet.
-    
-    msg_imu.angular_velocity.x = data->angularRate.c0;
-    msg_imu.angular_velocity.y = data->angularRate.c1;
-    msg_imu.angular_velocity.z = data->angularRate.c2;
-    
-    msg_imu.linear_acceleration.x = data->acceleration.c0;
-    msg_imu.linear_acceleration.y = data->acceleration.c1;
-    msg_imu.linear_acceleration.z = data->acceleration.c2;
-    
-    pub_imu.publish(msg_imu);
-    
-    
-    // Magnetic
-    sensor_msgs::MagneticField msg_magnetic;
-    msg_magnetic.header = msg_imu.header;
-    
-    msg_magnetic.magnetic_field.x = data->magnetic.c0;
-    msg_magnetic.magnetic_field.y = data->magnetic.c1;
-    msg_magnetic.magnetic_field.z = data->magnetic.c2;
-    
-    pub_magnetic.publish(msg_magnetic);
-    
-    
-    // Temperature
-    sensor_msgs::Temperature msg_temp;
-    msg_temp.header = msg_imu.header;
-    
-    msg_temp.temperature = data->temperature;
-    
-    pub_temp.publish(msg_temp);
-
-
-    // Pressure
-    sensor_msgs::FluidPressure msg_pressure;
-    msg_pressure.header = msg_imu.header;
-    
-    msg_pressure.fluid_pressure = data->pressure / 1000.0; // kPa -> Pascals
-    
-    pub_pressure.publish(msg_pressure);
+	  data->velocityUncertainty);
 
 }
 
-void poll_timerCB(const ros::TimerEvent&)
-{
 
-  ROS_INFO("asdfsad\n");
+void poll_device()
+{
     // Only bother if we have subscribers
-    if (pub_imu.getNumSubscribers()  <= 0 && pub_magnetic.getNumSubscribers() <= 0 &&
-        pub_temp.getNumSubscribers() <= 0 && pub_pressure.getNumSubscribers() <= 0 &&
-        pub_gps.getNumSubscribers()  <= 0 && pub_gps_time.getNumSubscribers() <= 0)
+    if (pub_ins.getNumSubscribers()     <= 0 &&
+        pub_gps.getNumSubscribers()     <= 0 &&
+        pub_sensors.getNumSubscribers() <= 0)
     {
       return;
     }
     
     static int seq = 0;
     seq++;
-    ros::Time timestamp =  ros::Time::now() + ros::Duration(time_offset); 
-    
+    ros::Time timestamp =  ros::Time::now(); 
     
     // INS & GPS Shared Data
     double gpsTime;
@@ -324,12 +260,13 @@ void poll_timerCB(const ros::TimerEvent&)
 
 
     // GPS Data (5Hz MAX)
-    /*
-    unsigned char gpsFix, numberOfSatellites;
-    float speedAccuracy, timeAccuracy;
-    VnVector3 positionAccuracy;
-    
-    vn200_getGpsSolution( &vn200,
+    if (pub_gps.getNumSubscribers() > 0)
+    {
+      unsigned char gpsFix, numberOfSatellites;
+      float speedAccuracy, timeAccuracy;
+      VnVector3 positionAccuracy;
+
+      vn200_getGpsSolution( &vn200,
                           &gpsTime,
                           &gpsWeek,
                           &gpsFix,
@@ -339,143 +276,125 @@ void poll_timerCB(const ros::TimerEvent&)
                           &positionAccuracy,
                           &speedAccuracy,
                           &timeAccuracy ); 
-    */
+                          
+      vectornav::gps msg_gps;
+      msg_gps.header.seq      = seq;
+      msg_gps.header.stamp    = timestamp;
+      msg_gps.header.frame_id = "gps";
+
+      msg_gps.Time    = gpsTime;
+      msg_gps.Week    = gpsWeek;
+      msg_gps.GpsFix  = gpsFix;
+      msg_gps.NumSats = numberOfSatellites;
+
+      msg_gps.LLA.x = LLA.c0;
+      msg_gps.LLA.y = LLA.c1;
+      msg_gps.LLA.z = LLA.c2;
+
+      msg_gps.NedVel.x = nedVelocity.c0;
+      msg_gps.NedVel.y = nedVelocity.c1;
+      msg_gps.NedVel.z = nedVelocity.c2;
+      
+      msg_gps.NedAcc.x = positionAccuracy.c0;
+      msg_gps.NedAcc.y = positionAccuracy.c1;
+      msg_gps.NedAcc.z = positionAccuracy.c2;
+      
+      msg_gps.SpeedAcc = speedAccuracy;
+      msg_gps.TimeAcc  = timeAccuracy;
+      
+      pub_gps.publish(msg_gps);
+    }
     
     
     // INS Solution Data 
-    unsigned short  status;
-    VnVector3 ypr;
-    float attitudeUncertainty, positionUncertainty, velocityUncertainty;
-    
-    vn200_getInsSolution( &vn200,
-                          &gpsTime,
-                          &gpsWeek,
-                          &status,
-                          &ypr,
-                          &LLA,
-                          &nedVelocity,
-                          &attitudeUncertainty,
-                          &positionUncertainty,
-                          &velocityUncertainty );            
-    
-    
-    // GPS Fix
-    sensor_msgs::NavSatFix msg_gps;
-    msg_gps.header.seq = seq;
-    msg_gps.header.stamp = timestamp;
-    msg_gps.header.frame_id = gps_frame_id;  // GPS Antenna frame
-    
-    if (status & 0x4)
-      msg_gps.status.status = sensor_msgs::NavSatStatus::STATUS_NO_FIX;
-    else
-      msg_gps.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
-
-    msg_gps.latitude  = LLA.c0;
-    msg_gps.longitude = LLA.c1;
-    msg_gps.altitude  = LLA.c2;
-   
-    msg_gps.position_covariance[0] = positionUncertainty;
-    msg_gps.position_covariance[1] = 0;
-    msg_gps.position_covariance[2] = 0;
-    
-    msg_gps.position_covariance[3] = 0;
-    msg_gps.position_covariance[4] = positionUncertainty;
-    msg_gps.position_covariance[5] = 0;
-    
-    msg_gps.position_covariance[6] = 0;
-    msg_gps.position_covariance[7] = 0;
-    msg_gps.position_covariance[8] = positionUncertainty;
-    
-    msg_gps.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_APPROXIMATED;
-    
-    pub_gps.publish(msg_gps);
-
-
-    // GPS Time
-    sensor_msgs::TimeReference msg_gps_time;
-    msg_gps_time.header = msg_gps.header;
-    
-    if ( gps_time_source == "GPS" )   
-      msg_gps_time.time_ref.sec  = (604800 * gpsWeek) + gpsTime;
-    else
-      // TODO: When gpsWeek rolls over, this will fail
-      msg_gps_time.time_ref.sec  = 315964800 + (604800 * gpsWeek) + gpsTime;
-
-    msg_gps_time.time_ref.nsec = (gpsTime - (long)gpsTime) * 1000000000; 
-    msg_gps_time.source = gps_time_source;
-    pub_gps_time.publish(msg_gps_time);
-    
-    //   
-    // IMU Data
-    //
-    VnVector3 magnetic, acceleration, angularRate;
-    float temperature, pressure;
-    
-    // Only bother if we have subscribers
-    if (pub_imu.getNumSubscribers()  || pub_magnetic.getNumSubscribers() ||
-        pub_temp.getNumSubscribers() || pub_pressure.getNumSubscribers())
+    if (pub_ins.getNumSubscribers() > 0)
     {
+      unsigned short  status;
+      VnVector3 ypr;
+      float attitudeUncertainty, positionUncertainty, velocityUncertainty;
+      
+      vn200_getInsSolution( &vn200,
+                            &gpsTime,
+                            &gpsWeek,
+                            &status,
+                            &ypr,
+                            &LLA,
+                            &nedVelocity,
+                            &attitudeUncertainty,
+                            &positionUncertainty,
+                            &velocityUncertainty );            
+      
+      vectornav::ins msg_ins;
+      msg_ins.header.seq      = seq;
+      msg_ins.header.stamp    = timestamp;
+      msg_ins.header.frame_id = imu_frame_id;
+
+      msg_ins.Time    = gpsTime;
+      msg_ins.Week    = gpsWeek;
+      msg_ins.Status  = status;
+
+      msg_ins.RPY.x = ypr.c2; // Intentional re-ordering
+      msg_ins.RPY.y = ypr.c1;
+      msg_ins.RPY.z = ypr.c0;
+
+      msg_ins.LLA.x = LLA.c0;
+      msg_ins.LLA.y = LLA.c1;
+      msg_ins.LLA.z = LLA.c2;
+
+      msg_ins.NedVel.x = nedVelocity.c0;
+      msg_ins.NedVel.y = nedVelocity.c1;
+      msg_ins.NedVel.z = nedVelocity.c2;
+      
+      
+      msg_ins.AttUncerainty = attitudeUncertainty;
+      msg_ins.PosUncerainty  = positionUncertainty;
+      msg_ins.VelUncerainty  = velocityUncertainty;
+      
+      pub_ins.publish(msg_ins);
+    }
+    
+    
+    // IMU Data
+    if (pub_sensors.getNumSubscribers() > 0)
+    {
+      VnVector3 magnetic, acceleration, angularRate;
+      float temperature, pressure;
+      
       vn200_getCalibratedSensorMeasurements(  &vn200,
                                               &magnetic,
                                               &acceleration,
                                               &angularRate,
                                               &temperature,
                                               &pressure );
-    
-      // IMU
-      sensor_msgs::Imu msg_imu;
-      msg_imu.header.seq = seq;
-      msg_imu.header.stamp = timestamp;
-      msg_imu.header.frame_id = imu_frame_id; // IMU sensor frame
-      
-      // TODO: If INS solution is unavailable, fall back to naive algorithm
-      
-      // ROS uses North-East-Up, Vector Nav uses North-East-Down
-      tf::Quaternion q = tf::createQuaternionFromRPY(  M_PI * ypr.c2/180.0, 
-                                                      -M_PI * ypr.c1/180.0, 
-                                                      -M_PI * ypr.c0/180.0 );
 
-      tf::quaternionTFToMsg(q, msg_imu.orientation);
-      
-      msg_imu.angular_velocity.x = angularRate.c0;
-      msg_imu.angular_velocity.y = angularRate.c1;
-      msg_imu.angular_velocity.z = angularRate.c2;
-      
-      msg_imu.linear_acceleration.x = acceleration.c0;
-      msg_imu.linear_acceleration.y = acceleration.c1;
-      msg_imu.linear_acceleration.z = acceleration.c2;
-      
-      pub_imu.publish(msg_imu);
-      
-      
-      // Magnetic
-      sensor_msgs::MagneticField msg_magnetic;
-      msg_magnetic.header = msg_imu.header;
-      
-      msg_magnetic.magnetic_field.x = magnetic.c0;
-      msg_magnetic.magnetic_field.y = magnetic.c1;
-      msg_magnetic.magnetic_field.z = magnetic.c2;
-      
-      pub_magnetic.publish(msg_magnetic);
-      
-      
-      // Temperature
-      sensor_msgs::Temperature msg_temp;
-      msg_temp.header = msg_imu.header;
-      
-      msg_temp.temperature = temperature;
-      
-      pub_temp.publish(msg_temp);
+      vectornav::sensors msg_sensors;
+      msg_sensors.header.seq      = seq;
+      msg_sensors.header.stamp    = timestamp;
+      msg_sensors.header.frame_id = imu_frame_id;
 
+      msg_sensors.Mag.x = magnetic.c0;
+      msg_sensors.Mag.y = magnetic.c1;
+      msg_sensors.Mag.z = magnetic.c2;
 
-      // Pressure
-      sensor_msgs::FluidPressure msg_pressure;
-      msg_pressure.header = msg_imu.header;
+      msg_sensors.Accel.x = acceleration.c0;
+      msg_sensors.Accel.y = acceleration.c1;
+      msg_sensors.Accel.z = acceleration.c2;
+
+      msg_sensors.Gyro.x = angularRate.c0;
+      msg_sensors.Gyro.y = angularRate.c1;
+      msg_sensors.Gyro.z = angularRate.c2;
       
-      msg_pressure.fluid_pressure = pressure / 1000.0; // kPa -> Pascals
+      msg_sensors.Temp     = temperature;
+      msg_sensors.Pressure = pressure;
       
-      pub_pressure.publish(msg_pressure);
+      pub_sensors.publish(msg_sensors);
+      
     }
+}
+
+void poll_timerCB(const ros::TimerEvent&)
+{
+  poll_device();
 }
 
 /////////////////////////////////////////////////
@@ -483,7 +402,7 @@ int main( int argc, char* argv[] )
 {
   // Initialize ROS;
   ros::init(argc, argv, "vectornav");
-  ros::NodeHandle n;
+  ros::NodeHandle n; 
   ros::NodeHandle n_("~");
   
   // Read Parameters
@@ -496,34 +415,27 @@ int main( int argc, char* argv[] )
   
   n_.param<std::string>("imu/frame_id", imu_frame_id, "imu");
   n_.param<std::string>("gps/frame_id", gps_frame_id, "gps");
-  
-  n_.param<std::string>("time_reference_source", gps_time_source, "UTC");
-  n_.param<double>(     "time_offset"          , time_offset    , 0.0);
    
   // Type: 0 None, 19 IMU, 20 GPS, 22 INS
   n_.param<int>(        "async_output_type"  , async_output_type, 0);
   n_.param<int>(        "async_output_rate"  , async_output_rate, 50); 
   
   // Initialize Publishers
-  pub_imu         = n_.advertise<sensor_msgs::Imu>          ("imu/data"        , 1000);
-  pub_magnetic    = n_.advertise<sensor_msgs::MagneticField>("imu/magnetic"    , 1000);
-  pub_temp        = n_.advertise<sensor_msgs::Temperature>  ("imu/temperature" , 1000);
-  pub_pressure    = n_.advertise<sensor_msgs::FluidPressure>("imu/pressure"    , 1000);
-  
-  pub_gps         = n_.advertise<sensor_msgs::NavSatFix>    ("gps/fix"         , 1000);
-  pub_gps_time    = n_.advertise<sensor_msgs::TimeReference>("gps/time"        , 1000);
-  
+  pub_ins     = n_.advertise<vectornav::ins>    ("ins", 1000);
+  pub_gps     = n_.advertise<vectornav::gps>    ("gps", 1000);
+  pub_sensors = n_.advertise<vectornav::sensors>("imu", 1000);
   
   // Initialize VectorNav
   ROS_INFO("Initializing vn200. Port:%s Baud:%d\n", port.c_str(), baud);
-	vn200_connect(&vn200, port.c_str(), baud); 
+	vn200_connect(&vn200, port.c_str(), baud);
   vn200_setAsynchronousDataOutputType(&vn200, async_output_type, true);
-		
+
+  ros::Timer poll_timer; 
 	if (async_output_type == 0)
 	{
 	  // Polling loop
     ROS_INFO("Polling at %d Hz\n", poll_rate);
-	  ros::Timer poll_timer = n.createTimer(ros::Duration(1.0/(double)poll_rate), poll_timerCB);
+	  poll_timer = n.createTimer(ros::Duration(1.0/(double)poll_rate), poll_timerCB);
   }
   else
   {

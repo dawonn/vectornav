@@ -19,12 +19,13 @@ find_package(catkin REQUIRED tf)
 ## Declare ROS messages and services ##
 #######################################
 
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+# Generate messages in the 'msg' folder
+ add_message_files(
+   FILES
+   ins.msg
+   gps.msg
+   sensors.msg
+ )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -34,10 +35,11 @@ find_package(catkin REQUIRED tf)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs 
+  geometry_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -51,7 +53,7 @@ find_package(catkin REQUIRED tf)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES vectornav
-   CATKIN_DEPENDS roscpp sensor_msgs tf
+   CATKIN_DEPENDS roscpp sensor_msgs geometry_msgs tf
 #  DEPENDS system_lib
 )
 

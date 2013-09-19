@@ -1,26 +1,15 @@
 <launch>
 
-	<node pkg="vectornav" type="vn200_node" name="vectornav"  output="screen" >
-	  <remap from="imu/data"        to="imu/data" />
-	  <remap from="imu/magnetic"    to="imu/magnetic" />
-	  <remap from="imu/temperature" to="imu/temperature" />
-	  <remap from="gps/fix"         to="gps/fix" />
-	  <remap from="gps/time"        to="gps/time" />	  
+	<node pkg="vectornav" type="vn200_node" name="vectornav"  output="screen" > 
 	  
 	  <param name="serial_port" type="string" value="/dev/ttyUSB0" />
 	  <param name="serial_baud" type="int"    value="115200" />
 	  
-	  <param name="imu/frame_id" type="string" value="imu" />
-	  <param name="gps/frame_id" type="string" value="gps" />
-	  
-	  <param name="time_reference_source" type="string" value="UTC" />
-	  <param name="time_offset"           type="double" value="0.0" />
-	  
 	  <!-- Type: 0 None (Polling method), 19 IMU, 20 GPS, 22 INS -->
-	  <param name="async_output_type" type="int"    value="19" />
+	  <param name="async_output_type" type="int"    value="0" />
 	  <param name="async_output_rate" type="int"    value="100" />
 	  
-	  <param name="poll_rate"   type="int"    value="40" />
+	  <param name="poll_rate"   type="int"    value="50" />
 	</node>	
 	
 </launch>
