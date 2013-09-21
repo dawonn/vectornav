@@ -413,8 +413,8 @@ int main( int argc, char* argv[] )
   n_.param<int>(        "serial_baud" , baud     , 115200);
   n_.param<int>(        "poll_rate"   , poll_rate, 40);
   
-  n_.param<std::string>("imu/frame_id", imu_frame_id, "imu");
-  n_.param<std::string>("gps/frame_id", gps_frame_id, "gps");
+  n_.param<std::string>("imu/frame_id", imu_frame_id, "LLA");
+  n_.param<std::string>("gps/frame_id", gps_frame_id, "LLA");
    
   // Type: 0 None, 19 IMU, 20 GPS, 22 INS
   n_.param<int>(        "async_output_type"  , async_output_type, 0);

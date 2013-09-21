@@ -10,6 +10,9 @@
 	  <param name="async_output_rate" type="int"    value="100" />
 	  
 	  <param name="poll_rate"   type="int"    value="50" />
+	  
+	  <param name="imu/frame_id" type="string" value="LLA" />
+	  <param name="gps/frame_id" type="string" value="LLA" />
 	</node>	
 	
 </launch>
