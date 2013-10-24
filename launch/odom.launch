@@ -7,11 +7,13 @@
 	  <param name="child_frame_id"  type="string" value="odom" />
 
 		<remap from="fix"       to="/vectornav/ins/NavSatFix" />
-	</node>	
+	</node>
 	
 		<!-- publish static transform -->
 	<node pkg="tf" type="static_transform_publisher" name="vectornav_tf_odom" 
 	      args="0 0 0 0 0 0 map imu 100" />
+	      
+	<node pkg="vectornav" type="local_odom" name="local_odom" />
 </launch>
 
 

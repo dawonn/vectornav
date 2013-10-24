@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
+#include <stdlib.h>     /* exit, EXIT_FAILURE */
 
 #include "vectornav.h"
 
@@ -51,6 +52,8 @@ Vn200 vn200;
 
 void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
 {
+  //TODO: Publish messages perhaps? ;)
+
   ros::Time timestamp =  ros::Time::now();
   static int seq = 0;
   seq++;
@@ -115,7 +118,7 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
     data->ypr.roll);
     
     ROS_INFO(
-	  "  quaternion.X:           %+#7.2f\n"
+	  "\n  quaternion.X:           %+#7.2f\n"
 	  "  quaternion.Y:           %+#7.2f\n"
 	  "  quaternion.Z:           %+#7.2f\n"
 	  "  quaternion.W:           %+#7.2f\n",
@@ -125,7 +128,7 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
 	  data->quaternion.w);
 	  
     ROS_INFO(
-	  "                          {Value, Voltage}\n"
+	  "\n                          {Value, Voltage}\n"
 	  "  magnetic X:             %+#7.2f, %+#7.2f\n"
 	  "  magnetic Y:             %+#7.2f, %+#7.2f\n"
 	  "  magnetic Z:             %+#7.2f, %+#7.2f\n",
@@ -134,7 +137,7 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
 	  data->magnetic.c2, data->magneticVoltage.c2);
 
     ROS_INFO(
-	  "  acceleration X:         %+#7.2f, %+#7.2f\n"
+	  "\n  acceleration X:         %+#7.2f, %+#7.2f\n"
 	  "  acceleration Y:         %+#7.2f, %+#7.2f\n"
 	  "  acceleration Z:         %+#7.2f, %+#7.2f\n",
 	  data->acceleration.c0, data->accelerationVoltage.c0, 
@@ -142,7 +145,7 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
 	  data->acceleration.c2, data->accelerationVoltage.c2);
 
     ROS_INFO(
-	  "                          {Value, Voltage, Bias, BiasVariance}\n"
+	  "\n                          {Value, Voltage, Bias, BiasVariance}\n"
 	  "  angularRate X:          %+#7.2f, %+#7.2f, %+#7.2f, %+#7.2f\n"
 	  "  angularRate Y:          %+#7.2f, %+#7.2f, %+#7.2f, %+#7.2f\n"
 	  "  angularRate Z:          %+#7.2f, %+#7.2f, %+#7.2f, %+#7.2f\n",
@@ -154,7 +157,7 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
 	  data->angularRateBias.c2, data->angularRateBiasVariance.c2);
 
     ROS_INFO(
-	  "  Attitude Variance X:    %+#7.2f\n"
+	  "\n  Attitude Variance X:    %+#7.2f\n"
 	  "  Attitude Variance Y:    %+#7.2f\n"
 	  "  Attitude Variance Z:    %+#7.2f\n",
 	  data->attitudeVariance.c0, 
@@ -162,7 +165,7 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
 	  data->attitudeVariance.c2);
 
     ROS_INFO(
-	  "  Direction Cosine Matrix:\n"
+	  "\n  Direction Cosine Matrix:\n"
 	  "    %+#7.2f, %+#7.2f, %+#7.2f\n"
 	  "    %+#7.2f, %+#7.2f, %+#7.2f\n"
 	  "    %+#7.2f, %+#7.2f, %+#7.2f\n",
@@ -171,7 +174,7 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
 	  data->dcm.c20, data->dcm.c21, data->dcm.c22);
 
     ROS_INFO(
-	  "  Temperature:            %+#7.2f\n"
+	  "\n  Temperature:            %+#7.2f\n"
 	  "  Temperature Voltage:    %+#7.2f\n"
 	  "  Pressure:               %+#7.2f\n",
 	  data->temperature,
@@ -179,7 +182,7 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
 	  data->pressure);
 
     ROS_INFO(
-	  "  GPS Time:               %+#7.2f\n"
+	  "\n  GPS Time:               %+#7.2f\n"
 	  "  GPS Week:               %u\n"
 	  "  GPS Fix:                %s (%u)\n"
 	  "  GPS Satellites:         %u\n",
@@ -189,7 +192,7 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
 	  data->numberOfSatellites);
 
     ROS_INFO(
-	  "  LLA.Lattitude:          %+#7.2f\n"
+	  "\n  LLA.Lattitude:          %+#7.2f\n"
 	  "  LLA.Longitude:          %+#7.2f\n"
 	  "  LLA.Altitude:           %+#7.2f\n",
 	  data->latitudeLongitudeAltitude.c0,
@@ -197,7 +200,7 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
 	  data->latitudeLongitudeAltitude.c2);
 
     ROS_INFO(
-	  "  Velocity.North:         %+#7.2f\n"
+	  "\n  Velocity.North:         %+#7.2f\n"
 	  "  Velocity.East:          %+#7.2f\n"
 	  "  Velocity.Down:          %+#7.2f\n",
 	  data->velocity.c0,
@@ -205,7 +208,7 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
 	  data->velocity.c2);
 
     ROS_INFO(
-	  "  Position Accuracy X:    %+#7.2f\n"
+	  "\n  Position Accuracy X:    %+#7.2f\n"
 	  "  Position Accuracy Y:    %+#7.2f\n"
 	  "  Position Accuracy Z:    %+#7.2f\n",
 	  data->positionAccuracy.c0,
@@ -213,13 +216,13 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
 	  data->positionAccuracy.c2);
 
     ROS_INFO(
-	  "  Speed Accuracy:         %+#7.2f\n"
+	  "\n  Speed Accuracy:         %+#7.2f\n"
 	  "  Time Accuracy:          %+#7.2f\n",
 	  data->speedAccuracy,
 	  data->timeAccuracy);
 
     ROS_INFO(
-	  "  INS Status:             %7.4X\n"
+	  "\n  INS Status:             %7.4X\n"
 	  "    %s\n"
 	  "    %s\n"
 	  "    %s\n",
@@ -229,7 +232,7 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
     INSerror.c_str());
 
     ROS_INFO(
-	  "  Attitude Uncertainty:   %+#7.2f\n"
+	  "\n  Attitude Uncertainty:   %+#7.2f\n"
 	  "  Position Uncertainty:   %+#7.2f\n"
 	  "  Velocity Uncertainty:   %+#7.2f\n",
 	  data->attitudeUncertainty,
@@ -397,6 +400,37 @@ void poll_timerCB(const ros::TimerEvent&)
   poll_device();
 }
 
+void vnerr_msg(VN_ERROR_CODE vn_error, char* msg)
+{
+  switch(vn_error)
+  {
+    case VNERR_NO_ERROR:
+      strcpy(msg, "No Error");
+      break;
+    case VNERR_UNKNOWN_ERROR:
+      strcpy(msg, "Unknown Error");
+      break;
+    case VNERR_NOT_IMPLEMENTED:
+      strcpy(msg, "Not implemented");
+      break;
+    case VNERR_TIMEOUT:
+      strcpy(msg, "Timemout");
+      break;
+    case VNERR_INVALID_VALUE:
+      strcpy(msg, "Invalid value");
+      break;
+    case VNERR_FILE_NOT_FOUND:
+      strcpy(msg, "File not found");
+      break;
+    case VNERR_NOT_CONNECTED:
+      strcpy(msg, "Not connected");
+      break;
+    default:
+      strcpy(msg, "Undefined Error");
+  }
+}
+
+
 /////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
@@ -426,10 +460,25 @@ int main( int argc, char* argv[] )
   pub_sensors = n_.advertise<vectornav::sensors>("imu", 1000);
   
   // Initialize VectorNav
+  VN_ERROR_CODE vn_retval;
+  char vn_error_msg[100];
   ROS_INFO("Initializing vn200. Port:%s Baud:%d\n", port.c_str(), baud);
-	vn200_connect(&vn200, port.c_str(), baud);
-  vn200_setAsynchronousDataOutputType(&vn200, async_output_type, true);
-
+	vn_retval = vn200_connect(&vn200, port.c_str(), baud);  
+	if (vn_retval != VNERR_NO_ERROR)
+  {
+    vnerr_msg(vn_retval, vn_error_msg);
+	  ROS_FATAL( "Could not connect to device via: %s, Error Text: %s", port.c_str(), vn_error_msg);
+	  exit (EXIT_FAILURE);
+	}
+	
+  vn_retval = vn200_setAsynchronousDataOutputType(&vn200, async_output_type, true);
+	if (vn_retval != VNERR_NO_ERROR)
+  {
+    vnerr_msg(vn_retval, vn_error_msg);
+	  ROS_FATAL( "Could not set output type on device via: %s, Error Text: %s", port.c_str(), vn_error_msg);
+	  exit (EXIT_FAILURE);
+	}
+	
   ros::Timer poll_timer; 
 	if (async_output_type == 0)
 	{
