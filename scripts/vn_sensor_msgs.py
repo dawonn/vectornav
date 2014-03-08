@@ -51,12 +51,12 @@ def sub_imuCB(msg_in):
   global msg_imu
   msg_imu.header.stamp          = msg_in.header.stamp
   msg_imu.header.frame_id       = msg_in.header.frame_id
-  msg_imu.angular_velocity.x    = msg_in.Accel.x
-  msg_imu.angular_velocity.y    = msg_in.Accel.y
-  msg_imu.angular_velocity.z    = msg_in.Accel.z
-  msg_imu.linear_acceleration.x = msg_in.Gyro.x
-  msg_imu.linear_acceleration.y = msg_in.Gyro.y
-  msg_imu.linear_acceleration.z = msg_in.Gyro.z
+  msg_imu.angular_velocity.x    = msg_in.Gyro.x
+  msg_imu.angular_velocity.y    = msg_in.Gyro.y
+  msg_imu.angular_velocity.z    = msg_in.Gyro.z
+  msg_imu.linear_acceleration.x = msg_in.Accel.x
+  msg_imu.linear_acceleration.y = msg_in.Accel.y
+  msg_imu.linear_acceleration.z = msg_in.Accel.z
   pub_imu.publish(msg_imu)               
   
   msg_mag = MagneticField()
