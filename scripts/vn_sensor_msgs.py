@@ -40,6 +40,8 @@ from sensor_msgs.msg  import TimeReference
 from vectornav.msg    import ins
 from vectornav.msg    import sensors
 
+import math
+
 
 
 def sub_imuCB(msg_in): 
@@ -90,9 +92,10 @@ def sub_insCB(msg_in):
   msg_imu.header.stamp          = msg_in.header.stamp
   msg_imu.header.frame_id       = msg_in.header.frame_id
   
-  roll  = msg_in.RPY.x
-  pitch = msg_in.RPY.y
-  yaw   = msg_in.RPY.z
+  # Convert the RPY data from the Vectornav into radians!
+  roll  = (math.pi * msg_in.RPY.x) / 180.0
+  pitch = (math.pi * msg_in.RPY.y) / 180.0
+  yaw   = (math.pi * msg_in.RPY.z) / 180.0
   q = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
   msg_imu.orientation.x = q[0]
   msg_imu.orientation.y = q[1]
