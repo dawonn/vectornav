@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 #
-# Subscribe to vectorNav.INS and publish a sensor_msgs.gpsfix
-# Dereck Wonnacott (2013) - MIT Licence (TODO: put license text here?)
-#  
+# Dereck Wonnacott (C) 2013 
+# MIT Licence (TODO: put license text here...)
+# 
+# This node publihses a NavSatFix from the INS solution data
+#
+ 
 
 import rospy
 from vectornav.msg      import ins

@@ -427,7 +427,20 @@ int main( int argc, char* argv[] )
   
   // Initialize VectorNav
   ROS_INFO("Initializing vn200. Port:%s Baud:%d\n", port.c_str(), baud);
-	vn200_connect(&vn200, port.c_str(), baud);
+  VN_ERROR_CODE errorCode;
+	errorCode = vn200_connect(&vn200, port.c_str(), baud);
+	
+	if (errorCode != VNERR_NO_ERROR) 
+	{
+	  ROS_FATAL("Could not conenct to vn200 on port:%s @ Baud:%d; Error %d \n"
+	            "Did you add your user to the 'dialout' group in /etc/group?", 
+	            port.c_str(), 
+	            baud, 
+	            errorCode);
+	  return -1;
+	}
+	
+  ROS_DEBUG("AsynchronousDataOutputType set to: %d", async_output_type);
   vn200_setAsynchronousDataOutputType(&vn200, async_output_type, true);
 
   ros::Timer poll_timer; 
