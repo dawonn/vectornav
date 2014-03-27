@@ -2,7 +2,7 @@
 <package>
   <name>vectornav</name>
   <version>0.1.0</version>
-  <description>ROS interface for the VectorNav IMU/GPS</description>
+  <description>ROS interface for the VectorNav INS/GPS</description>
 
   <maintainer email="dereck@gmail.com">Dereck Wonnacott</maintainer>
 
