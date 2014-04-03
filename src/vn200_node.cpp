@@ -463,29 +463,16 @@ int main( int argc, char* argv[] )
   VN_ERROR_CODE vn_retval;
   char vn_error_msg[100];
   ROS_INFO("Initializing vn200. Port:%s Baud:%d\n", port.c_str(), baud);
-<<<<<<< HEAD
-  VN_ERROR_CODE errorCode;
-	errorCode = vn200_connect(&vn200, port.c_str(), baud);
-	
-	if (errorCode != VNERR_NO_ERROR) 
-	{
-	  ROS_FATAL("Could not conenct to vn200 on port:%s @ Baud:%d; Error %d \n"
-	            "Did you add your user to the 'dialout' group in /etc/group?", 
-	            port.c_str(), 
-	            baud, 
-	            errorCode);
-	  return -1;
-	}
-	
-  ROS_DEBUG("AsynchronousDataOutputType set to: %d", async_output_type);
-  vn200_setAsynchronousDataOutputType(&vn200, async_output_type, true);
 
-=======
 	vn_retval = vn200_connect(&vn200, port.c_str(), baud);  
 	if (vn_retval != VNERR_NO_ERROR)
   {
     vnerr_msg(vn_retval, vn_error_msg);
-	  ROS_FATAL( "Could not connect to device via: %s, Error Text: %s", port.c_str(), vn_error_msg);
+	  ROS_FATAL("Could not conenct to vn200 on port:%s @ Baud:%d; Error %d \n"
+	            "Did you add your user to the 'dialout' group in /etc/group?", 
+	            port.c_str(), 
+	            baud, 
+	            vn_retval);
 	  exit (EXIT_FAILURE);
 	}
 	
@@ -497,7 +484,6 @@ int main( int argc, char* argv[] )
 	  exit (EXIT_FAILURE);
 	}
 	
->>>>>>> 87f89eae5b927685cae13e72f97860e186dc3303
   ros::Timer poll_timer; 
 	if (async_output_type == 0)
 	{
