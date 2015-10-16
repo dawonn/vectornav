@@ -278,7 +278,8 @@ DLL_EXPORT VN_ERROR_CODE vn200_getModelNumber(Vn200* vn200, char* modelBuffer, u
 DLL_EXPORT VN_ERROR_CODE vn200_getHardwareRevision(Vn200* vn200, int* hardwareRevision);
 
 
-DLL_EXPORT VN_ERROR_CODE vn200_setBinaryOutputRegisters(Vn200* vn200, VN_BOOL waitForResponse);
+DLL_EXPORT VN_ERROR_CODE vn200_setBinaryOutputRegisters(Vn200* vn200, int binary_data_port, int gps_data_rate,
+        int ins_data_rate, int imu_data_rate, VN_BOOL waitForResponse);
 
 /**
  * \brief Gets the values in the Serial Number register.

@@ -1386,7 +1386,8 @@ VN_ERROR_CODE vn200_setAsynchronousDataOutputFrequency(Vn200* vn200, unsigned in
     return errorCode;
 }
 
-VN_ERROR_CODE vn200_setBinaryOutputRegisters(Vn200* vn200, VN_BOOL waitForResponse)
+VN_ERROR_CODE vn200_setBinaryOutputRegisters(Vn200* vn200, int binary_data_port, int gps_data_rate,
+        int ins_data_rate, int imu_data_rate, VN_BOOL waitForResponse)
 {
 
     int errorCode;
@@ -1398,7 +1399,7 @@ VN_ERROR_CODE vn200_setBinaryOutputRegisters(Vn200* vn200, VN_BOOL waitForRespon
 
         int curBufLoc = 0;
         char cmdToSendBuilder[VN_MAX_COMMAND_SIZE];
-        curBufLoc = sprintf(cmdToSendBuilder, "$VNWRG,75,1,8,01,0202");
+        curBufLoc = sprintf(cmdToSendBuilder, "$VNWRG,75,%d,%d,01,0202", binary_data_port, 800/imu_data_rate);
 
         cmdToSendBuilder[curBufLoc] = '\0';
 
@@ -1413,7 +1414,7 @@ VN_ERROR_CODE vn200_setBinaryOutputRegisters(Vn200* vn200, VN_BOOL waitForRespon
 
         int curBufLoc = 0;
         char cmdToSendBuilder[VN_MAX_COMMAND_SIZE];
-        curBufLoc = sprintf(cmdToSendBuilder, "$VNWRG,76,1,40,31,10CA,0100,0600");
+        curBufLoc = sprintf(cmdToSendBuilder, "$VNWRG,76,%d,%d,31,10CA,0100,0600", binary_data_port, 800/ins_data_rate);
         cmdToSendBuilder[curBufLoc] = '\0';
 
         if (waitForResponse)
@@ -1426,7 +1427,7 @@ VN_ERROR_CODE vn200_setBinaryOutputRegisters(Vn200* vn200, VN_BOOL waitForRespon
     {
         int curBufLoc = 0;
         char cmdToSendBuilder[VN_MAX_COMMAND_SIZE];
-        curBufLoc = sprintf(cmdToSendBuilder, "$VNWRG,77,1,200,08,0EBF");
+        curBufLoc = sprintf(cmdToSendBuilder, "$VNWRG,77,%d,%d,08,0EBF", binary_data_port, 800/gps_data_rate);
         cmdToSendBuilder[curBufLoc] = '\0';
 
         if (waitForResponse)

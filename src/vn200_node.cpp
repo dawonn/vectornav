@@ -717,7 +717,9 @@ int main( int argc, char* argv[] )
 
     // Read Parameters
     std::string port;
-    int baud, poll_rate_ins, poll_rate_gps, poll_rate_imu, async_output_type, async_output_rate;
+    int baud, poll_rate_ins, poll_rate_gps, poll_rate_imu, async_output_type, async_output_rate,
+        binary_data_output_port, binary_gps_data_rate, binary_ins_data_rate,
+        binary_imu_data_rate;
 
     n_.param<std::string>("serial_port" , port     , "/dev/ttyUSB0");
     n_.param<int>(        "serial_baud" , baud     , 115200);
@@ -731,6 +733,11 @@ int main( int argc, char* argv[] )
     // Type: 0 None, 19 IMU, 20 GPS, 22 INS
     n_.param<int>(        "async_output_type"  , async_output_type, 0);
     n_.param<int>(        "async_output_rate"  , async_output_rate, 50); 
+    
+    n_.param<int>(        "binary_data_output_port"  , binary_data_output_port, 1); 
+    n_.param<int>(        "binary_gps_data_output_rate"  , binary_gps_data_rate, 4); 
+    n_.param<int>(        "binary_ins_data_output_rate"  , binary_ins_data_rate, 20); 
+    n_.param<int>(        "binary_imu_data_output_rate"  , binary_imu_data_rate, 100); 
 
     // Initialize Publishers
     pub_ins     = n_.advertise<vectornav::ins>    ("ins", 1000);
@@ -760,10 +767,8 @@ int main( int argc, char* argv[] )
     position.c2 = 0;
 
     vn200_registerAsyncBinaryResponseListener(&vn200, &asyncBinaryResponseListener);   
-    //vn_retval = vn200_setGpsAntennaOffset(&vn200, position, true);
-    vn_retval = vn200_setGpsAntennaOffset(&vn200, position, false);
-
-    ROS_INFO("Set antenna offset");
+    
+    vn_retval = vn200_setGpsAntennaOffset(&vn200, position, true);
 
     if (vn_retval != VNERR_NO_ERROR)
     {
@@ -781,8 +786,8 @@ int main( int argc, char* argv[] )
         exit (EXIT_FAILURE);
     }
 
-    //vn_retval = vn200_setBinaryOutputRegisters(&vn200, true);
-    vn_retval = vn200_setBinaryOutputRegisters(&vn200, false);
+    vn_retval = vn200_setBinaryOutputRegisters(&vn200, binary_data_output_port, binary_gps_data_rate,
+            binary_ins_data_rate, binary_imu_data_rate, true);
 
     if (vn_retval != VNERR_NO_ERROR)
     {
