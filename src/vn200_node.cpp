@@ -39,6 +39,7 @@
 #include <vectornav/gps.h>
 #include <vectornav/ins.h>
 #include <vectornav/sensors.h>
+#include <vectornav/sync_in.h>
 
 // Params
 std::string imu_frame_id, gps_frame_id;
@@ -47,20 +48,23 @@ std::string imu_frame_id, gps_frame_id;
 ros::Publisher pub_ins;
 ros::Publisher pub_gps;
 ros::Publisher pub_sensors;
+ros::Publisher pub_sync_in;
 
 // Device
 Vn200 vn200;
 
-int ins_seq = 0;
-int imu_seq = 0;
-int gps_seq = 0;
-int msg_cnt = 0;
+int ins_seq           = 0;
+int imu_seq           = 0;
+int gps_seq           = 0;
+int sync_in_seq       = 0;
+int msg_cnt           = 0;
 int last_group_number = 0;
 
 
 struct ins_binary_data_struct 
 {
     uint64_t gps_time;
+    uint64_t sync_in_time;
     float yaw;
     float pitch;
     float roll;
@@ -71,6 +75,7 @@ struct ins_binary_data_struct
     float vel_east;
     float vel_down;
     uint16_t ins_status;
+    uint32_t sync_in_count;
     float yaw_sigma;
     float pitch_sigma;
     float roll_sigma;
@@ -237,11 +242,30 @@ void publish_imu_data()
     }
 }
 
+void publish_sync_in()
+{
+    sync_in_seq++;
+    ros::Time timestamp =  ros::Time::now(); 
+    // sync_in from camera strobe
+    if (pub_sync_in.getNumSubscribers() > 0)
+    {
+        vectornav::sync_in msg_sync_in;
+        msg_sync_in.header.seq      = imu_seq;
+        msg_sync_in.header.stamp    = timestamp;
+        msg_sync_in.header.frame_id = "sync_in";
+        msg_sync_in.gps_time 	    = (double)(ins_binary_data.gps_time-ins_binary_data.sync_in_time)*1E-9;
+        msg_sync_in.sync_in_count   = ins_binary_data.sync_in_count;
+
+        pub_sync_in.publish(msg_sync_in);
+    }
+}
+
 void asyncBinaryResponseListener(Vn200* sender, unsigned char* data, unsigned int buf_len)
 {
     int sync_byte = data[0];
     int group_number = data[1];
     int fields = data[3]*256+data[2];
+    static uint32_t last_sync_in_count = 0;
 
     //ROS_INFO_STREAM(sync_byte << " " << group_number);
 
@@ -265,6 +289,15 @@ void asyncBinaryResponseListener(Vn200* sender, unsigned char* data, unsigned in
         ins_msg++;
         memcpy(&ins_binary_data, data+8, buf_len-10);
         publish_ins_data();
+
+        if (last_sync_in_count != ins_binary_data.sync_in_count)
+        {
+            double syncInTime = (ins_binary_data.gps_time - ins_binary_data.sync_in_time) * 1e-9;
+            ROS_DEBUG_STREAM("Received strobe count:" << ins_binary_data.sync_in_count << " at GPS time " << std::fixed << std::setw(12) << syncInTime);
+            last_sync_in_count = ins_binary_data.sync_in_count;
+            publish_sync_in();
+        }
+
         if (remainder(ins_msg, 100) == 0)
         {
             ins_msg = 0;
@@ -743,6 +776,8 @@ int main( int argc, char* argv[] )
     pub_ins     = n_.advertise<vectornav::ins>    ("ins", 1000);
     pub_gps     = n_.advertise<vectornav::gps>    ("gps", 1000);
     pub_sensors = n_.advertise<vectornav::sensors>("imu", 1000);
+    pub_sync_in = n_.advertise<vectornav::sync_in>("sync_in", 1000);
+
 
     // Initialize VectorNav
     VN_ERROR_CODE vn_retval;
@@ -776,6 +811,29 @@ int main( int argc, char* argv[] )
         ROS_FATAL( "Could not set GPS Antenna Offset, Error Text: %s", vn_error_msg);
         exit (EXIT_FAILURE);
     }
+
+    ROS_INFO("About to set SynchronizationControl");
+
+    vn_retval = vn200_setSynchronizationControl(&vn200, 
+         3, // SyncInMode: 5=Output asynchronous message on trigger of SYNC_IN
+         0, // SyncInEdge: 0=rising
+         0, // SyncInSkipFactor
+         0, // reserved
+         6, // SyncOutMode: 6= Trigger on a GPS PPS event (1 Hz) when a 3D fix is valid
+         1, // SyncOutPolarity: 0=Negative 1=Positive 
+         0, // SyncOutSkipFactor
+         100000000, // pulse width in ns
+         0, true); // reserved, wait for response
+
+    if (vn_retval != VNERR_NO_ERROR)
+    {
+        vnerr_msg(vn_retval, vn_error_msg);
+        ROS_FATAL( "Could not set SynchronizationControl, Error Text: %s", vn_error_msg);
+        exit (EXIT_FAILURE);
+    } else {
+        ROS_INFO("Set SynchronizationControl");
+    }
+    
 
     vn_retval = vn200_setAsynchronousDataOutputType(&vn200, 0, true);
 

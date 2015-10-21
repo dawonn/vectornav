@@ -25,6 +25,7 @@ find_package(catkin REQUIRED tf)
    ins.msg
    gps.msg
    sensors.msg
+   sync_in.msg
    utc_time.msg
  )
 
