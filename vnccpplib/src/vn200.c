@@ -1417,7 +1417,8 @@ VN_ERROR_CODE vn200_setBinaryOutputRegisters(Vn200* vn200, int binary_data_port,
 
         int curBufLoc = 0;
         char cmdToSendBuilder[VN_MAX_COMMAND_SIZE];
-        curBufLoc = sprintf(cmdToSendBuilder, "$VNWRG,76,%d,%d,31,10CA,0100,0600", binary_data_port, 800/ins_data_rate);
+        //curBufLoc = sprintf(cmdToSendBuilder, "$VNWRG,76,%d,%d,31,10CA,0100,0600", binary_data_port, 800/ins_data_rate);
+        curBufLoc = sprintf(cmdToSendBuilder, "$VNWRG,76,%d,%d,31,30CE,0100,0600", binary_data_port, 800/ins_data_rate); // added sync_in timing and count
         cmdToSendBuilder[curBufLoc] = '\0';
 
         if (waitForResponse)
