@@ -259,7 +259,7 @@ void publish_sync_in()
     if (pub_sync_in.getNumSubscribers() > 0)
     {
         vectornav::sync_in msg_sync_in;
-        msg_sync_in.header.seq      = imu_seq;
+        msg_sync_in.header.seq      = sync_in_seq;
         msg_sync_in.header.stamp    = timestamp;
         msg_sync_in.header.frame_id = "sync_in";
         msg_sync_in.gps_time 	    = (double)(ins_binary_data.gps_time-ins_binary_data.sync_in_time)*1E-9;
@@ -302,7 +302,8 @@ void asyncBinaryResponseListener(Vn200* sender, unsigned char* data, unsigned in
         if (last_sync_in_count != ins_binary_data.sync_in_count)
         {
             double syncInTime = (ins_binary_data.gps_time - ins_binary_data.sync_in_time) * 1e-9;
-            ROS_DEBUG_STREAM("Received strobe count:" << ins_binary_data.sync_in_count << " at GPS time " << std::fixed << std::setw(12) << syncInTime);
+            ROS_DEBUG_STREAM("Received strobe count:" << ins_binary_data.sync_in_count << " at GPS time "
+                    << std::fixed << std::setw(12) << syncInTime);
             last_sync_in_count = ins_binary_data.sync_in_count;
             publish_sync_in();
         }
@@ -763,7 +764,8 @@ void stop_vn200()
     if (vn_retval != VNERR_NO_ERROR)
     {
         vnerr_msg(vn_retval, vn_error_msg);
-        ROS_FATAL( "Could not turn off BinaryResponseListener output on device via: %s, Error Text: %s", port.c_str(), vn_error_msg);
+        ROS_FATAL( "Could not turn off BinaryResponseListener output on device via: %s, Error Text: %s",
+                port.c_str(), vn_error_msg);
         exit (EXIT_FAILURE);
     }
 
@@ -923,7 +925,8 @@ int main( int argc, char* argv[] )
     if (vn_retval != VNERR_NO_ERROR)
     {
         vnerr_msg(vn_retval, vn_error_msg);
-        ROS_FATAL( "Could not set BinaryResponseListener output on device via: %s, Error Text: %s", port.c_str(), vn_error_msg);
+        ROS_FATAL( "Could not set BinaryResponseListener output on device via: %s, Error Text: %s",
+                port.c_str(), vn_error_msg);
         exit (EXIT_FAILURE);
     }
 
