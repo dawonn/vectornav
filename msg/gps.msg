@@ -1,5 +1,6 @@
 std_msgs/Header       header
 float64               Time
+utc_time	          UtcTime
 uint16                Week
 uint8                 GpsFix
 uint8                 NumSats
