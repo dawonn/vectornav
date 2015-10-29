@@ -103,6 +103,7 @@ typedef struct {
  * \param[in]	newData	Pointer to the new data.
  */
 typedef void (*Vn200NewAsyncDataReceivedListener)(Vn200* sender, Vn200CompositeData* newData);
+typedef void (*Vn200NewAsyncBinaryResponseListener)(Vn200* sender, unsigned  char* newData, unsigned int data_length);
 
 /**
  * \brief Connects to a VectorNav VN-200 device.
@@ -211,6 +212,7 @@ DLL_EXPORT VN_ERROR_CODE vn200_reset(Vn200* vn200);
  * \return VectorNav error code.
  */
 DLL_EXPORT VN_ERROR_CODE vn200_registerAsyncDataReceivedListener(Vn200* vn200, Vn200NewAsyncDataReceivedListener listener);
+DLL_EXPORT VN_ERROR_CODE vn200_registerAsyncBinaryResponseListener(Vn200* vn200, Vn200NewAsyncBinaryResponseListener listener);
 
 /**
  * \brief Unregisters an already registered function for recieving notifications
@@ -221,6 +223,7 @@ DLL_EXPORT VN_ERROR_CODE vn200_registerAsyncDataReceivedListener(Vn200* vn200, V
  * \return VectorNav error code.
  */
 DLL_EXPORT VN_ERROR_CODE vn200_unregisterAsyncDataReceivedListener(Vn200* vn200, Vn200NewAsyncDataReceivedListener listener);
+DLL_EXPORT VN_ERROR_CODE vn200_unregisterAsyncBinaryResponseListener(Vn200* vn200, Vn200NewAsyncBinaryResponseListener listener);
 
 /**
  * \brief Checks if we are able to send and receive communication with the VN-200 sensor.
@@ -273,6 +276,10 @@ DLL_EXPORT VN_ERROR_CODE vn200_getModelNumber(Vn200* vn200, char* modelBuffer, u
  * \return VectorNav error code.
  */
 DLL_EXPORT VN_ERROR_CODE vn200_getHardwareRevision(Vn200* vn200, int* hardwareRevision);
+
+
+DLL_EXPORT VN_ERROR_CODE vn200_setBinaryOutputRegisters(Vn200* vn200, int binary_data_port, int gps_data_rate,
+        int ins_data_rate, int imu_data_rate, VN_BOOL waitForResponse);
 
 /**
  * \brief Gets the values in the Serial Number register.
