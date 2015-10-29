@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include "vn200.h"
 #include "vn_errorCodes.h"
+#include <unistd.h>
 
 #define COMMAND_HEADER_SIZE				5
 #define RESPONSE_BUILDER_BUFFER_SIZE	256
@@ -495,9 +496,9 @@ void* vn200_communicationHandler(void* vn200Obj)
 
             }
 
+//            printf("%c",readBuffer[curResponsePos]); 
             /* See if we have even found the start of a response. */
             if (readBuffer[curResponsePos] == '$') {
-                /* printf("%s\n",readBuffer); */
                 /* Alright, we have found the start of a command. */
                 haveFoundStartOfCommand = VN_TRUE;
                 responseBuilderBufferPos = 0;
@@ -1390,7 +1391,7 @@ VN_ERROR_CODE vn200_setBinaryOutputRegisters(Vn200* vn200, int binary_data_port,
         int ins_data_rate, int imu_data_rate, VN_BOOL waitForResponse)
 {
 
-    int errorCode;
+    int errorCode_75, errorCode_76, errorCode_77;
 
     if (!vn200->isConnected)
         return VNERR_NOT_CONNECTED;
@@ -1404,11 +1405,13 @@ VN_ERROR_CODE vn200_setBinaryOutputRegisters(Vn200* vn200, int binary_data_port,
         cmdToSendBuilder[curBufLoc] = '\0';
 
         if (waitForResponse)
-            errorCode = vn200_transaction(vn200, cmdToSendBuilder, "VNWRG,");
+            errorCode_75 = vn200_transaction(vn200, cmdToSendBuilder, "VNWRG,");
         else
-            errorCode = vn200_writeOutCommand(vn200, cmdToSendBuilder);
+            errorCode_75 = vn200_writeOutCommand(vn200, cmdToSendBuilder);
 
     }
+
+    usleep(10000);
 
     {
 
@@ -1419,11 +1422,13 @@ VN_ERROR_CODE vn200_setBinaryOutputRegisters(Vn200* vn200, int binary_data_port,
         cmdToSendBuilder[curBufLoc] = '\0';
 
         if (waitForResponse)
-            errorCode = vn200_transaction(vn200, cmdToSendBuilder, "VNWRG,");
+            errorCode_76 = vn200_transaction(vn200, cmdToSendBuilder, "VNWRG,");
         else
-            errorCode = vn200_writeOutCommand(vn200, cmdToSendBuilder);
+            errorCode_76 = vn200_writeOutCommand(vn200, cmdToSendBuilder);
 
     }
+
+    usleep(10000);
 
     {
         int curBufLoc = 0;
@@ -1432,13 +1437,13 @@ VN_ERROR_CODE vn200_setBinaryOutputRegisters(Vn200* vn200, int binary_data_port,
         cmdToSendBuilder[curBufLoc] = '\0';
 
         if (waitForResponse)
-            errorCode = vn200_transaction(vn200, cmdToSendBuilder, "VNWRG,");
+            errorCode_77 = vn200_transaction(vn200, cmdToSendBuilder, "VNWRG,");
         else
-            errorCode = vn200_writeOutCommand(vn200, cmdToSendBuilder);
+            errorCode_77 = vn200_writeOutCommand(vn200, cmdToSendBuilder);
 
     }
 
-    return errorCode;
+    return errorCode_75 || errorCode_76 || errorCode_77;
 }
 
 VN_ERROR_CODE vn200_getMagneticGravityReferenceVectors(Vn200* vn200, VnVector3* magneticReference, VnVector3* gravityReference)

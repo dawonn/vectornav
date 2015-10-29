@@ -33,13 +33,19 @@
 
 #include <ros/ros.h>
 #include <tf/tf.h>
-
+#include <signal.h>
 // Message Types
 #include <vectornav/utc_time.h>
 #include <vectornav/gps.h>
 #include <vectornav/ins.h>
 #include <vectornav/sensors.h>
+
 #include <vectornav/sync_in.h>
+#include <ros/xmlrpc_manager.h>
+
+// Signal-safe flag for whether shutdown is requested
+sig_atomic_t volatile g_request_shutdown = 0;
+
 
 // Params
 std::string imu_frame_id, gps_frame_id;
@@ -60,6 +66,9 @@ int sync_in_seq       = 0;
 int msg_cnt           = 0;
 int last_group_number = 0;
 
+
+std::string port;
+char vn_error_msg[100];
 
 struct ins_binary_data_struct 
 {
@@ -739,20 +748,71 @@ void vnerr_msg(VN_ERROR_CODE vn_error, char* msg)
     }
 }
 
+void stop_vn200()
+{
+    VN_ERROR_CODE vn_retval;
+    int retry_cnt = 0;
+
+    while (vn_retval != VNERR_NO_ERROR && retry_cnt < 3)
+    {
+        retry_cnt++;    
+        vn_retval = vn200_setBinaryOutputRegisters(&vn200, 0, 1,
+            1, 1, true);
+    }
+
+    if (vn_retval != VNERR_NO_ERROR)
+    {
+        vnerr_msg(vn_retval, vn_error_msg);
+        ROS_FATAL( "Could not turn off BinaryResponseListener output on device via: %s, Error Text: %s", port.c_str(), vn_error_msg);
+        exit (EXIT_FAILURE);
+    }
+
+    ROS_INFO("Disabled binary output register");
+    vn200_unregisterAsyncBinaryResponseListener(&vn200, &asyncBinaryResponseListener);   
+    vn200_disconnect(&vn200);
+}
+
+void mySigintHandler(int sig)
+{
+    g_request_shutdown = 1;
+}
+
+// Replacement "shutdown" XMLRPC callback
+void shutdownCallback(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result)
+{
+    int num_params = 0;
+
+    if (params.getType() == XmlRpc::XmlRpcValue::TypeArray)
+    num_params = params.size();
+    if (num_params > 1)
+    {
+        std::string reason = params[1];
+        ROS_WARN("Shutdown request received. Reason: [%s]", reason.c_str());
+        g_request_shutdown = 1; // Set flag
+    }
+
+    result = ros::xmlrpc::responseInt(1, "", 0);
+}
 
 /////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
     // Initialize ROS;
-    ros::init(argc, argv, "vectornav");
+    ros::init(argc, argv, "vectornav", ros::init_options::NoSigintHandler);
     ros::NodeHandle n; 
     ros::NodeHandle n_("~");
 
     // Read Parameters
-    std::string port;
     int baud, poll_rate_ins, poll_rate_gps, poll_rate_imu, async_output_type, async_output_rate,
         binary_data_output_port, binary_gps_data_rate, binary_ins_data_rate,
         binary_imu_data_rate;
+
+    int retry_cnt = 0;
+
+    // Override XMLRPC shutdown
+    ros::XMLRPCManager::instance()->unbind("shutdown");
+    ros::XMLRPCManager::instance()->bind("shutdown", shutdownCallback);
+    signal(SIGINT, mySigintHandler);
 
     n_.param<std::string>("serial_port" , port     , "/dev/ttyUSB0");
     n_.param<int>(        "serial_baud" , baud     , 115200);
@@ -781,7 +841,6 @@ int main( int argc, char* argv[] )
 
     // Initialize VectorNav
     VN_ERROR_CODE vn_retval;
-    char vn_error_msg[100];
     ROS_INFO("Initializing vn200. Port:%s Baud:%d\n", port.c_str(), baud);
 
     vn_retval = vn200_connect(&vn200, port.c_str(), baud);  
@@ -796,19 +855,23 @@ int main( int argc, char* argv[] )
         exit (EXIT_FAILURE);
     }
 
-    VnVector3 position;
-    position.c0 = 0;
-    position.c1 = -0.039;
-    position.c2 = 0;
+    usleep(10000);
 
     vn200_registerAsyncBinaryResponseListener(&vn200, &asyncBinaryResponseListener);   
-    
-    vn_retval = vn200_setGpsAntennaOffset(&vn200, position, true);
+ 
+    /* turn off asynchronous ASCII output, retry a couple of times */
+    vn_retval = vn200_setAsynchronousDataOutputType(&vn200, 0, true);   
+
+    while (vn_retval != VNERR_NO_ERROR && retry_cnt < 3)
+    {
+        retry_cnt++;    
+    	vn_retval = vn200_setAsynchronousDataOutputType(&vn200, 0, true);   
+    }
 
     if (vn_retval != VNERR_NO_ERROR)
     {
         vnerr_msg(vn_retval, vn_error_msg);
-        ROS_FATAL( "Could not set GPS Antenna Offset, Error Text: %s", vn_error_msg);
+        ROS_FATAL( "Could not set output type on device via: %s, Error Text: %s", port.c_str(), vn_error_msg);
         exit (EXIT_FAILURE);
     }
 
@@ -834,15 +897,25 @@ int main( int argc, char* argv[] )
         ROS_INFO("Set SynchronizationControl");
     }
     
+    VnVector3 position;
+    position.c0 = 0;
+    position.c1 = -0.039;
+    position.c2 = 0;
 
-    vn_retval = vn200_setAsynchronousDataOutputType(&vn200, 0, true);
+    usleep(10000);
+
+    vn_retval = vn200_setGpsAntennaOffset(&vn200, position, true);
+
 
     if (vn_retval != VNERR_NO_ERROR)
     {
         vnerr_msg(vn_retval, vn_error_msg);
-        ROS_FATAL( "Could not set output type on device via: %s, Error Text: %s", port.c_str(), vn_error_msg);
+        ROS_FATAL( "Could not set GPS Antenna Offset, Error Text: %s", vn_error_msg);
         exit (EXIT_FAILURE);
     }
+
+    usleep(10000);
+
 
     vn_retval = vn200_setBinaryOutputRegisters(&vn200, binary_data_output_port, binary_gps_data_rate,
             binary_ins_data_rate, binary_imu_data_rate, true);
@@ -854,30 +927,14 @@ int main( int argc, char* argv[] )
         exit (EXIT_FAILURE);
     }
 
-    /*
-       ros::Timer poll_timer_gps; 
-       ros::Timer poll_timer_ins; 
-       ros::Timer poll_timer_imu;
-
-       if (async_output_type == 0)
-       {
-    // Polling loop
-    ROS_INFO("Polling GPS at %d Hz\n", poll_rate_gps);
-    poll_timer_gps = n.createTimer(ros::Duration(1.0/(double)poll_rate_gps), poll_timer_gps_CB);
-
-    ROS_INFO("Polling INS at %d Hz\n", poll_rate_ins);
-    poll_timer_ins = n.createTimer(ros::Duration(1.0/(double)poll_rate_ins), poll_timer_ins_CB);
-
-    ROS_INFO("Polling IMU at %d Hz\n", poll_rate_imu);
-    poll_timer_imu = n.createTimer(ros::Duration(1.0/(double)poll_rate_imu), poll_timer_imu_CB);
-    }
-    else
+    while (!g_request_shutdown)
     {
+        ros::spinOnce();
+        usleep(500);
     }
-    */
-    ros::spin();
-
-    vn200_disconnect(&vn200);
+    stop_vn200();
+    ros::shutdown();
     return 0;
 }
+
 
