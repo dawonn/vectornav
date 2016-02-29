@@ -133,6 +133,8 @@ DLL_EXPORT VN_ERROR_CODE vn200_disconnect(Vn200* vn200);
  */
 DLL_EXPORT unsigned char vn200_checksum_compute(const char* cmdToCheck);
 
+DLL_EXPORT unsigned short vn200_CRC_compute(unsigned char* data, unsigned int length);
+
 /**
  * \brief Computes the checksum for the provided command and returns it as a
  * two character string representing it in hexidecimal.
