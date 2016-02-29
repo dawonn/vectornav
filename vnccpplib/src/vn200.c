@@ -446,9 +446,9 @@ void* vn200_communicationHandler(void* vn200Obj)
             /* See if we have found the start of binary output response */
             if ( (readBuffer[curResponsePos] == 0xFA || haveFoundStartOfBinaryResponse) && (!haveFoundStartOfCommand) ) {
                 haveFoundStartOfBinaryResponse = VN_TRUE;
-                VN_BOOL loop1Condition = VN_FALSE;
-                VN_BOOL loop2Condition = VN_FALSE;
-                VN_BOOL loop3Condition = VN_FALSE;
+                VN_BOOL imuMsgCondition = VN_FALSE;
+                VN_BOOL insMsgCondition = VN_FALSE;
+                VN_BOOL gpsMsgCondition = VN_FALSE;
 
                 if (curResponsePos+1 < numOfBytesRead)                    
                 {
@@ -456,13 +456,13 @@ void* vn200_communicationHandler(void* vn200Obj)
                         current_group_number = readBuffer[curResponsePos];
 
                     if (readBuffer[curResponsePos+1] == 1 && current_group_number == 0)
-                        loop1Condition = VN_TRUE;
+                        imuMsgCondition = VN_TRUE;
 
                     if (readBuffer[curResponsePos+1] == 49 && current_group_number == 0)
-                        loop2Condition = VN_TRUE;
+                        insMsgCondition = VN_TRUE;
 
                     if (readBuffer[curResponsePos+1] == 8 && current_group_number == 0)
-                        loop3Condition = VN_TRUE;
+                        gpsMsgCondition = VN_TRUE;
 
                     noGpAssgn = VN_FALSE;
                 }
@@ -484,7 +484,7 @@ void* vn200_communicationHandler(void* vn200Obj)
 
 
 
-                if (loop1Condition || current_group_number == 1)		
+                if (imuMsgCondition || current_group_number == 1)		
                 {	
                     current_group_number = 1;	   
                     num_bytes_to_copy = min(38-num_bytes_copied, numOfBytesRead - curResponsePos);
@@ -515,7 +515,7 @@ void* vn200_communicationHandler(void* vn200Obj)
                     }
 
                 } 			
-                else if (loop2Condition || current_group_number == 49)
+                else if (insMsgCondition || current_group_number == 49)
                 {
                     current_group_number = 49;
                     num_bytes_to_copy = min(100-num_bytes_copied, numOfBytesRead - curResponsePos);
@@ -545,7 +545,7 @@ void* vn200_communicationHandler(void* vn200Obj)
                         break;
                     }
                 }
-                else if (loop3Condition || current_group_number == 8)
+                else if (gpsMsgCondition || current_group_number == 8)
                 {
                     current_group_number = 8;
                     num_bytes_to_copy = min(82-num_bytes_copied, numOfBytesRead - curResponsePos);
