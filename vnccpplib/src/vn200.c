@@ -406,6 +406,8 @@ void* vn200_communicationHandler(void* vn200Obj)
     VN_BOOL haveFoundStartOfCommand = VN_FALSE;
     VN_BOOL haveFoundStartOfBinaryResponse = VN_FALSE;
 
+    unsigned char sync_bytes[3] = {232, 1, 102};
+
     vn200 = (Vn200*) vn200Obj;
     vn200Int = vn200_getInternalData(vn200);
 
@@ -415,6 +417,9 @@ void* vn200_communicationHandler(void* vn200Obj)
     int num_bytes_to_copy = 0;
     int current_group_number = 0;
     int write_buffer = 0;
+
+    int bt = 0;
+    VN_BOOL noGpAssgn = VN_FALSE;
 
     while (vn200Int->continueServicingComPort) {
 
@@ -432,6 +437,7 @@ void* vn200_communicationHandler(void* vn200Obj)
         for ( ; curResponsePos < numOfBytesRead; curResponsePos++) {
 
             if (responseBuilderBufferPos > RESPONSE_BUILDER_BUFFER_SIZE) {
+                printf("buffer pose  > buffer size\n");
                 /* We are about to overfill our buffer. Let's just reinitialize the buffer. */
                 haveFoundStartOfCommand = VN_FALSE;
                 responseBuilderBufferPos = 0;
@@ -440,73 +446,148 @@ void* vn200_communicationHandler(void* vn200Obj)
             /* See if we have found the start of binary output response */
             if ( (readBuffer[curResponsePos] == 0xFA || haveFoundStartOfBinaryResponse) && (!haveFoundStartOfCommand) ) {
                 haveFoundStartOfBinaryResponse = VN_TRUE;
-                if ((readBuffer[curResponsePos+1] == 1 && current_group_number == 0) || current_group_number == 1)		
+                VN_BOOL imuMsgCondition = VN_FALSE;
+                VN_BOOL insMsgCondition = VN_FALSE;
+                VN_BOOL gpsMsgCondition = VN_FALSE;
+
+                if (curResponsePos+1 < numOfBytesRead)                    
+                {
+                    if (noGpAssgn)
+                        current_group_number = readBuffer[curResponsePos];
+
+                    if (readBuffer[curResponsePos+1] == 1 && current_group_number == 0)
+                        imuMsgCondition = VN_TRUE;
+
+                    if (readBuffer[curResponsePos+1] == 49 && current_group_number == 0)
+                        insMsgCondition = VN_TRUE;
+
+                    if (readBuffer[curResponsePos+1] == 8 && current_group_number == 0)
+                        gpsMsgCondition = VN_TRUE;
+
+                    noGpAssgn = VN_FALSE;
+                }
+                else
+                {
+                    if (num_bytes_copied == 0)
+                    {
+                        responseBuilderBuffer[0] = readBuffer[curResponsePos];
+                        num_bytes_copied = 1;
+                    }
+
+                    if (current_group_number == 0)
+                    {
+                        noGpAssgn = VN_TRUE;
+                        break;
+                    }
+                   
+                }
+
+
+
+                if (imuMsgCondition || current_group_number == 1)		
                 {	
                     current_group_number = 1;	   
                     num_bytes_to_copy = min(38-num_bytes_copied, numOfBytesRead - curResponsePos);
-                    memcpy(responseBuilderBuffer+num_bytes_copied, &readBuffer[curResponsePos], num_bytes_to_copy);
-                    curResponsePos = curResponsePos + num_bytes_to_copy - 1 ;
+                    memcpy(&responseBuilderBuffer[num_bytes_copied], &readBuffer[curResponsePos], num_bytes_to_copy);
+                    curResponsePos = curResponsePos + num_bytes_to_copy -1;
                     num_bytes_copied += num_bytes_to_copy;
                     if (num_bytes_copied == 38)
                     {
+                        unsigned short crc;
+                        crc = vn200_CRC_compute(responseBuilderBuffer, 38);
+                        
                         current_group_number = 0;
                         num_bytes_copied = 0;
                         num_bytes_to_copy = 0;
                         haveFoundStartOfBinaryResponse = VN_FALSE;
-                        vn200_processReceivedBinaryResponseData(vn200, responseBuilderBuffer, 38);
+
+                        if (crc == 0)
+                            vn200_processReceivedBinaryResponseData(vn200, responseBuilderBuffer, 38);
+
+                        bt = 0;
                         continue;
+                    }
+                    else
+                    {
+                        bt = 1;
+                        responseBuilderBufferPos = 0;
+                        break;
                     }
 
                 } 			
-                else if ((readBuffer[curResponsePos+1] == 49 && current_group_number == 0) || current_group_number == 49)
+                else if (insMsgCondition || current_group_number == 49)
                 {
                     current_group_number = 49;
-                    num_bytes_to_copy = min(88-num_bytes_copied, numOfBytesRead - curResponsePos);
-                    memcpy(responseBuilderBuffer+num_bytes_copied, &readBuffer[curResponsePos], num_bytes_to_copy);
+                    num_bytes_to_copy = min(100-num_bytes_copied, numOfBytesRead - curResponsePos);
+                    memcpy(&responseBuilderBuffer[num_bytes_copied], &readBuffer[curResponsePos], num_bytes_to_copy);
                     curResponsePos = curResponsePos + num_bytes_to_copy - 1;
                     num_bytes_copied += num_bytes_to_copy;
-                    if (num_bytes_copied == 88)
+                    if (num_bytes_copied == 100)
                     {
+                        unsigned short crc;
+                        crc = vn200_CRC_compute(responseBuilderBuffer, 100);
+                        
                         current_group_number = 0;
                         num_bytes_copied = 0;
                         num_bytes_to_copy = 0;
                         haveFoundStartOfBinaryResponse = VN_FALSE;
-                        vn200_processReceivedBinaryResponseData(vn200, responseBuilderBuffer, 88);
+
+                        if (crc == 0)
+                            vn200_processReceivedBinaryResponseData(vn200, responseBuilderBuffer, 100);
+
+                        bt = 0;
                         continue;
                     }   
+                    else
+                    {
+                        bt = 1;
+                        responseBuilderBufferPos = 0;
+                        break;
+                    }
                 }
-                else if ((readBuffer[curResponsePos+1] == 8 && current_group_number == 0) || current_group_number == 8)
+                else if (gpsMsgCondition || current_group_number == 8)
                 {
                     current_group_number = 8;
                     num_bytes_to_copy = min(82-num_bytes_copied, numOfBytesRead - curResponsePos);
-                    memcpy(responseBuilderBuffer+num_bytes_copied, &readBuffer[curResponsePos], num_bytes_to_copy);
+                    memcpy(&responseBuilderBuffer[num_bytes_copied], &readBuffer[curResponsePos], num_bytes_to_copy);
                     curResponsePos = curResponsePos + num_bytes_to_copy - 1;
                     num_bytes_copied += num_bytes_to_copy;
 
                     if (num_bytes_copied == 82)
                     {
+                        unsigned short crc;
+                        crc = vn200_CRC_compute(responseBuilderBuffer, 82);
+                        
                         current_group_number = 0;
                         num_bytes_copied = 0;
                         num_bytes_to_copy = 0;
                         haveFoundStartOfBinaryResponse = VN_FALSE;
-                        vn200_processReceivedBinaryResponseData(vn200, responseBuilderBuffer, 82);
+                        
+                        if (crc == 0)
+                            vn200_processReceivedBinaryResponseData(vn200, responseBuilderBuffer, 82);
+
+                        bt = 0;
                         continue;
-                    }      
+                    }
+                    else
+                    {
+                        bt = 1;
+                        responseBuilderBufferPos = 0;
+                        break;
+                    }
                 }
 
             }
 
-//            printf("%c",readBuffer[curResponsePos]); 
             /* See if we have even found the start of a response. */
-            if (readBuffer[curResponsePos] == '$') {
+            if (readBuffer[curResponsePos] == '$' && !haveFoundStartOfCommand && !haveFoundStartOfBinaryResponse) {
                 /* Alright, we have found the start of a command. */
                 haveFoundStartOfCommand = VN_TRUE;
                 responseBuilderBufferPos = 0;
             }
             /* Check if we are at the end of the reponse. */
-            else if (readBuffer[curResponsePos] == '\r') {
-
-                /* We have found the end of the packet. */
+            else if (readBuffer[curResponsePos] == '\r' && !haveFoundStartOfBinaryResponse) {
+//                /* We have found the end of the packet. */
                 responseBuilderBuffer[responseBuilderBufferPos] = 0;
                 vn200_processReceivedPacket(vn200, responseBuilderBuffer);
                 responseBuilderBufferPos = 0;
@@ -611,6 +692,24 @@ unsigned char vn200_checksum_compute(const char* cmdToCheck)
         xorVal ^= (unsigned char) cmdToCheck[i];
 
     return xorVal;
+}
+
+unsigned short vn200_CRC_compute(unsigned char* data, unsigned int length)
+{
+
+    unsigned int i;
+    unsigned short crc = 0;
+
+    for (i = 1; i < length; i++)
+    {
+        crc = (unsigned char)(crc >> 8) | (crc << 8);
+        crc ^= data[i];
+        crc ^= (unsigned char)(crc & 0xff) >> 4;
+        crc ^= crc << 12;
+        crc ^= (crc & 0x00ff) << 5;        
+    }
+
+    return crc;
 }
 
 void vn200_checksum_computeAndReturnAsHex(const char* cmdToCheck, char* checksum)

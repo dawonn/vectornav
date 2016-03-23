@@ -122,7 +122,7 @@ struct gps_binary_data_struct
     float east_sigma;
     float down_sigma;
     float vel_sigma;
-    uint32_t time_sigma;
+    float time_sigma;
 } __attribute__((packed));
 
 struct gps_binary_data_struct gps_binary_data;
@@ -216,12 +216,14 @@ void publish_ins_data()
         msg_ins.NedVel.y = ins_binary_data.vel_east;
         msg_ins.NedVel.z = ins_binary_data.vel_down;
 
-
         msg_ins.RollUncertainty = ins_binary_data.roll_sigma;
         msg_ins.PitchUncertainty = ins_binary_data.pitch_sigma;
         msg_ins.YawUncertainty = ins_binary_data.yaw_sigma;
         msg_ins.PosUncertainty  = ins_binary_data.pos_sigma;
         msg_ins.VelUncertainty  = ins_binary_data.vel_sigma;
+
+        msg_ins.SyncInTime = (double)(ins_binary_data.gps_time-ins_binary_data.sync_in_time)*1E-9;
+        msg_ins.SyncInCount = ins_binary_data.sync_in_count; 
 
         pub_ins.publish(msg_ins);
     } 
@@ -754,7 +756,11 @@ void stop_vn200()
     VN_ERROR_CODE vn_retval;
     int retry_cnt = 0;
 
-    while (vn_retval != VNERR_NO_ERROR && retry_cnt < 3)
+
+    vn_retval = vn200_setBinaryOutputRegisters(&vn200, 0, 1,
+            1, 1, true);
+
+    while (vn_retval != VNERR_NO_ERROR && retry_cnt < 2)
     {
         retry_cnt++;    
         vn_retval = vn200_setBinaryOutputRegisters(&vn200, 0, 1,
