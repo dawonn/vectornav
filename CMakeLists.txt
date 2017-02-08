@@ -65,23 +65,18 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories( vnccpplib/include )
+include_directories(vnccpplib/include)
 
 ## Declare a cpp library
-add_library(vn100
-  vnccpplib/src/vn100.c
-)
-add_library(vn200
-  vnccpplib/src/vn200.c
-)
-add_library(vncp_services
-  vnccpplib/src/arch/linux/vncp_services.c
-)
+add_library(vn100         vnccpplib/src/vn100.c)
+add_library(vn200         vnccpplib/src/vn200.c)
+add_library(vncp_services vnccpplib/src/arch/linux/vncp_services.c)
 
 ## Declare a cpp executable
 add_executable(vn200_node     src/vn200_node.cpp 
                               vnccpplib/src/arch/linux/vncp_services.c
                               vnccpplib/src/vn200.c)
+add_dependencies(vn200_node ${PROJECT_NAME}_generate_messages)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
