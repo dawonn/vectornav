@@ -65,38 +65,23 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories( vnccpplib/include )
+include_directories( vnproglib-1.1/cpp/include )
+link_directories( vnproglib-1.1/cpp/build/bin )
+find_library(vnproglib vncxx)
 
 ## Declare a cpp library
-add_library(vn100
-  vnccpplib/src/vn100.c
-)
-add_library(vn200
-  vnccpplib/src/vn200.c
-)
-add_library(vncp_services
-  vnccpplib/src/arch/linux/vncp_services.c
-)
-
 ## Declare a cpp executable
-add_executable(vn200_node     src/vn200_node.cpp 
-                              vnccpplib/src/arch/linux/vncp_services.c
-                              vnccpplib/src/vn200.c)
+add_executable(vn200_node src/vn200_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(vectornav_node vectornav_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(vncp_services
-   pthread 
- )
- 
- target_link_libraries(vn200_node
-   ${catkin_LIBRARIES}
-   vncp_services
-   vn200
- )
+target_link_libraries(vn200_node
+  libvncxx.a
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
@@ -106,7 +91,7 @@ add_executable(vn200_node     src/vn200_node.cpp
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
 # Mark executable scripts (Python etc.) for installation
-# in contrast to setup.py, you can choose the destination
+
 install(PROGRAMS
   scripts/gpsFix.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

@@ -29,7 +29,7 @@
 #include <math.h>
 #include <stdlib.h>     /* exit, EXIT_FAILURE */
 
-#include "vectornav.h"
+#include <vn/sensors.h>
 
 #include <ros/ros.h>
 #include <tf/tf.h>
@@ -42,6 +42,9 @@
 
 #include <vectornav/sync_in.h>
 #include <ros/xmlrpc_manager.h>
+
+using namespace vn::protocol::uart;
+using namespace vn::sensors;
 
 // Signal-safe flag for whether shutdown is requested
 sig_atomic_t volatile g_request_shutdown = 0;
@@ -57,7 +60,7 @@ ros::Publisher pub_sensors;
 ros::Publisher pub_sync_in;
 
 // Device
-Vn200 vn200;
+vn::sensors::VnSensor vn200;
 
 int ins_seq           = 0;
 int imu_seq           = 0;
@@ -143,6 +146,8 @@ struct imu_binary_data_struct imu_binary_data;
 int ins_msg = 0;
 int gps_msg = 0;
 int imu_msg = 0;
+
+const unsigned raw_imu_max_rate = 800;
 
 void publish_gps_data()
 {
@@ -271,6 +276,9 @@ void publish_sync_in()
     }
 }
 
+// BAH: This function does parsing that the new Vectornav c++ library does internally,
+// so this function should no longer be necessary.
+/*
 void asyncBinaryResponseListener(Vn200* sender, unsigned char* data, unsigned int buf_len)
 {
     int sync_byte = data[0];
@@ -334,13 +342,15 @@ void asyncBinaryResponseListener(Vn200* sender, unsigned char* data, unsigned in
 
     }
 
-    /*    if (group_number != last_group_number)
+    //    if (group_number != last_group_number) {
 
-          ROS_INFO_STREAM("sync byte: " << sync_byte << "group number: " << group_number << " fields: " << fields);
-          last_group_number = group_number;
-          } */
+    //        ROS_INFO_STREAM("sync byte: " << sync_byte << "group number: " << group_number << " fields: " << fields);
+              last_group_number = group_number;
+    //    }
 }
+*/
 
+/*
 void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
 {
     //TODO: Publish messages perhaps? ;)
@@ -528,7 +538,9 @@ void asyncDataListener(Vn200* sender, Vn200CompositeData* data)
             data->velocityUncertainty);
 
 }
+*/
 
+/*
 void poll_gps()
 {
     // Only bother if we have subscribers
@@ -544,7 +556,6 @@ void poll_gps()
     double gpsTime;
     unsigned short gpsWeek;
     VnVector3 LLA, nedVelocity;
-
 
     // GPS Data (5Hz MAX)
     if (pub_gps.getNumSubscribers() > 0)
@@ -705,7 +716,9 @@ void poll_imu()
 
     }
 }
+*/
 
+/*
 void poll_timer_gps_CB(const ros::TimerEvent&)
 {
     poll_gps();
@@ -720,7 +733,9 @@ void poll_timer_imu_CB(const ros::TimerEvent&)
 {
     poll_imu();
 }
+*/
 
+/*
 void vnerr_msg(VN_ERROR_CODE vn_error, char* msg)
 {
     switch(vn_error)
@@ -750,7 +765,15 @@ void vnerr_msg(VN_ERROR_CODE vn_error, char* msg)
             strcpy(msg, "Undefined Error");
     }
 }
+*/
 
+bool dividesEvenly(unsigned numerator, unsigned denominator)
+{
+    unsigned dividend = numerator / denominator;
+    return numerator == denominator * dividend;
+}
+
+/*
 void stop_vn200()
 {
     VN_ERROR_CODE vn_retval;
@@ -779,6 +802,7 @@ void stop_vn200()
     vn200_unregisterAsyncBinaryResponseListener(&vn200, &asyncBinaryResponseListener);   
     vn200_disconnect(&vn200);
 }
+*/
 
 void mySigintHandler(int sig)
 {
@@ -840,6 +864,43 @@ int main( int argc, char* argv[] )
     n_.param<int>(        "binary_ins_data_output_rate"  , binary_ins_data_rate, 20); 
     n_.param<int>(        "binary_imu_data_output_rate"  , binary_imu_data_rate, 100); 
 
+    // Validate the rate inputs.
+    if (binary_gps_data_rate < 1 || binary_gps_data_rate > raw_imu_max_rate) {
+        ROS_FATAL_STREAM("binary_gps_data_output_rate of "
+          << binary_gps_data_rate << " is out of range (1 - "
+          << raw_imu_max_rate << ")");
+        exit(EXIT_FAILURE);
+    } else if (!dividesEvenly(raw_imu_max_rate, binary_gps_data_rate)) {
+        ROS_FATAL_STREAM("binary_gps_data_rate does not evenly divide "
+          << raw_imu_max_rate);
+        exit(EXIT_FAILURE);
+    }
+
+    if (binary_ins_data_rate < 1 || binary_ins_data_rate > raw_imu_max_rate) {
+        ROS_FATAL_STREAM("binary_ins_data_rate of "
+          << binary_ins_data_rate << " is out of range (1 - "
+          << raw_imu_max_rate << ")");
+        exit(EXIT_FAILURE);
+    } else if (!dividesEvenly(raw_imu_max_rate, binary_ins_data_rate)) {
+        ROS_FATAL_STREAM("binary_ins_data_rate does not evenly divide "
+          << raw_imu_max_rate);
+        exit(EXIT_FAILURE);
+    }
+
+    if (binary_imu_data_rate < 1 || binary_imu_data_rate > raw_imu_max_rate) {
+        ROS_FATAL_STREAM("binary_imu_data_rate of "
+          << binary_imu_data_rate << " is out of range (1 - "
+          << raw_imu_max_rate << ")");
+        exit(EXIT_FAILURE);
+    } else if (!dividesEvenly(raw_imu_max_rate, binary_imu_data_rate)) {
+        ROS_FATAL_STREAM("binary_imu_data_rate does not evenly divide "
+          << raw_imu_max_rate);
+        exit(EXIT_FAILURE);
+    }
+
+    AsyncMode binary_data_output_mode =
+      static_cast<AsyncMode>(binary_data_output_port);
+
     // Initialize Publishers
     pub_ins     = n_.advertise<vectornav::ins>    ("ins", 1000);
     pub_gps     = n_.advertise<vectornav::gps>    ("gps", 1000);
@@ -848,28 +909,74 @@ int main( int argc, char* argv[] )
 
 
     // Initialize VectorNav
-    VN_ERROR_CODE vn_retval;
+    //VN_ERROR_CODE vn_retval;
     ROS_INFO("Initializing vn200. Port:%s Baud:%d\n", port.c_str(), baud);
 
-    vn_retval = vn200_connect(&vn200, port.c_str(), baud);  
-    if (vn_retval != VNERR_NO_ERROR)
-    {
-        vnerr_msg(vn_retval, vn_error_msg);
-        ROS_FATAL("Could not conenct to vn200 on port:%s @ Baud:%d; Error %d \n"
+    try {
+        vn200.connect(port, baud);
+    } catch (...) {
+        ROS_FATAL("Could not conenct to vn200 on port:%s @ Baud:%d;"
                 "Did you add your user to the 'dialout' group in /etc/group?", 
                 port.c_str(), 
-                baud, 
-                vn_retval);
-        exit (EXIT_FAILURE);
+                baud); 
+        exit(EXIT_FAILURE);
     }
 
-    usleep(10000);
+    GpsGroup gps_gps_group = GPSGROUP_UTC | GPSGROUP_TOW | GPSGROUP_WEEK
+        | GPSGROUP_NUMSATS | GPSGROUP_FIX | GPSGROUP_POSLLA | GPSGROUP_VELNED
+        | GPSGROUP_VELU | GPSGROUP_TIMEU;
 
-    vn200_registerAsyncBinaryResponseListener(&vn200, &asyncBinaryResponseListener);   
+    BinaryOutputRegister gps_log_reg(
+        binary_data_output_mode,
+        raw_imu_max_rate / binary_gps_data_rate,
+        COMMONGROUP_NONE,
+        TIMEGROUP_NONE,
+        IMUGROUP_NONE,
+        gps_gps_group,
+        ATTITUDEGROUP_NONE,
+        INSGROUP_NONE);
+
+    CommonGroup ins_common_group = COMMONGROUP_TIMEGPS | COMMONGROUP_TIMESYNCIN
+        | COMMONGROUP_YAWPITCHROLL | COMMONGROUP_POSITION
+        | COMMONGROUP_VELOCITY | COMMONGROUP_INSSTATUS | COMMONGROUP_SYNCINCNT;
+
+    AttitudeGroup ins_attitude_group = ATTITUDEGROUP_YPRU;
+
+    InsGroup ins_ins_group = INSGROUP_POSU | INSGROUP_VELU;
+
+    BinaryOutputRegister ins_log_reg(
+        binary_data_output_mode,
+        raw_imu_max_rate / binary_ins_data_rate,
+        ins_common_group,
+        TIMEGROUP_NONE,
+        IMUGROUP_NONE,
+        GPSGROUP_NONE,
+        ins_attitude_group,
+        ins_ins_group);
+
+    CommonGroup imu_common_group = COMMONGROUP_TIMEGPS | COMMONGROUP_ACCEL
+        | COMMONGROUP_ANGULARRATE;
+
+    BinaryOutputRegister imu_log_reg(
+        binary_data_output_mode,
+        raw_imu_max_rate / binary_imu_data_rate,
+        imu_common_group,
+        TIMEGROUP_NONE,
+        IMUGROUP_NONE,
+        GPSGROUP_NONE,
+        ATTITUDEGROUP_NONE,
+        INSGROUP_NONE);
+
+    vn200.writeBinaryOutput1(gps_log_reg);
+    vn200.writeBinaryOutput2(ins_log_reg);
+    vn200.writeBinaryOutput3(imu_log_reg);
+
+    //vn200_registerAsyncBinaryResponseListener(&vn200, &asyncBinaryResponseListener);   
  
     /* turn off asynchronous ASCII output, retry a couple of times */
-    vn_retval = vn200_setAsynchronousDataOutputType(&vn200, 0, true);   
+    //vn_retval = vn200_setAsynchronousDataOutputType(&vn200, 0, true);   
 
+/*
     while (vn_retval != VNERR_NO_ERROR && retry_cnt < 3)
     {
         retry_cnt++;    
@@ -882,9 +989,22 @@ int main( int argc, char* argv[] )
         ROS_FATAL( "Could not set output type on device via: %s, Error Text: %s", port.c_str(), vn_error_msg);
         exit (EXIT_FAILURE);
     }
+    */
 
     ROS_INFO("About to set SynchronizationControl");
 
+    vn::sensors::SynchronizationControlRegister sync_control(
+        SYNCINMODE_COUNT,
+        SYNCINEDGE_RISING,
+        0, // sync in skip factor
+        SYNCOUTMODE_GPSPPS,
+        SYNCOUTPOLARITY_NEGATIVE,
+        0, // sync out skip factor
+        1000000); // a millisecond should be fine.
+
+    vn200.writeSynchronizationControl(sync_control);
+
+/*
     vn_retval = vn200_setSynchronizationControl(&vn200, 
          3, // SyncInMode: 5=Output asynchronous message on trigger of SYNC_IN
          0, // SyncInEdge: 0=rising
@@ -893,9 +1013,11 @@ int main( int argc, char* argv[] )
          6, // SyncOutMode: 6= Trigger on a GPS PPS event (1 Hz) when a 3D fix is valid
          1, // SyncOutPolarity: 0=Negative 1=Positive 
          0, // SyncOutSkipFactor
-         100000000, // pulse width in ns
+         1,000,000,00, // pulse width in ns
          0, true); // reserved, wait for response
+ */
 
+/*
     if (vn_retval != VNERR_NO_ERROR)
     {
         vnerr_msg(vn_retval, vn_error_msg);
@@ -904,17 +1026,21 @@ int main( int argc, char* argv[] )
     } else {
         ROS_INFO("Set SynchronizationControl");
     }
+*/
     
-    VnVector3 position;
-    position.c0 = 0;
-    position.c1 = -0.039;
-    position.c2 = 0;
+    vn::math::vec3f position;
+    position[0] = 0.0;
+    position[1] = -0.039;
+    position[2] = 0.0;
 
-    usleep(10000);
+    //usleep(10000);
 
-    vn_retval = vn200_setGpsAntennaOffset(&vn200, position, true);
+    vn200.writeGpsAntennaOffset(position);
+
+    //vn_retval = vn200_setGpsAntennaOffset(&vn200, position, true);
 
 
+/*
     if (vn_retval != VNERR_NO_ERROR)
     {
         vnerr_msg(vn_retval, vn_error_msg);
@@ -923,8 +1049,10 @@ int main( int argc, char* argv[] )
     }
 
     usleep(10000);
+    */
 
 
+/*
     vn_retval = vn200_setBinaryOutputRegisters(&vn200, binary_data_output_port, binary_gps_data_rate,
             binary_ins_data_rate, binary_imu_data_rate, true);
 
@@ -935,13 +1063,14 @@ int main( int argc, char* argv[] )
                 port.c_str(), vn_error_msg);
         exit (EXIT_FAILURE);
     }
+    */
 
     while (!g_request_shutdown)
     {
         ros::spinOnce();
         usleep(500);
     }
-    stop_vn200();
+    //stop_vn200();
     ros::shutdown();
     return 0;
 }
