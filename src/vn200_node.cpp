@@ -43,6 +43,8 @@
 #include <vectornav/sync_in.h>
 #include <ros/xmlrpc_manager.h>
 
+#include <iostream>
+
 using namespace vn::protocol::uart;
 using namespace vn::sensors;
 
@@ -148,6 +150,12 @@ int gps_msg = 0;
 int imu_msg = 0;
 
 const unsigned raw_imu_max_rate = 800;
+
+const unsigned gps_group_signature = BINARYGROUP_GPS;
+const unsigned ins_group_signature = BINARYGROUP_COMMON | BINARYGROUP_ATTITUDE
+                                     | BINARYGROUP_INS;
+const unsigned imu_group_signature = BINARYGROUP_COMMON;
+
 
 void publish_gps_data()
 {
@@ -273,6 +281,28 @@ void publish_sync_in()
         msg_sync_in.sync_in_count   = ins_binary_data.sync_in_count;
 
         pub_sync_in.publish(msg_sync_in);
+    }
+}
+
+void binaryMessageReceived(void * user_data, Packet & p, size_t index)
+{
+    if (p.type() == Packet::TYPE_BINARY && p.isValid()) {
+        switch (p.groups()) {
+        case gps_group_signature:
+            std::cout << "Got a GPS group." << std::endl;   
+            break;
+        case ins_group_signature:
+            std::cout << "Got an INS group." << std::endl;   
+            break;
+        case imu_group_signature:
+            std::cout << "Got an IMU group." << std::endl;   
+            break;
+        default:
+            ROS_WARN("Received unknown group signature from vectornav");
+        }
+    } else {
+        ROS_WARN("Received invalid packet from vectornav.");
+        // Ignore non-binary packets for now.
     }
 }
 
@@ -936,6 +966,7 @@ int main( int argc, char* argv[] )
         ATTITUDEGROUP_NONE,
         INSGROUP_NONE);
 
+
     CommonGroup ins_common_group = COMMONGROUP_TIMEGPS | COMMONGROUP_TIMESYNCIN
         | COMMONGROUP_YAWPITCHROLL | COMMONGROUP_POSITION
         | COMMONGROUP_VELOCITY | COMMONGROUP_INSSTATUS | COMMONGROUP_SYNCINCNT;
@@ -953,6 +984,7 @@ int main( int argc, char* argv[] )
         GPSGROUP_NONE,
         ins_attitude_group,
         ins_ins_group);
+
 
     CommonGroup imu_common_group = COMMONGROUP_TIMEGPS | COMMONGROUP_ACCEL
         | COMMONGROUP_ANGULARRATE;
@@ -1065,11 +1097,15 @@ int main( int argc, char* argv[] )
     }
     */
 
+    vn200.registerAsyncPacketReceivedHandler(NULL, binaryMessageReceived);
+
     while (!g_request_shutdown)
     {
         ros::spinOnce();
         usleep(500);
     }
+
+    vn200.unregisterAsyncPacketReceivedHandler();
     //stop_vn200();
     ros::shutdown();
     return 0;
