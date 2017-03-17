@@ -1,0 +1,5 @@
+var searchData=
+[
+  ['negate',['Negate',['../struct_vector_nav_1_1_math_1_1mat3f.html#ae58dce21b1f490fc955b7866ee203c00',1,'VectorNav.Math.mat3f.Negate()'],['../struct_vector_nav_1_1_math_1_1quatf.html#a3e480ff3cab563883b57ae8cfc0582b8',1,'VectorNav.Math.quatf.Negate()'],['../struct_vector_nav_1_1_math_1_1vec3d.html#a6cc301ee31675d926fc164e4627356c8',1,'VectorNav.Math.vec3d.Negate()'],['../struct_vector_nav_1_1_math_1_1vec3f.html#a78d0f4b21267721bb1f6d018afc1cfb7',1,'VectorNav.Math.vec3f.Negate()'],['../struct_vector_nav_1_1_math_1_1vec4f.html#a54833e0d9c7f8e5168a011d8d3c01acb',1,'VectorNav.Math.vec4f.Negate()']]],
+  ['normalize',['Normalize',['../struct_vector_nav_1_1_math_1_1quatf.html#aa5f1c5f93a0b275c8ee59ba209ec589b',1,'VectorNav.Math.quatf.Normalize()'],['../struct_vector_nav_1_1_math_1_1vec3d.html#aeac7aa3a1cc497b48a1c0896065a45d5',1,'VectorNav.Math.vec3d.Normalize()'],['../struct_vector_nav_1_1_math_1_1vec3f.html#a62e3b8e775d201dc6599b534ca003daa',1,'VectorNav.Math.vec3f.Normalize()'],['../struct_vector_nav_1_1_math_1_1vec4f.html#a6224f3f0cf664684868aeb487086ee0a',1,'VectorNav.Math.vec4f.Normalize()']]]
+];

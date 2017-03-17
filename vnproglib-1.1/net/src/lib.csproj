@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{EC9638D2-8869-4CAE-B5B1-6BB6D4CB8788}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>VectorNav</RootNamespace>
+    <AssemblyName>VectorNav</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protocol\Uart\Common.cs" />
+    <Compile Include="Protocol\Uart\Packet.cs" />
+    <Compile Include="Protocol\Uart\PacketFinder.cs" />
+    <Compile Include="Protocol\Uart\PacketFoundEventArgs.cs" />
+    <Compile Include="Protocol\Uart\Util.cs" />
+    <Compile Include="Data\Integrity\Detection.cs" />
+    <Compile Include="Data\Util.cs" />
+    <Compile Include="Math\Attitude.cs" />
+    <Compile Include="Math\Const.cs" />
+    <Compile Include="Math\Conv.cs" />
+    <Compile Include="Math\mat3f.cs" />
+    <Compile Include="Math\matf.cs" />
+    <Compile Include="Math\Position.cs" />
+    <Compile Include="Math\quatf.cs" />
+    <Compile Include="Math\vec3d.cs" />
+    <Compile Include="Math\vec3f.cs" />
+    <Compile Include="Math\vec4f.cs" />
+    <Compile Include="Math\vecf.cs" />
+    <Compile Include="Communication\AutoConnectPort.cs" />
+    <Compile Include="Communication\ISimplePort.cs" />
+    <Compile Include="Communication\SerialPort.cs" />
+    <Compile Include="Api.cs" />
+    <Compile Include="DateTimePrecise.cs" />
+    <Compile Include="Linux.cs" />
+    <Compile Include="Pair.cs" />
+    <Compile Include="Util.cs" />
+    <Compile Include="Win32.cs" />
+    <Compile Include="Sensor\CompositeData.cs" />
+    <Compile Include="Sensor\EzAsyncData.cs" />
+    <Compile Include="Sensor\Searcher.cs" />
+    <Compile Include="Sensor\SensorErrorException.cs" />
+    <Compile Include="Sensor\VnSensor.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,0 +1,144 @@
+.. VectorNav Python Library documentation master file, created by
+   sphinx-quickstart on Mon Sep 15 16:05:46 2014.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+... _ref-label:
+Examples
+===============
+
+This page walks through the basics of using the VectorNav Python Library with
+an example for connecting to a VectorNav sensor.
+
+1. Before getting started, please make sure you have Python v3.4 or later
+   installed on your system and can run the Python interpreter from the
+   command line.
+
+2. Next you will need to make the VectorNav library accessible from the Python
+   interpreter. The preferred method is to copy the appropriate package from
+   ``{LIBRARY}/python/bin`` and place it under your PYTHONPATH in the
+   site-packages directory. For example, on a Windows machine, you would copy
+   the folder ``{LIBRARY}/python/bin/win32/vn`` and place this under the path
+   ``C:/Python34/Lib/site-packages`` (typical path). The alternative method is
+   to start the Python interpreter in the directory with the appropriate
+   VectorNav binary package. On Windows, you would first use the command line
+   to change directory to ``{LIBRARY}/python/bin/win32`` and then start the
+   Python interpreter.
+
+3. Now start the Python interpreter from the command line by executing the
+   command ``python``.
+
+4. We will now use the VectorNav Python Library to connect and interact with a
+   VectorNav sensor. Import the ``vnpy.sensors`` module by executing the command
+   below::
+   
+	>>> from vnpy.sensors import *
+
+5. Create a new ``VnSensor`` object and connect to the sensor, substituting the
+   appropriate connection parameters::
+   
+	>>> vs = VnSensor()
+	>>> vs.connect("COM1", 115200)
+
+6. Now let's query the sensor to get the model number. All methods that request
+   and return information are formatted as ``read*`` where the asterisk is
+   replaced the register's name as listed in the product's user manual,
+   converted to camel case::
+   
+	>>> vs.read_model_number()
+	'VN-200T-CR'
+
+7. Now, let's read in some orientation data from the sensor. We will now query
+   the Yaw Pitch Roll register::
+   
+	>>> vs.read_yaw_pitch_roll()
+	<vn.math._math.vec3f object at 0x00735730>
+    
+   This doesn't look like the Yaw Pitch Roll data we expect from the sensor.
+   What is actually displayed is information about a 3-component vector storing
+   our Yaw Pitch Roll data. Let's requery the sensor but this time store the
+   returned object in a variable::
+   
+	>>> ypr = vs.read_yaw_pitch_roll()
+    
+   We now have our queried Yaw Pitch Roll stored in our variable ``ypr``. You
+   can access the individual components as shown below::
+   
+	>>> ypr.x
+	76.09700012207031
+	>>> ypr.y
+	-31.472000122070312
+	>>> ypr.z
+	1.378000020980835
+    
+8. Most of the registers of the sensor are accessed via structured objects. The
+   previous register was structured as a ``vec3f`` object representing the
+   3-components of yaw, pitch and roll. More complex registers are further
+   structured depending on the types of fields present. Let's see what happens
+   when we query the Yaw, Pitch, Roll, Magnetic, Acceleration, and Angular
+   Rates register::
+   
+	>>> reg = vs.read_yaw_pitch_roll_magnetic_acceleration_and_angular_rates()
+    
+   You can easily see the structure of the returned object by performing a
+   ``dir`` on the object::
+   
+	>>> dir(reg)
+	['__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__form
+	at__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__instan
+	ce_size__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__',
+	 '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclas
+	shook__', '__weakref__', 'accel', 'gyro', 'mag', 'yawPitchRoll']
+   
+   The displayed listing shows a lot of built-in attributes, but at the end,
+   you can see the fields ``accel``, ``gyro``, ``mag`` and ``yawPitchRoll``.
+   If you try accessing the ``accel`` field, you will get the information about
+   a ``vn.core.vec3f`` object, indicating this data is structured into a
+   3-component vector object. To access the individual acceleration components,
+   you must access them as shown below::
+   
+	>>> reg.accel.x
+	-5.255000114440918
+	>>> reg.accel.y
+	-0.19300000369548798
+	>>> reg.accel.z
+	-8.543000221252441
+    
+9. Let's do a simple reconfiguration of the sensor to illustrate a write operation.
+   The factory default for asynchronous data output frequency is 40 Hz. You can
+   change this setting to 10 Hz by issuing the commands below.
+   
+	>>> vs.write_async_data_output_frequency(10)
+	>>> vs.read_async_data_output_frequency()
+	10
+    
+10. In the previous step, it is possible to send a single value to set the
+    register because the register has a simple arrangement of two fields with
+    the second field being optional. However, many configuration registers have
+    an assortment of many fields. The preferred way to configure these
+    registers is to first read the existing settings, modifying the desired
+    fields in the returned object, and then sending the object to update the
+    register. The commands below illustrate this sequence for the register
+    VPE Basic Control::
+    
+	>>> reg = vs.read_vpe_basic_control()
+	>>> reg.headingMode
+	vn.core.HeadingMode.Relative
+	>>> reg.headingMode = HeadingMode.Absolute
+	>>> vs.writeVpeBasicControl(reg)
+	>>> reg = vs.read_vpe_basic_control()
+	>>> reg.headingMode
+	vn.core.HeadingMode.Absolute
+    
+    This example also illustrates the use of enums for register fields that
+    only accept a certain range of values.
+    
+    If you prefer to not do a read of the existing register values followed by
+    modification of only the fields you wish to change, you can also fully
+    specify the fields of the register by creating a new structure with the
+    desired values. The commands below show how to set the register back to 
+    its original setting::
+    
+	>>> reg = VpeBasicControlRegister(VpeEnable.Enable, HeadingMode.Relative, VpeMode.Mode1, VpeMode.Mode1)
+	>>> vs.write_vpe_basic_control(reg)
+  

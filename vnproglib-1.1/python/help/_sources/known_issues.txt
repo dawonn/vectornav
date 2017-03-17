@@ -1,0 +1,12 @@
+Known Issues
+===============
+
+This page contains known issues for the VectorNav Python Library.
+
+.. only:: not internal
+
+    * There are no known issues for the library.
+
+.. only:: internal
+
+    * Unable to reliably deploy and run GUI applications on other machines.

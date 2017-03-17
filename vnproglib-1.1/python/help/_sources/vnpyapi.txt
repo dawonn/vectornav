@@ -1,0 +1,1337 @@
+Library API Documentation
+=========================
+
+.. module:: vnpy
+	:synopsis: Common VectorNav Python utilities.
+
+Available Types
+---------------
+
+.. class:: CompositeData
+	:noindex:
+
+	Mega class that consolidates all data output types available from VectorNav sensors.
+
+
+.. class:: EzAsyncData
+	:noindex:
+
+	Wraps class :class:`VnSensor` and provides easy methods for accessing the sensor's asynchronous data messages.
+
+
+.. class:: VnSensor
+	:noindex:
+
+	Base class for interfacing with VectorNav sensors.
+
+.. class:: Attitude
+	:noindex:
+
+	Represents attitude of an object that may be represented in either yaw, pitch, roll, quaternion, or direction
+	cosine matrix.
+
+
+.. class:: Packet
+	:noindex:
+
+	Wraps a VectorNav UART packet with associated tools for parsing.
+
+
+:class:`CompositeData` Objects
+------------------------------
+
+.. class:: CompositeData
+
+	This class is able to hold all data output types from VectorNav sensors.
+
+
+Class attributes are:
+
+.. attribute:: CompositeData.has_any_attitude
+
+	Indicates if :attr:`CompositeData.any_attitude` contains any data.
+
+.. attribute:: CompositeData.any_attitude
+
+	Gets and converts the latest attitude data regardless of the received underlying type. Based on which type of
+	attitude data that was last received and processed, this value may be based on either received yaw, pitch, roll,
+	quaternion, or direction cosine matrix data.
+
+.. attribute:: CompositeData.has_yaw_pitch_roll
+
+	Indicates if :attr:`CompositeData.yaw_pitch_roll` has valid data.
+
+.. attribute:: CompositeData.yaw_pitch_roll
+
+	Yaw, pitch, roll data.
+
+.. attribute:: CompositeData.has_quaternion
+
+	Indicates if :attr:`CompositeData.quaternion` has valid data.
+
+.. attribute:: CompositeData.quaternion
+
+	Quaternion data.
+
+.. attribute:: CompositeData.has_direction_cosine_matrix
+
+	Indicates if :attr:`CompositeData.direction_cosine_matrix` has valid data.
+
+.. attribute:: CompositeData.direction_cosine_matrix
+
+	Direction cosine matrix data.
+
+.. attribute:: CompositeData.has_any_magnetic
+
+	Indicates if :attr:`CompositeData.any_magnetic` has valid data.
+
+.. attribute:: CompositeData.any_magnetic
+
+	Gets the latest magnetic data regardless of the received underlying type.
+
+.. attribute:: CompositeData.has_magnetic
+
+	Indicates if :attr:`CompositeData.magnetic` has valid data.
+
+.. attribute:: CompositeData.magnetic
+
+	Magnetic data.
+
+.. attribute:: CompositeData.has_magnetic_uncompensated
+
+	Indicates if :attr:`CompositeData.magnetic_uncompensated` has valid data.
+
+.. attribute:: CompositeData.magnetic_uncompensated
+
+	Magnetic uncompensated data.
+
+.. attribute:: CompositeData.has_magnetic_ned
+
+	Indicates if :attr:`CompositeData.magnetic_ned` has valid data.
+
+.. attribute:: CompositeData.magnetic_ned
+
+	Magnetic NED data.
+
+.. attribute:: CompositeData.has_magnetic_ecef
+
+	Indicates if :attr:`CompositeData.magnetic_ecef` has valid data.
+
+.. attribute:: CompositeData.magnetic_ecef
+
+	Magnetic ECEF data.
+
+.. attribute:: CompositeData.has_any_acceleration
+
+	Indicates if :attr:`CompositeData.any_acceleration` has valid data.
+
+.. attribute:: CompositeData.any_acceleration
+
+	Gets the latest acceleration data regardless of the received underlying type.
+
+.. attribute:: CompositeData.has_acceleration
+
+	Indicates if :attr:`CompositeData.acceleration` has valid data.
+
+.. attribute:: CompositeData.acceleration
+
+	Acceleration data.
+
+.. attribute:: CompositeData.has_acceleration_linear_body
+
+	Indicates if :attr:`CompositeData.acceleration_linear_body` has valid data.
+
+.. attribute:: CompositeData.acceleration_linear_body
+
+	Acceleration linear body data.
+
+.. attribute:: CompositeData.has_acceleration_uncompensated
+
+	Indicates if :attr:`CompositeData.acceleration_uncompensated` has valid data.
+
+.. attribute:: CompositeData.acceleration_uncompensated
+
+	Acceleration uncompensated data.
+
+.. attribute:: CompositeData.has_acceleration_linear_ned
+
+	Indicates if :attr:`CompositeData.acceleration_linear_ned` has valid data.
+
+.. attribute:: CompositeData.acceleration_linear_ned
+
+	Acceleration linear NED data.
+
+.. attribute:: CompositeData.has_acceleration_linear_ecef
+
+	Indicates if :attr:`CompositeData.acceleration_linear_ecef` has valid data.
+
+.. attribute:: CompositeData.acceleration_linear_ecef
+
+	Acceleration linear ECEF data.
+
+.. attribute:: CompositeData.has_acceleration_ned
+
+	Indicates if :attr:`CompositeData.acceleration_ned` has valid data.
+
+.. attribute:: CompositeData.acceleration_ned
+
+	Acceleration NED data.
+
+.. attribute:: CompositeData.has_acceleration_ecef
+
+	Indicates if :attr:`CompositeData.acceleration_ecef` has valid data.
+
+.. attribute:: CompositeData.acceleration_ecef
+
+	Acceleration ECEF data.
+
+.. attribute:: CompositeData.has_any_angular_rate
+
+	Indicates if :attr:`CompositeData.any_angular_rate` has valid data.
+
+.. attribute:: CompositeData.any_angular_rate
+
+	Gets the latest angular rate data regardless of the received underlying type.
+
+.. attribute:: CompositeData.has_angular_rate
+
+	Indicates if :attr:`CompositeData.angular_rate` has valid data.
+
+.. attribute:: CompositeData.angular_rate
+
+	Angular rate data.
+
+.. attribute:: CompositeData.has_angular_rate_uncompensated
+
+	Indicates if :attr:`CompositeData.angular_rate_uncompensated` has valid data.
+
+.. attribute:: CompositeData.angular_rate_uncompensated
+
+	Angular rate uncompensated data.
+
+.. attribute:: CompositeData.has_any_temperature
+
+	Indicates if :attr:`CompositeData.any_temperature` has valid data.
+
+.. attribute:: CompositeData.any_temperature
+
+	Gets the latest temperature data regardless of the received underlying type.
+
+.. attribute:: CompositeData.has_temperature
+
+	Indicates if :attr:`CompositeData.temperature` has valid data.
+
+.. attribute:: CompositeData.temperature
+
+	Temperature data.
+
+.. attribute:: CompositeData.has_any_pressure
+
+	Indicates if :attr:`CompositeData.any_pressure` has valid data.
+
+.. attribute:: CompositeData.any_pressure
+
+	Gets the latest pressure data regardless of the received underlying type.
+
+.. attribute:: CompositeData.has_pressure
+
+	Indicates if :attr:`CompositeData.pressure` has valid data.
+
+.. attribute:: CompositeData.pressure
+
+	Temperature data.
+
+.. attribute:: CompositeData.has_any_position
+
+	Indicates if :attr:`CompositeData.any_position` has valid data.
+
+.. attribute:: CompositeData.any_position
+
+	Gets the latest position data regardless of the received underlying type.
+
+.. attribute:: CompositeData.has_position_gps_lla
+
+	Indicates if :attr:`CompositeData.position_gps_lla` has valid data.
+
+.. attribute:: CompositeData.position_gps_lla
+
+	Position GPS LLA data.
+
+.. attribute:: CompositeData.has_position_gps_ecef
+
+	Indicates if :attr:`CompositeData.position_gps_ecef` has valid data.
+
+.. attribute:: CompositeData.position_gps_ecef
+
+	Position GPS ECEF data.
+
+.. attribute:: CompositeData.has_position_estimated_lla
+
+	Indicates if :attr:`CompositeData.position_estimated_lla` has valid data.
+
+.. attribute:: CompositeData.position_estimated_lla
+
+	Position estimated LLA data.
+
+.. attribute:: CompositeData.has_position_estimated_ecef
+
+	Indicates if :attr:`CompositeData.position_estimated_ecef` has valid data.
+
+.. attribute:: CompositeData.position_estimated_ecef
+
+	Position estimated ECEF data.
+
+.. attribute:: CompositeData.has_any_velocity
+
+	Indicates if :attr:`CompositeData.any_velocity` has valid data.
+
+.. attribute:: CompositeData.any_velocity
+
+	Gets the latest velocity data regardless of the received underlying type.
+
+.. attribute:: CompositeData.has_velocity_gps_ned
+
+	Indicates if :attr:`CompositeData.velocity_gps_ned` has valid data.
+
+.. attribute:: CompositeData.velocity_gps_ned
+
+	Velocity GPS NED data.
+
+.. attribute:: CompositeData.has_velocity_gps_ecef
+
+	Indicates if :attr:`CompositeData.velocity_gps_ecef` has valid data.
+
+.. attribute:: CompositeData.velocity_gps_ecef
+
+	Velocity GPS ECEF data.
+
+.. attribute:: CompositeData.has_velocity_estimated_ned
+
+	Indicates if :attr:`CompositeData.velocity_estimated_ned` has valid data.
+
+.. attribute:: CompositeData.velocity_estimated_ned
+
+	Velocity estimated NED data.
+
+.. attribute:: CompositeData.has_velocity_estimated_ecef
+
+	Indicates if :attr:`CompositeData.velocity_estimated_ecef` has valid data.
+
+.. attribute:: CompositeData.velocity_estimated_ecef
+
+	Velocity estimated ECEF data.
+
+.. attribute:: CompositeData.has_velocity_estimated_body
+
+	Indicates if :attr:`CompositeData.velocity_estimated_body` has valid data.
+
+.. attribute:: CompositeData.velocity_estimated_body
+
+	Velocity estimated body data.
+
+.. attribute:: CompositeData.has_delta_time
+
+	Indicates if :attr:`CompositeData.delta_time` has valid data.
+
+.. attribute:: CompositeData.delta_time
+
+	Delta time data.
+
+.. attribute:: CompositeData.has_delta_theta
+
+	Indicates if :attr:`CompositeData.delta_theta` has valid data.
+
+.. attribute:: CompositeData.delta_theta
+
+	Delta theta data.
+
+.. attribute:: CompositeData.has_delta_velocity
+
+	Indicates if :attr:`CompositeData.delta_velocity` has valid data.
+
+.. attribute:: CompositeData.delta_velocity
+
+	Delta velocity data.
+
+.. attribute:: CompositeData.has_time_startup
+
+	Indicates if :attr:`CompositeData.time_startup` has valid data.
+
+.. attribute:: CompositeData.time_startup
+
+	Time startup data.
+
+.. attribute:: CompositeData.has_time_gps
+
+	Indicates if :attr:`CompositeData.time_gps` has valid data.
+
+.. attribute:: CompositeData.time_gps
+
+	Time GPS data.
+
+.. attribute:: CompositeData.has_tow
+
+	Indicates if :attr:`CompositeData.tow` has valid data.
+
+.. attribute:: CompositeData.tow
+
+	GPS time of week data.
+
+.. attribute:: CompositeData.has_week
+
+	Indicates if :attr:`CompositeData.week` has valid data.
+
+.. attribute:: CompositeData.week
+
+	Week data.
+
+.. attribute:: CompositeData.has_num_sats
+
+	Indicates if :attr:`CompositeData.num_sats` has valid data.
+
+.. attribute:: CompositeData.num_sats
+
+	NumSats data.
+
+.. attribute:: CompositeData.has_time_sync_in
+
+	Indicates if :attr:`CompositeData.time_sync_in` has valid data.
+
+.. attribute:: CompositeData.time_sync_in
+
+	TimeSyncIn data.
+
+.. attribute:: CompositeData.has_vpe_status
+
+	Indicates if :attr:`CompositeData.vpe_status` has valid data.
+
+.. attribute:: CompositeData.vpe_status
+
+	VpeStatus data.
+
+.. attribute:: CompositeData.has_ins_status
+
+	Indicates if :attr:`CompositeData.ins_status` has valid data.
+
+.. attribute:: CompositeData.ins_status
+
+	InsStatus data.
+
+.. attribute:: CompositeData.has_sync_in_cnt
+
+	Indicates if :attr:`CompositeData.sync_in_cnt` has valid data.
+
+.. attribute:: CompositeData.sync_in_cnt
+
+	SyncInCnt data.
+
+.. attribute:: CompositeData.has_time_gps_pps
+
+	Indicates if :attr:`CompositeData.time_gps_pps` has valid data.
+
+.. attribute:: CompositeData.time_gps_pps
+
+	TimeGpsPps data.
+
+.. attribute:: CompositeData.has_gps_tow
+
+	Indicates if :attr:`CompositeData.gps_tow` has valid data.
+
+.. attribute:: CompositeData.gps_tow
+
+	GpsTow data.
+
+.. attribute:: CompositeData.has_time_utc
+
+	Indicates if :attr:`CompositeData.time_utc` has valid data.
+
+.. attribute:: CompositeData.time_utc
+
+	TimeUtc data.
+
+.. attribute:: CompositeData.has_sens_sat
+
+	Indicates if :attr:`CompositeData.sens_sat` has valid data.
+
+.. attribute:: CompositeData.sens_sat
+
+	SensSat data.
+
+.. attribute:: CompositeData.has_fix
+
+	Indicates if :attr:`CompositeData.fix` has valid data.
+
+.. attribute:: CompositeData.fix
+
+	GPS fix data.
+
+.. attribute:: CompositeData.has_any_position_uncertainty
+
+	Indicates if :attr:`CompositeData.any_position_uncertainty` has valid data.
+
+.. attribute:: CompositeData.any_position_uncertainty
+
+	Gets the latest position uncertainty data regardless of the received underlying type.
+
+.. attribute:: CompositeData.has_position_uncertainty_gps_ned
+
+	Indicates if :attr:`CompositeData.position_uncertainty_gps_ned` has valid data.
+
+.. attribute:: CompositeData.position_uncertainty_gps_ned
+
+	GPS position uncertainty NED data.
+
+.. attribute:: CompositeData.has_position_uncertainty_gps_ecef
+
+	Indicates if :attr:`CompositeData.position_uncertainty_gps_ecef` has valid data.
+
+.. attribute:: CompositeData.position_uncertainty_gps_ecef
+
+	GPS position uncertainty ECEF data.
+
+.. attribute:: CompositeData.has_position_uncertainty_estimated
+
+	Indicates if :attr:`CompositeData.position_uncertainty_estimated` has valid data.
+
+.. attribute:: CompositeData.position_uncertainty_estimated
+
+	Estimated position uncertainty data.
+
+.. attribute:: CompositeData.has_any_velocity_uncertainty
+
+	Indicates if :attr:`CompositeData.any_velocity_uncertainty` has valid data.
+
+.. attribute:: CompositeData.any_velocity_uncertainty
+
+	Gets the latest velocity uncertainty data regardless of the received underlying type.
+
+.. attribute:: CompositeData.has_velocity_uncertainty_gps
+
+	Indicates if :attr:`CompositeData.velocity_uncertainty_gps` has valid data.
+
+.. attribute:: CompositeData.velocity_uncertainty_gps
+
+	GPS velocity uncertainty data.
+
+.. attribute:: CompositeData.has_velocity_uncertainty_estimated
+
+	Indicates if :attr:`CompositeData.velocity_uncertainty_estimated` has valid data.
+
+.. attribute:: CompositeData.velocity_uncertainty_estimated
+
+	Estimated velocity uncertainty data.
+
+.. attribute:: CompositeData.has_time_uncertainty
+
+	Indicates if :attr:`CompositeData.time_uncertainty` has valid data.
+
+.. attribute:: CompositeData.time_uncertainty
+
+	Time uncertainty data.
+
+.. attribute:: CompositeData.has_attitude_uncertainty
+
+	Indicates if :attr:`CompositeData.attitude_uncertainty` has valid data.
+
+.. attribute:: CompositeData.attitude_uncertainty
+
+	Attitude uncertainty data.
+
+Class methods are:
+
+.. classmethod:: CompositeData.parse(packet)
+
+	Parses a packet.
+
+
+:class:`EzAsyncData` Objects
+----------------------------
+
+.. class:: EzAsyncData
+
+	This class internally wraps a :class:`VnSensor` object and provides easy methods for accessing asynchronous data
+	from a VectorNav sensor. All low-level access functionality is still available through the property
+	:attr:`EzAsyncData.sensor`.
+
+	Typically a call to :func:`EzAsyncData.connect` is used to create this object.
+
+Class attributes are:
+
+.. attribute:: EzAsyncData.sensor
+
+	The wrapped :class:`VnSensor` object which can be used to query the VectorNav sensor.
+
+
+.. attribute:: EzAsyncData.currentdata
+
+	The most recently cached asynchronous data processed.
+
+Class methods are:
+
+.. classmethod:: EzAsyncData.connect(portname, baudrate)
+
+	Immediately connects to a VectorNav sensor using the provided port parameters and returns an :class:`EzAsyncData` object.
+
+
+.. method:: EzAsyncData.disconnect()
+
+	Disconnects from the VectorNav sensors.
+
+
+.. method:: EzAsyncData.next_data() -> CompositeData
+
+	Retrieves the next available data packet. If a new data packet has not been received since the last call, this
+	method will block until a new one is received. See also :ref:`EzAsyncData.next_data(timeout_ms) <ezasyncdata_nextdata_timeout_ms>` for a timeout version.
+
+
+.. _ezasyncdata_nextdata_timeout_ms:
+.. method:: EzAsyncData.next_data(timeout_ms) -> CompositeData
+
+	A timeout version of :func:`EzAsyncData.next_data()`. If a timeout occurs before a new data packet is received, a
+	:class:`TimeoutError` will be raised.
+
+
+
+:class:`VnSensor` Objects
+-------------------------
+
+.. class:: VnSensor
+
+	Helpful class for working with VectorNav sensors.
+
+Class attributes are:
+
+.. attribute:: VnSensor.baudrate
+
+	Baud rate of the serial port connection. Note this is independent of the sensor's on-board serial
+	baud rate setting.
+
+.. attribute:: VnSensor.is_connected
+
+	Indicates if the VnSensor is connected.
+
+.. attribute:: VnSensor.response_timeout_ms
+
+	The amount of time in milliseconds to wait for a response during read/write operations with the sensor.
+
+.. attribute:: VnSensor.retransmit_delay_ms
+
+	The delay in milliseconds between retransmitting commands.
+
+.. attribute:: VnSensor.send_error_detection_mode
+
+	The error detection mode used for commands sent to the sensor. Default is CHECKSUM.
+
+.. attribute:: VnSensor.port
+
+	Name of the port the sensor is connected to.
+
+
+Class methods are:
+
+.. method:: VnSensor.acceleration_disturbance_present(disturbance_present)
+
+	Command to inform the VectorNav Sensor if there is an acceleration disturbance present. Set `disturbance_present` to
+	`True` when a disturbance is present. Set it to `False` when the disturbance is gone.
+
+.. method:: VnSensor.change_baudrate(baudrate)
+
+	Issues a change baudrate to the VectorNav sensor and then reconnects the attached serial port at the new `baudrate`.
+
+.. method:: VnSensor.connect(port, baudrate)
+
+	Connects to a VectorNav sensor on the provided `port` and `baudrate`.
+
+.. method:: VnSensor.determine_device_family
+
+	This method will query the attached sensor and determine the device family it belongs to.
+
+.. method:: VnSensor.disconnect
+
+	Disconnects from the VectorNav sensor.
+
+.. method:: VnSensor.magnetic_disturbance_present(disturbance_present)
+
+	Command to inform the VectorNav Sensor if there is a magnetic disturbance present. Set `disturbance_present` to
+	`True` when a disturbance is present. Set it to `False` when the disturbance is gone.
+
+.. method:: VnSensor.read_acceleration_compensation
+
+	Reads the Acceleration Compensation register.
+
+.. method:: VnSensor.read_acceleration_measurements
+
+	Reads the Acceleration Measurements register.
+
+.. method:: VnSensor.read_angular_rate_measurements
+
+	Reads the Angular Rate Measurements register.
+
+.. method:: VnSensor.read_async_data_output_frequency(port=None)
+
+	Reads the Async Data Output Frequency register.
+
+.. method:: VnSensor.read_async_data_output_type(port=None)
+
+	Reads the Async Data Output Type register.
+
+.. method:: VnSensor.read_attitude_quaternion
+
+	Reads the Attitude Quaternion register.
+
+.. method:: VnSensor.read_binary_output_1
+.. method:: VnSensor.read_binary_output_2
+.. method:: VnSensor.read_binary_output_3
+
+	Reads the Binary Output 1/2/3 register.
+
+.. method:: VnSensor.read_calculated_magnetometer_calibration
+
+	Reads the Calculated Magnetometer Calibration register.
+
+.. method:: VnSensor.read_communication_protocol_control
+
+	Reads the Communication Protocol Control register.
+
+.. method:: VnSensor.read_delta_theta_and_delta_velocity
+
+	Reads the Delta Theta and Delta Velocity register.
+
+.. method:: VnSensor.read_delta_theta_and_delta_velocity_configuration(fields)
+.. method:: VnSensor.read_delta_theta_and_delta_velocity_configuration(integration_frame, gyro_compensation, accel_compensation)
+
+	Writes to the Delta Theta and Delta Velocity Configuration register.
+
+.. method:: VnSensor.read_filter_measurements_variance_parameters
+
+	Reads the Filter Measurements Variance Parameters register.
+
+.. method:: VnSensor.read_filter_active_tuning_parameters
+
+	Reads the Filter Active Tuning Parameters register.
+
+.. method:: VnSensor.read_filter_basic_control
+
+	Reads the Filter Basic Control register.
+
+.. method:: VnSensor.read_filter_startup_gyro_bias
+
+	Reads the Filter Startup Gyro Bias register.
+
+.. method:: VnSensor.read_firmware_version
+
+	Reads the Firmware Version register.
+
+.. method:: VnSensor.read_gps_antenna_offset
+
+	Reads the GPS Antenna Offset register.
+
+.. method:: VnSensor.read_gps_compass_baseline
+
+	Reads the GPS Compass Baseline register.
+
+.. method:: VnSensor.read_gps_compass_estimated_baseline
+
+	Reads the GPS Compass Estimated Baseline register.
+
+.. method:: VnSensor.read_gps_configuration
+
+	Reads the GPS Configuration register.
+
+.. method:: VnSensor.read_gps_solution_ecef
+
+	Reads the GPS Solution - ECEF register.
+
+.. method:: VnSensor.read_gps_solution_lla
+
+	Reads the GPS Solution - LLA register.
+
+.. method:: VnSensor.read_gyro_compensation
+
+	Reads the Gyro Compensation register.
+
+.. method:: VnSensor.read_hardware_revision
+
+	Reads the Hardware Revision register.
+
+.. method:: VnSensor.read_imu_filtering_configuration
+
+	Reads the IMU Filtering Configuration register.
+
+.. method:: VnSensor.read_imu_measurements
+
+	Reads the IMU Measurements register.
+
+.. method:: VnSensor.read_imu_rate_configuration
+
+	Reads the IMU Rate Configuration register.
+
+.. method:: VnSensor.read_indoor_heading_mode_control
+
+	Reads the Indoor Heading Mode Control register.
+
+.. method:: VnSensor.read_ins_advanced_configuration
+
+	Reads the INS Advanced Configuration register.
+
+.. method:: VnSensor.read_ins_basic_configuration_vn200
+
+	Reads the INS Basic Configuration register for a VN-200 sensor.
+
+.. method:: VnSensor.read_ins_basic_configuration_vn300
+
+	Reads the INS Basic Configuration register for a VN-300 sensor.
+
+.. method:: VnSensor.read_ins_solution_ecef
+
+	Reads the INS Solution - ECEF register.
+
+.. method:: VnSensor.read_ins_solution_lla
+
+	Reads the INS Solution - LLA register.
+
+.. method:: VnSensor.read_ins_state_ecef
+
+	Reads the INS State - ECEF register.
+
+.. method:: VnSensor.read_ins_state_lla
+
+	Reads the INS State - LLA register.
+
+.. method:: VnSensor.read_magnetic_acceleration_and_angular_rates
+
+	Reads the Magnetic, Acceleration and Angular Rates register.
+
+.. method:: VnSensor.read_magnetic_and_gravity_reference_vectors
+
+	Reads the Magnetic and Gravity Reference Vectors register.
+
+.. method:: VnSensor.read_magnetic_measurements
+
+	Reads the Magnetic Measurements register.
+
+.. method:: VnSensor.read_magnetometer_calibration_control
+
+	Reads the Magnetometer Calibration Control register.
+
+.. method:: VnSensor.read_magnetometer_compensation
+
+	Reads the Magnetometer Compensation register.
+
+.. method:: VnSensor.read_model_number
+
+	Reads the Model Number register.
+
+.. method:: VnSensor.read_quaternion_magnetic_acceleration_and_angular_rates
+
+	Reads the Quaternion, Magnetic, Acceleration and Angular Rates register.
+
+.. method:: VnSensor.read_reference_frame_rotation
+
+	Reads the Reference Frame Rotation register.
+
+.. method:: VnSensor.read_reference_vector_configuration
+
+	Reads the Reference Vector Configuration register.
+
+.. method:: VnSensor.read_serial_baudrate(port=None)
+
+	Reads the Serial Baud Rate register for the specified `port`.
+
+.. method:: VnSensor.read_serial_number
+
+	Reads the Serial Number register.
+
+.. method:: VnSensor.read_startup_filter_bias_estimate
+
+	Reads the Startup Filter Bias Estimate register.
+
+.. method:: VnSensor.read_synchronization_control
+
+	Reads the Synchronization Control register.
+
+.. method:: VnSensor.read_synchronization_status
+
+	Reads the Synchronization Status register.
+
+.. method:: VnSensor.read_user_tag
+
+	Reads the User Tag register.
+
+.. method:: VnSensor.read_velocity_compensation_control
+
+	Reads the Velocity Compensation Control register.
+
+.. method:: VnSensor.read_velocity_compensation_measurement
+
+	Reads the Velocity Compensation Measurement register.
+
+.. method:: VnSensor.read_velocity_compensation_status
+
+	Reads the Velocity Compensation Status register.
+
+.. method:: VnSensor.read_vpe_basic_control
+
+	Reads the VPE Basic Control register.
+
+.. method:: VnSensor.read_vpe_accelerometer_advanced_tuning
+
+	Reads the VPE Accelerometer Advanced Tuning register.
+
+.. method:: VnSensor.read_vpe_accelerometer_basic_tuning
+
+	Reads the VPE Accelerometer Basic Tuning register.
+
+.. method:: VnSensor.read_vpe_gyro_basic_tuning
+
+	Reads the VPE Gryo Basic Tuning register.
+
+.. method:: VnSensor.read_vpe_magnetometer_advanced_tuning
+
+	Reads the VPE Magnetometer Advanced Tuning register.
+
+.. method:: VnSensor.read_vpe_magnetometer_basic_tuning
+
+	Reads the VPE Magnetometer Basic Tuning register.
+
+.. method:: VnSensor.read_yaw_pitch_roll
+
+	Reads the Yaw Pitch Roll register.
+
+.. method:: VnSensor.read_yaw_pitch_roll_magnetic_acceleration_and_angular_rates
+
+	Reads the Yaw, Pitch, Roll, Magnetic, Acceleration and Angular Rates register.
+
+.. method:: VnSensor.read_yaw_pitch_roll_true_body_acceleration_and_angular_rates_register
+
+	Reads the Yaw, Pitch, Roll, True Body Acceleration and Angular Rates register.
+
+.. method:: VnSensor.read_yaw_pitch_roll_true_inertial_acceleration_and_angular_rates_register
+
+	Reads the Yaw, Pitch, Roll, True Inertial Acceleration and Angular Rates register.
+
+.. method:: VnSensor.reset
+
+	Issues a Reset command to the VectorNav sensor.
+
+.. method:: VnSensor.restore_factory_settings
+
+	Issues a Restore Factory Settings command to the VectorNav sensor.
+
+.. method:: VnSensor.set_gyro_bias
+
+	Issues a command to the VectorNav Sensor to set the gyro's bias.
+
+.. classmethod:: VnSensor.supported_baudrates
+
+	The list of baud rates supported by VectorNav sensors.
+
+.. method:: VnSensor.tare
+
+	Issues a tare command to the VectorNav Sensor.
+
+.. method:: VnSensor.transaction(send)
+
+	Sends the provided command and returns the response from the sensor.
+
+	If the command does not have an asterisk '*', then a checksum will be performed and appended based on the current
+	error detection mode. Also, if the line-ending \\r\\n is not present, these will be added also.
+
+.. method:: VnSensor.verify_sensor_connectivity
+
+	Checks if we are able to send and receive communication with a sensor.
+
+.. method:: VnSensor.write_acceleration_compensation(fields)
+.. method:: VnSensor.write_acceleration_compensation(c, b)
+
+	Writes to the Acceleration Compensation register.
+
+.. method:: VnSensor.write_async_data_output_frequency(adof, port=None)
+
+	Writes to the Async Data Output Frequency register.
+
+.. method:: VnSensor.write_async_data_output_type(ador, port=None)
+
+	Writes to the Async Data Output Type register.
+
+.. method:: VnSensor.write_binary_output_1(fields)
+.. method:: VnSensor.write_binary_output_2(fields)
+.. method:: VnSensor.write_binary_output_3(fields)
+
+	Writes to the Binary Output 1/2/3 register.
+
+.. method:: VnSensor.write_communication_protocol_control(fields)
+.. method:: VnSensor.write_communication_protocol_control(serial_count, serial_status, spi_count, spi_status, serial_checksum, spi_checksum, error_mode)
+
+	Writes to the Communication Protocol Control register.
+
+.. method:: VnSensor.write_filter_active_tuning_parameters(fields)
+.. method:: VnSensor.write_filter_active_tuning_parameters(magnetic_disturbance_gain, acceleration_disturbance_gain, magnetic_disturbance_memory, acceleration_disturbance_memory)
+
+	Writes to the Filter Active Tuning Parameters register.
+
+.. method:: VnSensor.write_filter_basic_control(fields)
+.. method:: VnSensor.write_filter_basic_control(mag_mode, ext_mag_mode, ext_acc_mode, ext_gyro_mode, gyro_limit)
+
+	Writes to the Filter Basic Control register.
+
+.. method:: VnSensor.write_filter_measurements_variance_parameters(fields)
+.. method:: VnSensor.write_filter_measurements_variance_parameters(angular_walk_variance, angular_rate_variance, magnetic_variance, acceleration_variance)
+
+	Writes to the Filter Measurements Variance Parameters register.
+
+.. method:: VnSensor.write_filter_startup_gyro_bias(bias)
+
+	Writes to the Filter Startup Gyro Bias register.
+
+.. method:: VnSensor.write_gps_antenna_offset(position)
+
+	Writes to the GPS Antenna Offset register.
+
+.. method:: VnSensor.write_gps_compass_baseline(fields)
+.. method:: VnSensor.write_gps_compass_baseline(position, uncertainty)
+
+	Writes to the GPS Compass Baseline register.
+
+.. method:: VnSensor.write_gps_configuration(fields)
+.. method:: VnSensor.write_gps_configuration(mode, pps_source)
+
+	Writes to the GPS Configuration register.
+
+.. method:: VnSensor.write_gyro_compensation(fields)
+.. method:: VnSensor.write_gyro_compensation(c, b)
+
+	Writes to the Gyro Compensation register.
+
+.. method:: VnSensor.write_imu_filtering_configuration(fields)
+.. method:: VnSensor.write_imu_filtering_configuration(mag_window_size, accel_window_size, gyro_window_size, temp_window_size, pres_window_size, mag_filter_mode, accel_filter_mode, gyro_filter_mode, temp_filter_mode, pres_filter_mode)
+
+	Writes to the IMU Filtering Configuration register.
+
+.. method:: VnSensor.write_imu_rate_configuration(fields)
+.. method:: VnSensor.write_imu_rate_configuration(imu_rate, nav_divisor, filter_target_rate, filter_min_rate)
+
+	Writes to the IMU Rate Configuration register.
+
+.. method:: VnSensor.write_indoor_heading_mode_control(max_rate_error)
+
+	Writes to the Indoor Heading Mode Control register.
+
+.. method:: VnSensor.write_ins_advanced_configuration(fields)
+.. method:: VnSensor.write_ins_advanced_configuration(use_mag, use_pres, pos_att, vel_att, vel_bias, use_foam, gps_cov_type, vel_count, vel_init, move_origin, gps_timeout, delta_limit_pos, delta_limit_vel, min_pos_uncertainty, min_vel_uncertainty)
+
+	Writes to the INS Advanced Configuration register.
+
+.. method:: VnSensor.write_ins_basic_configuration_vn200(fields)
+.. method:: VnSensor.write_ins_basic_configuration_vn200(scenario, ahrs_aiding)
+
+	Writes to the INS Basic Configuration register for a VN-200 sensor.
+
+.. method:: VnSensor.write_ins_basic_configuration_vn300(fields)
+.. method:: VnSensor.write_ins_basic_configuration_vn300(scenario, ahrs_aiding, est_baseline)
+
+	Writes to the INS Basic Configuration register for a VN-300 sensor.
+
+.. method:: VnSensor.write_magnetic_and_gravity_reference_vectors(fields)
+.. method:: VnSensor.write_magnetic_and_gravity_reference_vectors(mag_ref, acc_ref)
+
+	Writes to the Magnetic and Gravity Reference Vectors register.
+
+.. method:: VnSensor.write_magnetometer_calibration_control(fields)
+.. method:: VnSensor.write_magnetometer_calibration_control(hsi_mode, hsi_output, converge_rate)
+
+	Writes to the Magnetometer Calibration Control register.
+
+.. method:: VnSensor.write_magnetometer_compensation(fields)
+.. method:: VnSensor.write_magnetometer_compensation(c, b)
+
+	Writes to the Magnetometer Compensation register.
+
+.. method:: VnSensor.write_reference_frame_rotation(c)
+
+	Writes to the Reference Frame Rotation register.
+
+.. method:: VnSensor.write_reference_vector_configuration(fields)
+.. method:: VnSensor.write_reference_vector_configuration(use_mag_model, use_gravity_model, recalc_threshold, year, position)
+
+	Writes to the Reference Vector Configuration register.
+
+.. method:: VnSensor.write_serial_baudrate(baudrate, port=None)
+
+	Writes to the Serial Baud Rate register for the specified port.
+
+.. method:: VnSensor.write_settings
+
+	Issues a Write Settings command to the VectorNav Sensor.
+
+.. method:: VnSensor.write_startup_filter_bias_estimate(fields)
+.. method:: VnSensor.write_startup_filter_bias_estimate(gyro_bias, accel_bias, pressure_bias)
+
+	Writes to the Startup Filter Bias Estimate register.
+
+.. method:: VnSensor.write_synchronization_control(fields)
+.. method:: VnSensor.write_synchronization_control(sync_in_mode, sync_in_edge, sync_in_skip_factor, sync_out_mode, sync_out_polarity, sync_out_skip_factor, sync_out_pulse_width)
+
+	Writes to the Synchronization Control register.
+
+.. method:: VnSensor.write_synchronization_status(fields)
+.. method:: VnSensor.write_synchronization_status(sync_in_count, sync_in_time, sync_out_count)
+
+	Writes to the Synchronization Status register.
+
+.. method:: VnSensor.write_user_tag(tag)
+
+	Writes to the User Tag register.
+
+.. method:: VnSensor.write_velocity_compensation_control(fields)
+.. method:: VnSensor.write_velocity_compensation_control(mode, velocity_tuning, rate_tuning)
+
+	Writes to the Velocity Compensation Control register.
+
+.. method:: VnSensor.write_velocity_compensation_measurement(velocity)
+
+	Writes to the Velocity Compensation Measurement register.
+
+.. method:: VnSensor.write_vpe_basic_control(fields)
+.. method:: VnSensor.write_vpe_basic_control(enable, heading_mode, filtering_mode, tuning_mode)
+
+	Writes to the VPE Basic Control register.
+
+.. method:: VnSensor.write_vpe_accelerometer_advanced_tuning(fields)
+.. method:: VnSensor.write_vpe_accelerometer_advanced_tuning(min_filtering, max_filtering, max_adapt_rate, disturbance_window, max_tuning)
+
+	Writes to the VPE Accelerometer Advanced Tuning register.
+
+.. method:: VnSensor.write_vpe_accelerometer_basic_tuning(fields)
+.. method:: VnSensor.write_vpe_accelerometer_basic_tuning(base_tuning, adaptive_tuning, adaptive_filtering)
+
+	Writes to the VPE Accelerometer Basic Tuning register.
+
+.. method:: VnSensor.write_vpe_gyro_basic_tuning(fields)
+.. method:: VnSensor.write_vpe_gyro_basic_tuning(angular_walk_variance, base_tuning, adaptive_tuning)
+
+	Writes to the VPE Gryo Basic Tuning register.
+
+.. method:: VnSensor.write_vpe_magnetometer_advanced_tuning(fields)
+.. method:: VnSensor.write_vpe_magnetometer_advanced_tuning(min_filtering, max_filtering, max_adapt_rate, disturbance_window, max_tuning)
+
+	Writes to the VPE Magnetometer Advanced Tuning register.
+
+.. method:: VnSensor.write_vpe_magnetometer_basic_tuning(fields)
+.. method:: VnSensor.write_vpe_magnetometer_basic_tuning(base_tuning, adaptive_tuning, adaptive_filtering)
+
+	Writes to the VPE Magnetometer Basic Tuning register.
+
+
+
+
+:class:`Attitude` Objects
+-------------------------
+
+.. class:: Attitude
+
+	Represents an orientation of an object regardless of the underlying data type (i.e. yaw, pitch,
+	roll, quaternion, direction cosine matrix). Allows easy conversion between these types.
+
+Class attributes are:
+
+.. attribute:: Attitude.ypr_degs
+
+	Yaw, pitch, roll representation in degrees.
+
+.. attribute:: Attitude.ypr_rads
+
+	Yaw, pitch, roll representation in radians.
+
+.. attribute:: Attitude.quat
+
+	Quaternion representation.
+
+.. attribute:: Attitude.dcm
+
+	Direction cosine matrix representation.
+
+
+Class methods are:
+
+.. classmethod:: Attitude.no_rotation
+
+	Represents a object with no rotation.
+
+.. classmethod:: Attitude.from_quat(quat)
+
+	Creates an :class:`Attitude` object from the provided quaternion representation.
+
+.. classmethod:: Attitude.from_ypr_degs(ypr)
+
+	Creates an :class:`Attitude` object from the provided yaw, pitch, roll representation in degrees.
+
+.. classmethod:: Attitude.from_ypr_rads(ypr)
+
+	Creates an :class:`Attitude` object from the provided yaw, pitch, roll representation in radians.
+
+.. classmethod:: Attitude.from_dcm(dcm)
+
+	Creates an :class:`Attitude` object from the provided direction cosine matrix representation.
+
+
+:class:`Position` Objects
+-------------------------
+
+.. class:: Position
+
+	Represents the position/location of an object regardless of the underlying data type. Allows easy conversion between
+	these types.
+
+
+Class methods are:
+
+.. classmethod:: Attitude.from_lla(lla)
+
+	Creates a :class:`Position` object from the given latitude, longitude, altitude (LLA) values.
+
+.. classmethod:: Attitude.from_ecef(ecef)
+
+	Creates a :class:`Position` object from the given earth-centered, earth-fixed (ECEF) values.
+
+
+:class:`vec3f` Objects
+----------------------
+
+.. class:: vec3f
+
+	Represents a 3-component vector based on single-precision floats.
+
+Class attributes are:
+
+.. attribute:: vec3f.x
+
+	The X (0-component).
+
+.. attribute:: vec3f.y
+
+	The Y (1-component).
+
+.. attribute:: vec3f.z
+
+	The Z (2-component).
+
+
+:class:`vec4f` Objects
+----------------------
+
+.. class:: vec4f
+
+	Represents a 4-component vector based on single-precision floats.
+
+Class attributes are:
+
+.. attribute:: vec4f.x
+
+	The X (0-component).
+
+.. attribute:: vec4f.y
+
+	The Y (1-component).
+
+.. attribute:: vec4f.z
+
+	The Z (2-component).
+
+.. attribute:: vec4f.w
+
+	The W (3-component).
+
+
+:class:`mat3f` Objects
+----------------------
+
+.. class:: mat3f
+
+	Represents a 3x3 matrix based on single-precision floats.
+
+Class attributes are:
+
+.. attribute:: mat3f.e00
+
+	The element at row 0, column 0.
+
+.. attribute:: mat3f.e01
+
+	The element at row 0, column 1.
+
+.. attribute:: mat3f.e02
+
+	The element at row 0, column 2.
+
+.. attribute:: mat3f.e10
+
+	The element at row 1, column 0.
+
+.. attribute:: mat3f.e11
+
+	The element at row 1, column 1.
+
+.. attribute:: mat3f.e12
+
+	The element at row 1, column 2.
+
+.. attribute:: mat3f.e20
+
+	The element at row 2, column 0.
+
+.. attribute:: mat3f.e21
+
+	The element at row 2, column 1.
+
+.. attribute:: mat3f.e22
+
+	The element at row 2, column 2.
+
+
+:class:`Packet` Objects
+-----------------------
+
+.. class:: Packet
+
+	Wraps a VectorNav UART packet with associated tools for parsing.
+
+
+Class attributes are:
+
+.. attribute:: Packet.is_valid
+
+	Performs data integrity check on the data packet. This will be either 8-bit XOR checksum, CRC16-CCITT CRC, or no
+	check depending on the provided data integrity type in the packet.
+
+.. attribute:: Packet.type
+
+	The type of packet.
+
+.. attribute:: Packet.datastr
+
+	Returns the encapsulated data as a string.
+
+.. attribute:: Packet.is_error
+
+	Indicates if the packet is an ASCII error message.
+
+.. attribute:: Packet.is_response
+
+	Indicates if the packet is a response to a message sent to the sensor.
+
+.. attribute:: Packet.is_ascii_response
+
+	Indicates if the packet is an ASCII asynchronous message.
+
+
+Class methods are:
+
+.. method:: Packet.determine_ascii_async_type
+
+	Determines the type of ASCII asynchronous message this packet is.
+
+.. method:: Packet.parse_error
+
+	Parses an error packet to get the error type.
+

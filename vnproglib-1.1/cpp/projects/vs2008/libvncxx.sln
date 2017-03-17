@@ -1,0 +1,32 @@
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libvncxx", "libvncxx.vcproj", "{3B0F1756-1910-32BA-8AA1-74E8E33D8C16}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		MinSizeRel|Win32 = MinSizeRel|Win32
+		RelWithDebInfo|Win32 = RelWithDebInfo|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B3F3D668-B4FF-385E-919A-67F84B66C1E9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B3F3D668-B4FF-385E-919A-67F84B66C1E9}.Release|Win32.ActiveCfg = Release|Win32
+		{B3F3D668-B4FF-385E-919A-67F84B66C1E9}.MinSizeRel|Win32.ActiveCfg = MinSizeRel|Win32
+		{B3F3D668-B4FF-385E-919A-67F84B66C1E9}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
+		{3B0F1756-1910-32BA-8AA1-74E8E33D8C16}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3B0F1756-1910-32BA-8AA1-74E8E33D8C16}.Debug|Win32.Build.0 = Debug|Win32
+		{3B0F1756-1910-32BA-8AA1-74E8E33D8C16}.Release|Win32.ActiveCfg = Release|Win32
+		{3B0F1756-1910-32BA-8AA1-74E8E33D8C16}.Release|Win32.Build.0 = Release|Win32
+		{3B0F1756-1910-32BA-8AA1-74E8E33D8C16}.MinSizeRel|Win32.ActiveCfg = MinSizeRel|Win32
+		{3B0F1756-1910-32BA-8AA1-74E8E33D8C16}.MinSizeRel|Win32.Build.0 = MinSizeRel|Win32
+		{3B0F1756-1910-32BA-8AA1-74E8E33D8C16}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
+		{3B0F1756-1910-32BA-8AA1-74E8E33D8C16}.RelWithDebInfo|Win32.Build.0 = RelWithDebInfo|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['scenario',['Scenario',['../class_vector_nav_1_1_sensor_1_1_ins_basic_configuration_register_vn200.html#aa2f3434e8648b3dea3cfa9afe062c43a',1,'VectorNav.Sensor.InsBasicConfigurationRegisterVn200.Scenario()'],['../class_vector_nav_1_1_sensor_1_1_ins_basic_configuration_register_vn300.html#ac947809be6dc921b9d4e4ac225939950',1,'VectorNav.Sensor.InsBasicConfigurationRegisterVn300.Scenario()']]],
+  ['serialchecksum',['SerialChecksum',['../class_vector_nav_1_1_sensor_1_1_communication_protocol_control_register.html#a093cec9a09ea021ecd54059eb6dd88a6',1,'VectorNav::Sensor::CommunicationProtocolControlRegister']]],
+  ['serialcount',['SerialCount',['../class_vector_nav_1_1_sensor_1_1_communication_protocol_control_register.html#ae5a67080d884b80fb91cf1c23b991749',1,'VectorNav::Sensor::CommunicationProtocolControlRegister']]],
+  ['serialstatus',['SerialStatus',['../class_vector_nav_1_1_sensor_1_1_communication_protocol_control_register.html#a5f6f60d6308cf08bb538366596ff45f4',1,'VectorNav::Sensor::CommunicationProtocolControlRegister']]],
+  ['speedacc',['SpeedAcc',['../class_vector_nav_1_1_sensor_1_1_gps_solution_lla_register.html#af817acec62e24c670e37ef0135e13747',1,'VectorNav.Sensor.GpsSolutionLlaRegister.SpeedAcc()'],['../class_vector_nav_1_1_sensor_1_1_gps_solution_ecef_register.html#af08b188c2fa6c45ea9b4ad1657df049c',1,'VectorNav.Sensor.GpsSolutionEcefRegister.SpeedAcc()']]],
+  ['spichecksum',['SpiChecksum',['../class_vector_nav_1_1_sensor_1_1_communication_protocol_control_register.html#acbb2d3ae2f0f98f4228fb99c11e45f39',1,'VectorNav::Sensor::CommunicationProtocolControlRegister']]],
+  ['spicount',['SpiCount',['../class_vector_nav_1_1_sensor_1_1_communication_protocol_control_register.html#a7c0c956ae3eb5582bc5f12471c8ac971',1,'VectorNav::Sensor::CommunicationProtocolControlRegister']]],
+  ['spistatus',['SpiStatus',['../class_vector_nav_1_1_sensor_1_1_communication_protocol_control_register.html#ac8b9b8281ac184df5bd455d35acad7f8',1,'VectorNav::Sensor::CommunicationProtocolControlRegister']]],
+  ['status',['Status',['../class_vector_nav_1_1_sensor_1_1_ins_solution_lla_register.html#a7eabe75c87fff5c6a7f12cf2d8712850',1,'VectorNav.Sensor.InsSolutionLlaRegister.Status()'],['../class_vector_nav_1_1_sensor_1_1_ins_solution_ecef_register.html#a7ff7530527c9b2f2acc86bad34c6a112',1,'VectorNav.Sensor.InsSolutionEcefRegister.Status()']]],
+  ['syncincount',['SyncInCount',['../class_vector_nav_1_1_sensor_1_1_synchronization_status_register.html#af90a1b948bec3557e7cceac110c47629',1,'VectorNav::Sensor::SynchronizationStatusRegister']]],
+  ['syncinedge',['SyncInEdge',['../class_vector_nav_1_1_sensor_1_1_synchronization_control_register.html#ac32613d1541b9056a808d1906e938fc0',1,'VectorNav::Sensor::SynchronizationControlRegister']]],
+  ['syncinmode',['SyncInMode',['../class_vector_nav_1_1_sensor_1_1_synchronization_control_register.html#a3525985a681a1f8eafe111be229c75aa',1,'VectorNav::Sensor::SynchronizationControlRegister']]],
+  ['syncinskipfactor',['SyncInSkipFactor',['../class_vector_nav_1_1_sensor_1_1_synchronization_control_register.html#a977e9832d0f1bbb7872bd3ca5f3463cd',1,'VectorNav::Sensor::SynchronizationControlRegister']]],
+  ['syncintime',['SyncInTime',['../class_vector_nav_1_1_sensor_1_1_synchronization_status_register.html#a3ebbbae80c8d70e8514f7ecdb733e04c',1,'VectorNav::Sensor::SynchronizationStatusRegister']]],
+  ['syncoutcount',['SyncOutCount',['../class_vector_nav_1_1_sensor_1_1_synchronization_status_register.html#ab3177d663e55b56ceba8e9a92232155e',1,'VectorNav::Sensor::SynchronizationStatusRegister']]],
+  ['syncoutmode',['SyncOutMode',['../class_vector_nav_1_1_sensor_1_1_synchronization_control_register.html#ade4b1a139d668e70b1da6b36eb169707',1,'VectorNav::Sensor::SynchronizationControlRegister']]],
+  ['syncoutpolarity',['SyncOutPolarity',['../class_vector_nav_1_1_sensor_1_1_synchronization_control_register.html#ac9de3da717f5309168eda049378802e3',1,'VectorNav::Sensor::SynchronizationControlRegister']]],
+  ['syncoutpulsewidth',['SyncOutPulseWidth',['../class_vector_nav_1_1_sensor_1_1_synchronization_control_register.html#aa4b241b678658aff14c8b9439215082a',1,'VectorNav::Sensor::SynchronizationControlRegister']]],
+  ['syncoutskipfactor',['SyncOutSkipFactor',['../class_vector_nav_1_1_sensor_1_1_synchronization_control_register.html#a1a132e3186f245d39d4f2a286ddd789c',1,'VectorNav::Sensor::SynchronizationControlRegister']]]
+];

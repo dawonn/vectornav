@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['mag',['mag',['../struct_quaternion_magnetic_acceleration_and_angular_rates_register.html#a6d7a8470b23c03065744577e1cd50509',1,'QuaternionMagneticAccelerationAndAngularRatesRegister::mag()'],['../struct_magnetic_acceleration_and_angular_rates_register.html#a6d7a8470b23c03065744577e1cd50509',1,'MagneticAccelerationAndAngularRatesRegister::mag()'],['../struct_yaw_pitch_roll_magnetic_acceleration_and_angular_rates_register.html#a6d7a8470b23c03065744577e1cd50509',1,'YawPitchRollMagneticAccelerationAndAngularRatesRegister::mag()'],['../struct_imu_measurements_register.html#a6d7a8470b23c03065744577e1cd50509',1,'ImuMeasurementsRegister::mag()']]],
+  ['magfiltermode',['magFilterMode',['../struct_imu_filtering_configuration_register.html#a332858779937bac2207b27405b2f8e59',1,'ImuFilteringConfigurationRegister']]],
+  ['magmode',['magMode',['../struct_filter_basic_control_register.html#a84830f28c0f27a9e5beb22fa5ed03e32',1,'FilterBasicControlRegister']]],
+  ['magnetic',['magnetic',['../struct_vn_composite_data.html#a9d1d8cb4355d4b9ab047e73b12b2f128',1,'VnCompositeData']]],
+  ['magneticdisturbancegain',['magneticDisturbanceGain',['../struct_filter_active_tuning_parameters_register.html#aa0c0de20bb3bae02aac79085e575c6c8',1,'FilterActiveTuningParametersRegister']]],
+  ['magneticdisturbancememory',['magneticDisturbanceMemory',['../struct_filter_active_tuning_parameters_register.html#addf1bed42f8ea643478608977def03cb',1,'FilterActiveTuningParametersRegister']]],
+  ['magneticecef',['magneticEcef',['../struct_vn_composite_data.html#afa4d62e17e32eb869af646dd431278b3',1,'VnCompositeData']]],
+  ['magneticned',['magneticNed',['../struct_vn_composite_data.html#a2626f2354fac6a2120e4eaf23e985e4f',1,'VnCompositeData']]],
+  ['magneticuncompensated',['magneticUncompensated',['../struct_vn_composite_data.html#a21f67714e076de3c5258b0df66690ec1',1,'VnCompositeData']]],
+  ['magneticvariance',['magneticVariance',['../struct_filter_measurements_variance_parameters_register.html#ad52811589392356a70f3c2991df46f69',1,'FilterMeasurementsVarianceParametersRegister']]],
+  ['magref',['magRef',['../struct_magnetic_and_gravity_reference_vectors_register.html#ada01dab395502cd313a9f01f68c56027',1,'MagneticAndGravityReferenceVectorsRegister']]],
+  ['magwindowsize',['magWindowSize',['../struct_imu_filtering_configuration_register.html#ab00297258157bb773ab9736a2f6def06',1,'ImuFilteringConfigurationRegister']]],
+  ['maxadaptrate',['maxAdaptRate',['../struct_vpe_magnetometer_advanced_tuning_register.html#af4e6100eaf01c23b74f07aade65b7c4c',1,'VpeMagnetometerAdvancedTuningRegister::maxAdaptRate()'],['../struct_vpe_accelerometer_advanced_tuning_register.html#af4e6100eaf01c23b74f07aade65b7c4c',1,'VpeAccelerometerAdvancedTuningRegister::maxAdaptRate()']]],
+  ['maxfiltering',['maxFiltering',['../struct_vpe_magnetometer_advanced_tuning_register.html#a907ee0e82afbf788c0652c07234173a5',1,'VpeMagnetometerAdvancedTuningRegister::maxFiltering()'],['../struct_vpe_accelerometer_advanced_tuning_register.html#a907ee0e82afbf788c0652c07234173a5',1,'VpeAccelerometerAdvancedTuningRegister::maxFiltering()']]],
+  ['maxtuning',['maxTuning',['../struct_vpe_magnetometer_advanced_tuning_register.html#aaa976cfb6d5791bb0729119a6d17fde9',1,'VpeMagnetometerAdvancedTuningRegister::maxTuning()'],['../struct_vpe_accelerometer_advanced_tuning_register.html#aaa976cfb6d5791bb0729119a6d17fde9',1,'VpeAccelerometerAdvancedTuningRegister::maxTuning()']]],
+  ['minfiltering',['minFiltering',['../struct_vpe_magnetometer_advanced_tuning_register.html#a096789d671a578cd8e1aa5f3a739dcdc',1,'VpeMagnetometerAdvancedTuningRegister::minFiltering()'],['../struct_vpe_accelerometer_advanced_tuning_register.html#a096789d671a578cd8e1aa5f3a739dcdc',1,'VpeAccelerometerAdvancedTuningRegister::minFiltering()']]],
+  ['minposuncertainty',['minPosUncertainty',['../struct_ins_advanced_configuration_register.html#acd67f1cc0adca4aefabb480a2a0bbb39',1,'InsAdvancedConfigurationRegister']]],
+  ['minveluncertainty',['minVelUncertainty',['../struct_ins_advanced_configuration_register.html#a5f6ffdb251a824e231b26f727aa8c1d5',1,'InsAdvancedConfigurationRegister']]],
+  ['mode',['mode',['../struct_velocity_compensation_control_register.html#a37e90f5e3bd99fac2021fb3a326607d4',1,'VelocityCompensationControlRegister::mode()'],['../struct_gps_configuration_register.html#a37e90f5e3bd99fac2021fb3a326607d4',1,'GpsConfigurationRegister::mode()']]],
+  ['moveorigin',['moveOrigin',['../struct_ins_advanced_configuration_register.html#a0eb02c0a22494126dcd4ec1d10d0924b',1,'InsAdvancedConfigurationRegister']]]
+];

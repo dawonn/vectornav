@@ -1,0 +1,1852 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>VectorNav Sensor Registers &mdash; VectorNav Python Library 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="VectorNav Python Library 0.1 documentation" href="index.html" />
+    <link rel="next" title="vnpy.conv — Conversion utilities" href="vnpy_conv.html" />
+    <link rel="prev" title="EzAsyncData" href="ezasyncdata.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="vnpy_conv.html" title="vnpy.conv — Conversion utilities"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ezasyncdata.html" title="EzAsyncData"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">VectorNav Python Library 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="vectornav-sensor-registers">
+<h1>VectorNav Sensor Registers<a class="headerlink" href="#vectornav-sensor-registers" title="Permalink to this headline">¶</a></h1>
+<p>VectorNav sensors contains a large set of configurable registers with various fields for each one. Listed below are the
+list of register classes that are used for reading and writing to the sensor&#8217;s registers.</p>
+<ul class="simple">
+<li><a class="reference internal" href="#vnpy.AccelerationCompensationRegister" title="vnpy.AccelerationCompensationRegister"><code class="xref py py-class docutils literal"><span class="pre">AccelerationCompensationRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.BinaryOutputRegister" title="vnpy.BinaryOutputRegister"><code class="xref py py-class docutils literal"><span class="pre">BinaryOutputRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.CalculatedMagnetometerCalibrationRegister" title="vnpy.CalculatedMagnetometerCalibrationRegister"><code class="xref py py-class docutils literal"><span class="pre">CalculatedMagnetometerCalibrationRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.CommunicationProtocolControlRegister" title="vnpy.CommunicationProtocolControlRegister"><code class="xref py py-class docutils literal"><span class="pre">CommunicationProtocolControlRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.DeltaThetaAndDeltaVelocityConfigurationRegister" title="vnpy.DeltaThetaAndDeltaVelocityConfigurationRegister"><code class="xref py py-class docutils literal"><span class="pre">DeltaThetaAndDeltaVelocityConfigurationRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.DeltaThetaAndDeltaVelocityRegister" title="vnpy.DeltaThetaAndDeltaVelocityRegister"><code class="xref py py-class docutils literal"><span class="pre">DeltaThetaAndDeltaVelocityRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.FilterActiveTuningParametersRegister" title="vnpy.FilterActiveTuningParametersRegister"><code class="xref py py-class docutils literal"><span class="pre">FilterActiveTuningParametersRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.FilterBasicControlRegister" title="vnpy.FilterBasicControlRegister"><code class="xref py py-class docutils literal"><span class="pre">FilterBasicControlRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.FilterMeasurementsVarianceParametersRegister" title="vnpy.FilterMeasurementsVarianceParametersRegister"><code class="xref py py-class docutils literal"><span class="pre">FilterMeasurementsVarianceParametersRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.GpsCompassBaselineRegister" title="vnpy.GpsCompassBaselineRegister"><code class="xref py py-class docutils literal"><span class="pre">GpsCompassBaselineRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.GpsCompassEstimatedBaselineRegister" title="vnpy.GpsCompassEstimatedBaselineRegister"><code class="xref py py-class docutils literal"><span class="pre">GpsCompassEstimatedBaselineRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.GpsConfigurationRegister" title="vnpy.GpsConfigurationRegister"><code class="xref py py-class docutils literal"><span class="pre">GpsConfigurationRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.GpsSolutionEcefRegister" title="vnpy.GpsSolutionEcefRegister"><code class="xref py py-class docutils literal"><span class="pre">GpsSolutionEcefRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.GpsSolutionLlaRegister" title="vnpy.GpsSolutionLlaRegister"><code class="xref py py-class docutils literal"><span class="pre">GpsSolutionLlaRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.GyroCompensationRegister" title="vnpy.GyroCompensationRegister"><code class="xref py py-class docutils literal"><span class="pre">GyroCompensationRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.ImuFilteringConfigurationRegister" title="vnpy.ImuFilteringConfigurationRegister"><code class="xref py py-class docutils literal"><span class="pre">ImuFilteringConfigurationRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.ImuMeasurementsRegister" title="vnpy.ImuMeasurementsRegister"><code class="xref py py-class docutils literal"><span class="pre">ImuMeasurementsRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.ImuRateConfigurationRegister" title="vnpy.ImuRateConfigurationRegister"><code class="xref py py-class docutils literal"><span class="pre">ImuRateConfigurationRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.InsAdvancedConfigurationRegister" title="vnpy.InsAdvancedConfigurationRegister"><code class="xref py py-class docutils literal"><span class="pre">InsAdvancedConfigurationRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.InsBasicConfigurationRegisterVn200" title="vnpy.InsBasicConfigurationRegisterVn200"><code class="xref py py-class docutils literal"><span class="pre">InsBasicConfigurationRegisterVn200</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.InsBasicConfigurationRegisterVn300" title="vnpy.InsBasicConfigurationRegisterVn300"><code class="xref py py-class docutils literal"><span class="pre">InsBasicConfigurationRegisterVn300</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.InsSolutionEcefRegister" title="vnpy.InsSolutionEcefRegister"><code class="xref py py-class docutils literal"><span class="pre">InsSolutionEcefRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.InsSolutionLlaRegister" title="vnpy.InsSolutionLlaRegister"><code class="xref py py-class docutils literal"><span class="pre">InsSolutionLlaRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.InsStateEcefRegister" title="vnpy.InsStateEcefRegister"><code class="xref py py-class docutils literal"><span class="pre">InsStateEcefRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.InsStateLlaRegister" title="vnpy.InsStateLlaRegister"><code class="xref py py-class docutils literal"><span class="pre">InsStateLlaRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.MagneticAccelerationAndAngularRatesRegister" title="vnpy.MagneticAccelerationAndAngularRatesRegister"><code class="xref py py-class docutils literal"><span class="pre">MagneticAccelerationAndAngularRatesRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.MagneticAndGravityReferenceVectorsRegister" title="vnpy.MagneticAndGravityReferenceVectorsRegister"><code class="xref py py-class docutils literal"><span class="pre">MagneticAndGravityReferenceVectorsRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.MagnetometerCalibrationControlRegister" title="vnpy.MagnetometerCalibrationControlRegister"><code class="xref py py-class docutils literal"><span class="pre">MagnetometerCalibrationControlRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.MagnetometerCompensationRegister" title="vnpy.MagnetometerCompensationRegister"><code class="xref py py-class docutils literal"><span class="pre">MagnetometerCompensationRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister" title="vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister"><code class="xref py py-class docutils literal"><span class="pre">QuaternionMagneticAccelerationAndAngularRatesRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.ReferenceVectorConfigurationRegister" title="vnpy.ReferenceVectorConfigurationRegister"><code class="xref py py-class docutils literal"><span class="pre">ReferenceVectorConfigurationRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.StartupFilterBiasEstimateRegister" title="vnpy.StartupFilterBiasEstimateRegister"><code class="xref py py-class docutils literal"><span class="pre">StartupFilterBiasEstimateRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.SynchronizationControlRegister" title="vnpy.SynchronizationControlRegister"><code class="xref py py-class docutils literal"><span class="pre">SynchronizationControlRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.SynchronizationStatusRegister" title="vnpy.SynchronizationStatusRegister"><code class="xref py py-class docutils literal"><span class="pre">SynchronizationStatusRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.VelocityCompensationControlRegister" title="vnpy.VelocityCompensationControlRegister"><code class="xref py py-class docutils literal"><span class="pre">VelocityCompensationControlRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.VelocityCompensationStatusRegister" title="vnpy.VelocityCompensationStatusRegister"><code class="xref py py-class docutils literal"><span class="pre">VelocityCompensationStatusRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.VpeAccelerometerAdvancedTuningRegister" title="vnpy.VpeAccelerometerAdvancedTuningRegister"><code class="xref py py-class docutils literal"><span class="pre">VpeAccelerometerAdvancedTuningRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.VpeAccelerometerBasicTuningRegister" title="vnpy.VpeAccelerometerBasicTuningRegister"><code class="xref py py-class docutils literal"><span class="pre">VpeAccelerometerBasicTuningRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.VpeBasicControlRegister" title="vnpy.VpeBasicControlRegister"><code class="xref py py-class docutils literal"><span class="pre">VpeBasicControlRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.VpeGryoBasicTuningRegister" title="vnpy.VpeGryoBasicTuningRegister"><code class="xref py py-class docutils literal"><span class="pre">VpeGryoBasicTuningRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.VpeMagnetometerAdvancedTuningRegister" title="vnpy.VpeMagnetometerAdvancedTuningRegister"><code class="xref py py-class docutils literal"><span class="pre">VpeMagnetometerAdvancedTuningRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.VpeMagnetometerBasicTuningRegister" title="vnpy.VpeMagnetometerBasicTuningRegister"><code class="xref py py-class docutils literal"><span class="pre">VpeMagnetometerBasicTuningRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister" title="vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister"><code class="xref py py-class docutils literal"><span class="pre">YawPitchRollMagneticAccelerationAndAngularRatesRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.YawPitchRollTrueBodyAccelerationAndAngularRatesRegister" title="vnpy.YawPitchRollTrueBodyAccelerationAndAngularRatesRegister"><code class="xref py py-class docutils literal"><span class="pre">YawPitchRollTrueBodyAccelerationAndAngularRatesRegister</span></code></a></li>
+<li><a class="reference internal" href="#vnpy.YawPitchRollTrueInertialAccelerationAndAngularRatesRegister" title="vnpy.YawPitchRollTrueInertialAccelerationAndAngularRatesRegister"><code class="xref py py-class docutils literal"><span class="pre">YawPitchRollTrueInertialAccelerationAndAngularRatesRegister</span></code></a></li>
+</ul>
+<div class="section" id="accelerationcompensationregister">
+<h2><a class="reference internal" href="#vnpy.AccelerationCompensationRegister" title="vnpy.AccelerationCompensationRegister"><code class="xref py py-class docutils literal"><span class="pre">AccelerationCompensationRegister</span></code></a><a class="headerlink" href="#accelerationcompensationregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.AccelerationCompensationRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">AccelerationCompensationRegister</code><a class="headerlink" href="#vnpy.AccelerationCompensationRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Acceleration Compensation register.</p>
+</dd></dl>
+
+<p>Class attributes are:</p>
+<dl class="attribute">
+<dt id="vnpy.AccelerationCompensationRegister.c">
+<code class="descclassname">AccelerationCompensationRegister.</code><code class="descname">c</code><a class="headerlink" href="#vnpy.AccelerationCompensationRegister.c" title="Permalink to this definition">¶</a></dt>
+<dd><p>The c field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.AccelerationCompensationRegister.b">
+<code class="descclassname">AccelerationCompensationRegister.</code><code class="descname">b</code><a class="headerlink" href="#vnpy.AccelerationCompensationRegister.b" title="Permalink to this definition">¶</a></dt>
+<dd><p>The b field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="binaryoutputregister">
+<h2><a class="reference internal" href="#vnpy.BinaryOutputRegister" title="vnpy.BinaryOutputRegister"><code class="xref py py-class docutils literal"><span class="pre">BinaryOutputRegister</span></code></a><a class="headerlink" href="#binaryoutputregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.BinaryOutputRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">BinaryOutputRegister</code><a class="headerlink" href="#vnpy.BinaryOutputRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing a Binary Output register.</p>
+<p>The field outputGroup available on the sensor&#8217;s register is not necessary in this structure since all read/writes
+operations will automatically determine this from the settings for the individual groups within this structure.</p>
+</dd></dl>
+
+<p>Class attributes are:</p>
+<dl class="attribute">
+<dt id="vnpy.BinaryOutputRegister.async_mode">
+<code class="descclassname">BinaryOutputRegister.</code><code class="descname">async_mode</code><a class="headerlink" href="#vnpy.BinaryOutputRegister.async_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The asyncMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.BinaryOutputRegister.rate_divisor">
+<code class="descclassname">BinaryOutputRegister.</code><code class="descname">rate_divisor</code><a class="headerlink" href="#vnpy.BinaryOutputRegister.rate_divisor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The rateDivisor field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.BinaryOutputRegister.common_field">
+<code class="descclassname">BinaryOutputRegister.</code><code class="descname">common_field</code><a class="headerlink" href="#vnpy.BinaryOutputRegister.common_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Group 1 (Common)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.BinaryOutputRegister.time_field">
+<code class="descclassname">BinaryOutputRegister.</code><code class="descname">time_field</code><a class="headerlink" href="#vnpy.BinaryOutputRegister.time_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Group 2 (Time)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.BinaryOutputRegister.imu_field">
+<code class="descclassname">BinaryOutputRegister.</code><code class="descname">imu_field</code><a class="headerlink" href="#vnpy.BinaryOutputRegister.imu_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Group 3 (IMU)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.BinaryOutputRegister.gps_field">
+<code class="descclassname">BinaryOutputRegister.</code><code class="descname">gps_field</code><a class="headerlink" href="#vnpy.BinaryOutputRegister.gps_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Group 4 (GPS)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.BinaryOutputRegister.attitude_field">
+<code class="descclassname">BinaryOutputRegister.</code><code class="descname">attitude_field</code><a class="headerlink" href="#vnpy.BinaryOutputRegister.attitude_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Group 5 (Attitude)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.BinaryOutputRegister.ins_field">
+<code class="descclassname">BinaryOutputRegister.</code><code class="descname">ins_field</code><a class="headerlink" href="#vnpy.BinaryOutputRegister.ins_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Group 6 (INS)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="calculatedmagnetometercalibrationregister">
+<h2><a class="reference internal" href="#vnpy.CalculatedMagnetometerCalibrationRegister" title="vnpy.CalculatedMagnetometerCalibrationRegister"><code class="xref py py-class docutils literal"><span class="pre">CalculatedMagnetometerCalibrationRegister</span></code></a><a class="headerlink" href="#calculatedmagnetometercalibrationregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.CalculatedMagnetometerCalibrationRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">CalculatedMagnetometerCalibrationRegister</code><a class="headerlink" href="#vnpy.CalculatedMagnetometerCalibrationRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Calculated Magnetometer Calibration register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CalculatedMagnetometerCalibrationRegister.c">
+<code class="descclassname">CalculatedMagnetometerCalibrationRegister.</code><code class="descname">c</code><a class="headerlink" href="#vnpy.CalculatedMagnetometerCalibrationRegister.c" title="Permalink to this definition">¶</a></dt>
+<dd><p>The c field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CalculatedMagnetometerCalibrationRegister.b">
+<code class="descclassname">CalculatedMagnetometerCalibrationRegister.</code><code class="descname">b</code><a class="headerlink" href="#vnpy.CalculatedMagnetometerCalibrationRegister.b" title="Permalink to this definition">¶</a></dt>
+<dd><p>The b field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="communicationprotocolcontrolregister">
+<h2><a class="reference internal" href="#vnpy.CommunicationProtocolControlRegister" title="vnpy.CommunicationProtocolControlRegister"><code class="xref py py-class docutils literal"><span class="pre">CommunicationProtocolControlRegister</span></code></a><a class="headerlink" href="#communicationprotocolcontrolregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.CommunicationProtocolControlRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">CommunicationProtocolControlRegister</code><a class="headerlink" href="#vnpy.CommunicationProtocolControlRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Communication Protocol Control register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CommunicationProtocolControlRegister.serial_count">
+<code class="descclassname">CommunicationProtocolControlRegister.</code><code class="descname">serial_count</code><a class="headerlink" href="#vnpy.CommunicationProtocolControlRegister.serial_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>The serialCount field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CommunicationProtocolControlRegister.serial_status">
+<code class="descclassname">CommunicationProtocolControlRegister.</code><code class="descname">serial_status</code><a class="headerlink" href="#vnpy.CommunicationProtocolControlRegister.serial_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>The serialStatus field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CommunicationProtocolControlRegister.spi_count">
+<code class="descclassname">CommunicationProtocolControlRegister.</code><code class="descname">spi_count</code><a class="headerlink" href="#vnpy.CommunicationProtocolControlRegister.spi_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>The spiCount field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CommunicationProtocolControlRegister.spi_status">
+<code class="descclassname">CommunicationProtocolControlRegister.</code><code class="descname">spi_status</code><a class="headerlink" href="#vnpy.CommunicationProtocolControlRegister.spi_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>The spiStatus field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CommunicationProtocolControlRegister.serial_checksum">
+<code class="descclassname">CommunicationProtocolControlRegister.</code><code class="descname">serial_checksum</code><a class="headerlink" href="#vnpy.CommunicationProtocolControlRegister.serial_checksum" title="Permalink to this definition">¶</a></dt>
+<dd><p>The serialChecksum field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CommunicationProtocolControlRegister.spi_checksum">
+<code class="descclassname">CommunicationProtocolControlRegister.</code><code class="descname">spi_checksum</code><a class="headerlink" href="#vnpy.CommunicationProtocolControlRegister.spi_checksum" title="Permalink to this definition">¶</a></dt>
+<dd><p>The spiChecksum field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CommunicationProtocolControlRegister.error_mode">
+<code class="descclassname">CommunicationProtocolControlRegister.</code><code class="descname">error_mode</code><a class="headerlink" href="#vnpy.CommunicationProtocolControlRegister.error_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The errorMode field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="deltathetaanddeltavelocityconfigurationregister">
+<h2><a class="reference internal" href="#vnpy.DeltaThetaAndDeltaVelocityConfigurationRegister" title="vnpy.DeltaThetaAndDeltaVelocityConfigurationRegister"><code class="xref py py-class docutils literal"><span class="pre">DeltaThetaAndDeltaVelocityConfigurationRegister</span></code></a><a class="headerlink" href="#deltathetaanddeltavelocityconfigurationregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.DeltaThetaAndDeltaVelocityConfigurationRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">DeltaThetaAndDeltaVelocityConfigurationRegister</code><a class="headerlink" href="#vnpy.DeltaThetaAndDeltaVelocityConfigurationRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Delta Theta and Delta Velocity Configuration register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.DeltaThetaAndDeltaVelocityConfigurationRegister.integration_frame">
+<code class="descclassname">DeltaThetaAndDeltaVelocityConfigurationRegister.</code><code class="descname">integration_frame</code><a class="headerlink" href="#vnpy.DeltaThetaAndDeltaVelocityConfigurationRegister.integration_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>The integrationFrame field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.DeltaThetaAndDeltaVelocityConfigurationRegister.gyro_compensation">
+<code class="descclassname">DeltaThetaAndDeltaVelocityConfigurationRegister.</code><code class="descname">gyro_compensation</code><a class="headerlink" href="#vnpy.DeltaThetaAndDeltaVelocityConfigurationRegister.gyro_compensation" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gyroCompensation field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.DeltaThetaAndDeltaVelocityConfigurationRegister.accel_compensation">
+<code class="descclassname">DeltaThetaAndDeltaVelocityConfigurationRegister.</code><code class="descname">accel_compensation</code><a class="headerlink" href="#vnpy.DeltaThetaAndDeltaVelocityConfigurationRegister.accel_compensation" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accelCompensation field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="deltathetaanddeltavelocityregister">
+<h2><a class="reference internal" href="#vnpy.DeltaThetaAndDeltaVelocityRegister" title="vnpy.DeltaThetaAndDeltaVelocityRegister"><code class="xref py py-class docutils literal"><span class="pre">DeltaThetaAndDeltaVelocityRegister</span></code></a><a class="headerlink" href="#deltathetaanddeltavelocityregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.DeltaThetaAndDeltaVelocityRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">DeltaThetaAndDeltaVelocityRegister</code><a class="headerlink" href="#vnpy.DeltaThetaAndDeltaVelocityRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Delta Theta and Delta Velocity register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.DeltaThetaAndDeltaVelocityRegister.delta_time">
+<code class="descclassname">DeltaThetaAndDeltaVelocityRegister.</code><code class="descname">delta_time</code><a class="headerlink" href="#vnpy.DeltaThetaAndDeltaVelocityRegister.delta_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>The deltaTime field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.DeltaThetaAndDeltaVelocityRegister.delta_theta">
+<code class="descclassname">DeltaThetaAndDeltaVelocityRegister.</code><code class="descname">delta_theta</code><a class="headerlink" href="#vnpy.DeltaThetaAndDeltaVelocityRegister.delta_theta" title="Permalink to this definition">¶</a></dt>
+<dd><p>The deltaTheta field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.DeltaThetaAndDeltaVelocityRegister.delta_velocity">
+<code class="descclassname">DeltaThetaAndDeltaVelocityRegister.</code><code class="descname">delta_velocity</code><a class="headerlink" href="#vnpy.DeltaThetaAndDeltaVelocityRegister.delta_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>The deltaVelocity field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="filteractivetuningparametersregister">
+<h2><a class="reference internal" href="#vnpy.FilterActiveTuningParametersRegister" title="vnpy.FilterActiveTuningParametersRegister"><code class="xref py py-class docutils literal"><span class="pre">FilterActiveTuningParametersRegister</span></code></a><a class="headerlink" href="#filteractivetuningparametersregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.FilterActiveTuningParametersRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">FilterActiveTuningParametersRegister</code><a class="headerlink" href="#vnpy.FilterActiveTuningParametersRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Filter Active Tuning Parameters register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.FilterActiveTuningParametersRegister.magnetic_disturbance_gain">
+<code class="descclassname">FilterActiveTuningParametersRegister.</code><code class="descname">magnetic_disturbance_gain</code><a class="headerlink" href="#vnpy.FilterActiveTuningParametersRegister.magnetic_disturbance_gain" title="Permalink to this definition">¶</a></dt>
+<dd><p>The magneticDisturbanceGain field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.FilterActiveTuningParametersRegister.acceleration_disturbance_gain">
+<code class="descclassname">FilterActiveTuningParametersRegister.</code><code class="descname">acceleration_disturbance_gain</code><a class="headerlink" href="#vnpy.FilterActiveTuningParametersRegister.acceleration_disturbance_gain" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accelerationDisturbanceGain field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.FilterActiveTuningParametersRegister.magnetic_disturbance_memory">
+<code class="descclassname">FilterActiveTuningParametersRegister.</code><code class="descname">magnetic_disturbance_memory</code><a class="headerlink" href="#vnpy.FilterActiveTuningParametersRegister.magnetic_disturbance_memory" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accelerationDisturbanceGain field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.FilterActiveTuningParametersRegister.acceleration_disturbance_memory">
+<code class="descclassname">FilterActiveTuningParametersRegister.</code><code class="descname">acceleration_disturbance_memory</code><a class="headerlink" href="#vnpy.FilterActiveTuningParametersRegister.acceleration_disturbance_memory" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accelerationDisturbanceMemory field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="filterbasiccontrolregister">
+<h2><a class="reference internal" href="#vnpy.FilterBasicControlRegister" title="vnpy.FilterBasicControlRegister"><code class="xref py py-class docutils literal"><span class="pre">FilterBasicControlRegister</span></code></a><a class="headerlink" href="#filterbasiccontrolregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.FilterBasicControlRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">FilterBasicControlRegister</code><a class="headerlink" href="#vnpy.FilterBasicControlRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Filter Basic Control register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.FilterBasicControlRegister.mag_mode">
+<code class="descclassname">FilterBasicControlRegister.</code><code class="descname">mag_mode</code><a class="headerlink" href="#vnpy.FilterBasicControlRegister.mag_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The magMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.FilterBasicControlRegister.extMagMode">
+<code class="descclassname">FilterBasicControlRegister.</code><code class="descname">extMagMode</code><a class="headerlink" href="#vnpy.FilterBasicControlRegister.extMagMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The extMagMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.FilterBasicControlRegister.ext_acc_mode">
+<code class="descclassname">FilterBasicControlRegister.</code><code class="descname">ext_acc_mode</code><a class="headerlink" href="#vnpy.FilterBasicControlRegister.ext_acc_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The extAccMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.FilterBasicControlRegister.ext_gyro_mode">
+<code class="descclassname">FilterBasicControlRegister.</code><code class="descname">ext_gyro_mode</code><a class="headerlink" href="#vnpy.FilterBasicControlRegister.ext_gyro_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The extGyroMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.FilterBasicControlRegister.gyro_limit">
+<code class="descclassname">FilterBasicControlRegister.</code><code class="descname">gyro_limit</code><a class="headerlink" href="#vnpy.FilterBasicControlRegister.gyro_limit" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gyroLimit field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="filtermeasurementsvarianceparametersregister">
+<h2><a class="reference internal" href="#vnpy.FilterMeasurementsVarianceParametersRegister" title="vnpy.FilterMeasurementsVarianceParametersRegister"><code class="xref py py-class docutils literal"><span class="pre">FilterMeasurementsVarianceParametersRegister</span></code></a><a class="headerlink" href="#filtermeasurementsvarianceparametersregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.FilterMeasurementsVarianceParametersRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">FilterMeasurementsVarianceParametersRegister</code><a class="headerlink" href="#vnpy.FilterMeasurementsVarianceParametersRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Filter Measurements Variance Parameters register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.FilterMeasurementsVarianceParametersRegister.angular_walk_variance">
+<code class="descclassname">FilterMeasurementsVarianceParametersRegister.</code><code class="descname">angular_walk_variance</code><a class="headerlink" href="#vnpy.FilterMeasurementsVarianceParametersRegister.angular_walk_variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>The angularWalkVariance field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.FilterMeasurementsVarianceParametersRegister.angular_rate_variance">
+<code class="descclassname">FilterMeasurementsVarianceParametersRegister.</code><code class="descname">angular_rate_variance</code><a class="headerlink" href="#vnpy.FilterMeasurementsVarianceParametersRegister.angular_rate_variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>The angularRateVariance field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.FilterMeasurementsVarianceParametersRegister.magnetic_variance">
+<code class="descclassname">FilterMeasurementsVarianceParametersRegister.</code><code class="descname">magnetic_variance</code><a class="headerlink" href="#vnpy.FilterMeasurementsVarianceParametersRegister.magnetic_variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>The magneticVariance field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.FilterMeasurementsVarianceParametersRegister.acceleration_variance">
+<code class="descclassname">FilterMeasurementsVarianceParametersRegister.</code><code class="descname">acceleration_variance</code><a class="headerlink" href="#vnpy.FilterMeasurementsVarianceParametersRegister.acceleration_variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accelerationVariance field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gpscompassbaselineregister">
+<h2><a class="reference internal" href="#vnpy.GpsCompassBaselineRegister" title="vnpy.GpsCompassBaselineRegister"><code class="xref py py-class docutils literal"><span class="pre">GpsCompassBaselineRegister</span></code></a><a class="headerlink" href="#gpscompassbaselineregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.GpsCompassBaselineRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">GpsCompassBaselineRegister</code><a class="headerlink" href="#vnpy.GpsCompassBaselineRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the GPS Compass Baseline register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsCompassBaselineRegister.position">
+<code class="descclassname">GpsCompassBaselineRegister.</code><code class="descname">position</code><a class="headerlink" href="#vnpy.GpsCompassBaselineRegister.position" title="Permalink to this definition">¶</a></dt>
+<dd><p>The position field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsCompassBaselineRegister.uncertainty">
+<code class="descclassname">GpsCompassBaselineRegister.</code><code class="descname">uncertainty</code><a class="headerlink" href="#vnpy.GpsCompassBaselineRegister.uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>The uncertainty field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gpscompassestimatedbaselineregister">
+<h2><a class="reference internal" href="#vnpy.GpsCompassEstimatedBaselineRegister" title="vnpy.GpsCompassEstimatedBaselineRegister"><code class="xref py py-class docutils literal"><span class="pre">GpsCompassEstimatedBaselineRegister</span></code></a><a class="headerlink" href="#gpscompassestimatedbaselineregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.GpsCompassEstimatedBaselineRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">GpsCompassEstimatedBaselineRegister</code><a class="headerlink" href="#vnpy.GpsCompassEstimatedBaselineRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the GPS Compass Estimated Baseline register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsCompassEstimatedBaselineRegister.est_baseline_used">
+<code class="descclassname">GpsCompassEstimatedBaselineRegister.</code><code class="descname">est_baseline_used</code><a class="headerlink" href="#vnpy.GpsCompassEstimatedBaselineRegister.est_baseline_used" title="Permalink to this definition">¶</a></dt>
+<dd><p>The estBaselineUsed field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsCompassEstimatedBaselineRegister.num_meas">
+<code class="descclassname">GpsCompassEstimatedBaselineRegister.</code><code class="descname">num_meas</code><a class="headerlink" href="#vnpy.GpsCompassEstimatedBaselineRegister.num_meas" title="Permalink to this definition">¶</a></dt>
+<dd><p>The numMeas field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsCompassEstimatedBaselineRegister.position">
+<code class="descclassname">GpsCompassEstimatedBaselineRegister.</code><code class="descname">position</code><a class="headerlink" href="#vnpy.GpsCompassEstimatedBaselineRegister.position" title="Permalink to this definition">¶</a></dt>
+<dd><p>The position field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsCompassEstimatedBaselineRegister.uncertainty">
+<code class="descclassname">GpsCompassEstimatedBaselineRegister.</code><code class="descname">uncertainty</code><a class="headerlink" href="#vnpy.GpsCompassEstimatedBaselineRegister.uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>The uncertainty field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gpsconfigurationregister">
+<h2><a class="reference internal" href="#vnpy.GpsConfigurationRegister" title="vnpy.GpsConfigurationRegister"><code class="xref py py-class docutils literal"><span class="pre">GpsConfigurationRegister</span></code></a><a class="headerlink" href="#gpsconfigurationregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.GpsConfigurationRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">GpsConfigurationRegister</code><a class="headerlink" href="#vnpy.GpsConfigurationRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the GPS Configuration register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsConfigurationRegister.mode">
+<code class="descclassname">GpsConfigurationRegister.</code><code class="descname">mode</code><a class="headerlink" href="#vnpy.GpsConfigurationRegister.mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The mode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsConfigurationRegister.pps_source">
+<code class="descclassname">GpsConfigurationRegister.</code><code class="descname">pps_source</code><a class="headerlink" href="#vnpy.GpsConfigurationRegister.pps_source" title="Permalink to this definition">¶</a></dt>
+<dd><p>The ppsSource field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gpssolutionecefregister">
+<h2><a class="reference internal" href="#vnpy.GpsSolutionEcefRegister" title="vnpy.GpsSolutionEcefRegister"><code class="xref py py-class docutils literal"><span class="pre">GpsSolutionEcefRegister</span></code></a><a class="headerlink" href="#gpssolutionecefregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.GpsSolutionEcefRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">GpsSolutionEcefRegister</code><a class="headerlink" href="#vnpy.GpsSolutionEcefRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the GPS Solution - ECEF register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionEcefRegister.tow">
+<code class="descclassname">GpsSolutionEcefRegister.</code><code class="descname">tow</code><a class="headerlink" href="#vnpy.GpsSolutionEcefRegister.tow" title="Permalink to this definition">¶</a></dt>
+<dd><p>The tow field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionEcefRegister.week">
+<code class="descclassname">GpsSolutionEcefRegister.</code><code class="descname">week</code><a class="headerlink" href="#vnpy.GpsSolutionEcefRegister.week" title="Permalink to this definition">¶</a></dt>
+<dd><p>The week field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionEcefRegister.gps_fix">
+<code class="descclassname">GpsSolutionEcefRegister.</code><code class="descname">gps_fix</code><a class="headerlink" href="#vnpy.GpsSolutionEcefRegister.gps_fix" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gpsFix field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionEcefRegister.num_sats">
+<code class="descclassname">GpsSolutionEcefRegister.</code><code class="descname">num_sats</code><a class="headerlink" href="#vnpy.GpsSolutionEcefRegister.num_sats" title="Permalink to this definition">¶</a></dt>
+<dd><p>The numSats field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionEcefRegister.position">
+<code class="descclassname">GpsSolutionEcefRegister.</code><code class="descname">position</code><a class="headerlink" href="#vnpy.GpsSolutionEcefRegister.position" title="Permalink to this definition">¶</a></dt>
+<dd><p>The position field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionEcefRegister.velocity">
+<code class="descclassname">GpsSolutionEcefRegister.</code><code class="descname">velocity</code><a class="headerlink" href="#vnpy.GpsSolutionEcefRegister.velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>The velocity field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionEcefRegister.pos_acc">
+<code class="descclassname">GpsSolutionEcefRegister.</code><code class="descname">pos_acc</code><a class="headerlink" href="#vnpy.GpsSolutionEcefRegister.pos_acc" title="Permalink to this definition">¶</a></dt>
+<dd><p>The posAcc field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionEcefRegister.speed_acc">
+<code class="descclassname">GpsSolutionEcefRegister.</code><code class="descname">speed_acc</code><a class="headerlink" href="#vnpy.GpsSolutionEcefRegister.speed_acc" title="Permalink to this definition">¶</a></dt>
+<dd><p>The speedAcc field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionEcefRegister.time_acc">
+<code class="descclassname">GpsSolutionEcefRegister.</code><code class="descname">time_acc</code><a class="headerlink" href="#vnpy.GpsSolutionEcefRegister.time_acc" title="Permalink to this definition">¶</a></dt>
+<dd><p>The timeAcc field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gpssolutionllaregister">
+<h2><a class="reference internal" href="#vnpy.GpsSolutionLlaRegister" title="vnpy.GpsSolutionLlaRegister"><code class="xref py py-class docutils literal"><span class="pre">GpsSolutionLlaRegister</span></code></a><a class="headerlink" href="#gpssolutionllaregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.GpsSolutionLlaRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">GpsSolutionLlaRegister</code><a class="headerlink" href="#vnpy.GpsSolutionLlaRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the GPS Solution - LLA register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionLlaRegister.time">
+<code class="descclassname">GpsSolutionLlaRegister.</code><code class="descname">time</code><a class="headerlink" href="#vnpy.GpsSolutionLlaRegister.time" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionLlaRegister.week">
+<code class="descclassname">GpsSolutionLlaRegister.</code><code class="descname">week</code><a class="headerlink" href="#vnpy.GpsSolutionLlaRegister.week" title="Permalink to this definition">¶</a></dt>
+<dd><p>The week field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionLlaRegister.gps_fix">
+<code class="descclassname">GpsSolutionLlaRegister.</code><code class="descname">gps_fix</code><a class="headerlink" href="#vnpy.GpsSolutionLlaRegister.gps_fix" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gpsFix field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionLlaRegister.num_sats">
+<code class="descclassname">GpsSolutionLlaRegister.</code><code class="descname">num_sats</code><a class="headerlink" href="#vnpy.GpsSolutionLlaRegister.num_sats" title="Permalink to this definition">¶</a></dt>
+<dd><p>The numSats field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionLlaRegister.lla">
+<code class="descclassname">GpsSolutionLlaRegister.</code><code class="descname">lla</code><a class="headerlink" href="#vnpy.GpsSolutionLlaRegister.lla" title="Permalink to this definition">¶</a></dt>
+<dd><p>The lla field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionLlaRegister.ned_vel">
+<code class="descclassname">GpsSolutionLlaRegister.</code><code class="descname">ned_vel</code><a class="headerlink" href="#vnpy.GpsSolutionLlaRegister.ned_vel" title="Permalink to this definition">¶</a></dt>
+<dd><p>The nedVel field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionLlaRegister.ned_acc">
+<code class="descclassname">GpsSolutionLlaRegister.</code><code class="descname">ned_acc</code><a class="headerlink" href="#vnpy.GpsSolutionLlaRegister.ned_acc" title="Permalink to this definition">¶</a></dt>
+<dd><p>The nedAcc field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionLlaRegister.speed_acc">
+<code class="descclassname">GpsSolutionLlaRegister.</code><code class="descname">speed_acc</code><a class="headerlink" href="#vnpy.GpsSolutionLlaRegister.speed_acc" title="Permalink to this definition">¶</a></dt>
+<dd><p>The speedAcc field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GpsSolutionLlaRegister.time_acc">
+<code class="descclassname">GpsSolutionLlaRegister.</code><code class="descname">time_acc</code><a class="headerlink" href="#vnpy.GpsSolutionLlaRegister.time_acc" title="Permalink to this definition">¶</a></dt>
+<dd><p>The timeAcc field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gyrocompensationregister">
+<h2><a class="reference internal" href="#vnpy.GyroCompensationRegister" title="vnpy.GyroCompensationRegister"><code class="xref py py-class docutils literal"><span class="pre">GyroCompensationRegister</span></code></a><a class="headerlink" href="#gyrocompensationregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.GyroCompensationRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">GyroCompensationRegister</code><a class="headerlink" href="#vnpy.GyroCompensationRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Gyro Compensation register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GyroCompensationRegister.c">
+<code class="descclassname">GyroCompensationRegister.</code><code class="descname">c</code><a class="headerlink" href="#vnpy.GyroCompensationRegister.c" title="Permalink to this definition">¶</a></dt>
+<dd><p>The c field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.GyroCompensationRegister.b">
+<code class="descclassname">GyroCompensationRegister.</code><code class="descname">b</code><a class="headerlink" href="#vnpy.GyroCompensationRegister.b" title="Permalink to this definition">¶</a></dt>
+<dd><p>The b field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="imufilteringconfigurationregister">
+<h2><a class="reference internal" href="#vnpy.ImuFilteringConfigurationRegister" title="vnpy.ImuFilteringConfigurationRegister"><code class="xref py py-class docutils literal"><span class="pre">ImuFilteringConfigurationRegister</span></code></a><a class="headerlink" href="#imufilteringconfigurationregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.ImuFilteringConfigurationRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">ImuFilteringConfigurationRegister</code><a class="headerlink" href="#vnpy.ImuFilteringConfigurationRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the IMU Filtering Configuration register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuFilteringConfigurationRegister.mag_window_size">
+<code class="descclassname">ImuFilteringConfigurationRegister.</code><code class="descname">mag_window_size</code><a class="headerlink" href="#vnpy.ImuFilteringConfigurationRegister.mag_window_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>The magWindowSize field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuFilteringConfigurationRegister.accel_window_size">
+<code class="descclassname">ImuFilteringConfigurationRegister.</code><code class="descname">accel_window_size</code><a class="headerlink" href="#vnpy.ImuFilteringConfigurationRegister.accel_window_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accelWindowSize field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuFilteringConfigurationRegister.gyro_window_size">
+<code class="descclassname">ImuFilteringConfigurationRegister.</code><code class="descname">gyro_window_size</code><a class="headerlink" href="#vnpy.ImuFilteringConfigurationRegister.gyro_window_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gyroWindowSize field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuFilteringConfigurationRegister.temp_window_size">
+<code class="descclassname">ImuFilteringConfigurationRegister.</code><code class="descname">temp_window_size</code><a class="headerlink" href="#vnpy.ImuFilteringConfigurationRegister.temp_window_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>The tempWindowSize field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuFilteringConfigurationRegister.pres_window_size">
+<code class="descclassname">ImuFilteringConfigurationRegister.</code><code class="descname">pres_window_size</code><a class="headerlink" href="#vnpy.ImuFilteringConfigurationRegister.pres_window_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>The presWindowSize field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuFilteringConfigurationRegister.mag_filter_mode">
+<code class="descclassname">ImuFilteringConfigurationRegister.</code><code class="descname">mag_filter_mode</code><a class="headerlink" href="#vnpy.ImuFilteringConfigurationRegister.mag_filter_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The magFilterMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuFilteringConfigurationRegister.accel_filter_mode">
+<code class="descclassname">ImuFilteringConfigurationRegister.</code><code class="descname">accel_filter_mode</code><a class="headerlink" href="#vnpy.ImuFilteringConfigurationRegister.accel_filter_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accelFilterMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuFilteringConfigurationRegister.gyro_filter_mode">
+<code class="descclassname">ImuFilteringConfigurationRegister.</code><code class="descname">gyro_filter_mode</code><a class="headerlink" href="#vnpy.ImuFilteringConfigurationRegister.gyro_filter_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gyroFilterMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuFilteringConfigurationRegister.temp_filter_mode">
+<code class="descclassname">ImuFilteringConfigurationRegister.</code><code class="descname">temp_filter_mode</code><a class="headerlink" href="#vnpy.ImuFilteringConfigurationRegister.temp_filter_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The tempFilterMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuFilteringConfigurationRegister.pres_filter_mode">
+<code class="descclassname">ImuFilteringConfigurationRegister.</code><code class="descname">pres_filter_mode</code><a class="headerlink" href="#vnpy.ImuFilteringConfigurationRegister.pres_filter_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The presFilterMode field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="imumeasurementsregister">
+<h2><a class="reference internal" href="#vnpy.ImuMeasurementsRegister" title="vnpy.ImuMeasurementsRegister"><code class="xref py py-class docutils literal"><span class="pre">ImuMeasurementsRegister</span></code></a><a class="headerlink" href="#imumeasurementsregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.ImuMeasurementsRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">ImuMeasurementsRegister</code><a class="headerlink" href="#vnpy.ImuMeasurementsRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the IMU Measurements register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuMeasurementsRegister.mag">
+<code class="descclassname">ImuMeasurementsRegister.</code><code class="descname">mag</code><a class="headerlink" href="#vnpy.ImuMeasurementsRegister.mag" title="Permalink to this definition">¶</a></dt>
+<dd><p>The mag field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuMeasurementsRegister.accel">
+<code class="descclassname">ImuMeasurementsRegister.</code><code class="descname">accel</code><a class="headerlink" href="#vnpy.ImuMeasurementsRegister.accel" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accel field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuMeasurementsRegister.gyro">
+<code class="descclassname">ImuMeasurementsRegister.</code><code class="descname">gyro</code><a class="headerlink" href="#vnpy.ImuMeasurementsRegister.gyro" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gyro field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuMeasurementsRegister.temp">
+<code class="descclassname">ImuMeasurementsRegister.</code><code class="descname">temp</code><a class="headerlink" href="#vnpy.ImuMeasurementsRegister.temp" title="Permalink to this definition">¶</a></dt>
+<dd><p>The temp field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuMeasurementsRegister.pressure">
+<code class="descclassname">ImuMeasurementsRegister.</code><code class="descname">pressure</code><a class="headerlink" href="#vnpy.ImuMeasurementsRegister.pressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>The pressure field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="imurateconfigurationregister">
+<h2><a class="reference internal" href="#vnpy.ImuRateConfigurationRegister" title="vnpy.ImuRateConfigurationRegister"><code class="xref py py-class docutils literal"><span class="pre">ImuRateConfigurationRegister</span></code></a><a class="headerlink" href="#imurateconfigurationregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.ImuRateConfigurationRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">ImuRateConfigurationRegister</code><a class="headerlink" href="#vnpy.ImuRateConfigurationRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the IMU Rate Configuration register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuRateConfigurationRegister.imu_rate">
+<code class="descclassname">ImuRateConfigurationRegister.</code><code class="descname">imu_rate</code><a class="headerlink" href="#vnpy.ImuRateConfigurationRegister.imu_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>The imuRate field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuRateConfigurationRegister.nav_divisor">
+<code class="descclassname">ImuRateConfigurationRegister.</code><code class="descname">nav_divisor</code><a class="headerlink" href="#vnpy.ImuRateConfigurationRegister.nav_divisor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The navDivisor field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuRateConfigurationRegister.filter_target_rate">
+<code class="descclassname">ImuRateConfigurationRegister.</code><code class="descname">filter_target_rate</code><a class="headerlink" href="#vnpy.ImuRateConfigurationRegister.filter_target_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>The filterTargetRate field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ImuRateConfigurationRegister.filter_min_rate">
+<code class="descclassname">ImuRateConfigurationRegister.</code><code class="descname">filter_min_rate</code><a class="headerlink" href="#vnpy.ImuRateConfigurationRegister.filter_min_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>The filterMinRate field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="insadvancedconfigurationregister">
+<h2><a class="reference internal" href="#vnpy.InsAdvancedConfigurationRegister" title="vnpy.InsAdvancedConfigurationRegister"><code class="xref py py-class docutils literal"><span class="pre">InsAdvancedConfigurationRegister</span></code></a><a class="headerlink" href="#insadvancedconfigurationregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.InsAdvancedConfigurationRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">InsAdvancedConfigurationRegister</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the INS Advanced Configuration register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.use_mag">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">use_mag</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.use_mag" title="Permalink to this definition">¶</a></dt>
+<dd><p>The useMag field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.use_pres">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">use_pres</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.use_pres" title="Permalink to this definition">¶</a></dt>
+<dd><p>The usePres field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.pos_att">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">pos_att</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.pos_att" title="Permalink to this definition">¶</a></dt>
+<dd><p>The posAtt field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.vel_att">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">vel_att</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.vel_att" title="Permalink to this definition">¶</a></dt>
+<dd><p>The velAtt field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.vel_bias">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">vel_bias</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.vel_bias" title="Permalink to this definition">¶</a></dt>
+<dd><p>The velBias field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.use_foam">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">use_foam</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.use_foam" title="Permalink to this definition">¶</a></dt>
+<dd><p>The useFoam field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.gps_conv_type">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">gps_conv_type</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.gps_conv_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gpsConvType field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.vel_count">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">vel_count</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.vel_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>The velCount field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.vel_init">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">vel_init</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.vel_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>The velInit field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.move_origin">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">move_origin</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.move_origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>The moveOrigin field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.gps_timeout">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">gps_timeout</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.gps_timeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gpsTimeout field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.delta_limit_pos">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">delta_limit_pos</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.delta_limit_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>The deltaLimitPos field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.delta_limit_vel">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">delta_limit_vel</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.delta_limit_vel" title="Permalink to this definition">¶</a></dt>
+<dd><p>The deltaLimitVel field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.min_pos_uncertainty">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">min_pos_uncertainty</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.min_pos_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>The minPosUncertainty field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsAdvancedConfigurationRegister.min_vel_uncertainty">
+<code class="descclassname">InsAdvancedConfigurationRegister.</code><code class="descname">min_vel_uncertainty</code><a class="headerlink" href="#vnpy.InsAdvancedConfigurationRegister.min_vel_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>The minVelUncertainty field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="insbasicconfigurationregistervn200">
+<h2><a class="reference internal" href="#vnpy.InsBasicConfigurationRegisterVn200" title="vnpy.InsBasicConfigurationRegisterVn200"><code class="xref py py-class docutils literal"><span class="pre">InsBasicConfigurationRegisterVn200</span></code></a><a class="headerlink" href="#insbasicconfigurationregistervn200" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.InsBasicConfigurationRegisterVn200">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">InsBasicConfigurationRegisterVn200</code><a class="headerlink" href="#vnpy.InsBasicConfigurationRegisterVn200" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the INS Basic Configuration register for a VN-200 sensor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsBasicConfigurationRegisterVn200.scenario">
+<code class="descclassname">InsBasicConfigurationRegisterVn200.</code><code class="descname">scenario</code><a class="headerlink" href="#vnpy.InsBasicConfigurationRegisterVn200.scenario" title="Permalink to this definition">¶</a></dt>
+<dd><p>The scenario field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsBasicConfigurationRegisterVn200.ahrs_aiding">
+<code class="descclassname">InsBasicConfigurationRegisterVn200.</code><code class="descname">ahrs_aiding</code><a class="headerlink" href="#vnpy.InsBasicConfigurationRegisterVn200.ahrs_aiding" title="Permalink to this definition">¶</a></dt>
+<dd><p>The ahrsAiding field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="insbasicconfigurationregistervn300">
+<h2><a class="reference internal" href="#vnpy.InsBasicConfigurationRegisterVn300" title="vnpy.InsBasicConfigurationRegisterVn300"><code class="xref py py-class docutils literal"><span class="pre">InsBasicConfigurationRegisterVn300</span></code></a><a class="headerlink" href="#insbasicconfigurationregistervn300" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.InsBasicConfigurationRegisterVn300">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">InsBasicConfigurationRegisterVn300</code><a class="headerlink" href="#vnpy.InsBasicConfigurationRegisterVn300" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the INS Basic Configuration register for a VN-300 sensor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsBasicConfigurationRegisterVn300.scenario">
+<code class="descclassname">InsBasicConfigurationRegisterVn300.</code><code class="descname">scenario</code><a class="headerlink" href="#vnpy.InsBasicConfigurationRegisterVn300.scenario" title="Permalink to this definition">¶</a></dt>
+<dd><p>The scenario field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsBasicConfigurationRegisterVn300.ahrs_aiding">
+<code class="descclassname">InsBasicConfigurationRegisterVn300.</code><code class="descname">ahrs_aiding</code><a class="headerlink" href="#vnpy.InsBasicConfigurationRegisterVn300.ahrs_aiding" title="Permalink to this definition">¶</a></dt>
+<dd><p>The ahrsAiding field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsBasicConfigurationRegisterVn300.est_baseline">
+<code class="descclassname">InsBasicConfigurationRegisterVn300.</code><code class="descname">est_baseline</code><a class="headerlink" href="#vnpy.InsBasicConfigurationRegisterVn300.est_baseline" title="Permalink to this definition">¶</a></dt>
+<dd><p>The estBaseline field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="inssolutionecefregister">
+<h2><a class="reference internal" href="#vnpy.InsSolutionEcefRegister" title="vnpy.InsSolutionEcefRegister"><code class="xref py py-class docutils literal"><span class="pre">InsSolutionEcefRegister</span></code></a><a class="headerlink" href="#inssolutionecefregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.InsSolutionEcefRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">InsSolutionEcefRegister</code><a class="headerlink" href="#vnpy.InsSolutionEcefRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the INS Solution - ECEF register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionEcefRegister.time">
+<code class="descclassname">InsSolutionEcefRegister.</code><code class="descname">time</code><a class="headerlink" href="#vnpy.InsSolutionEcefRegister.time" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionEcefRegister.week">
+<code class="descclassname">InsSolutionEcefRegister.</code><code class="descname">week</code><a class="headerlink" href="#vnpy.InsSolutionEcefRegister.week" title="Permalink to this definition">¶</a></dt>
+<dd><p>The week field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionEcefRegister.status">
+<code class="descclassname">InsSolutionEcefRegister.</code><code class="descname">status</code><a class="headerlink" href="#vnpy.InsSolutionEcefRegister.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>The status field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionEcefRegister.yaw_pitch_roll">
+<code class="descclassname">InsSolutionEcefRegister.</code><code class="descname">yaw_pitch_roll</code><a class="headerlink" href="#vnpy.InsSolutionEcefRegister.yaw_pitch_roll" title="Permalink to this definition">¶</a></dt>
+<dd><p>The yawPitchRoll field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionEcefRegister.velocity">
+<code class="descclassname">InsSolutionEcefRegister.</code><code class="descname">velocity</code><a class="headerlink" href="#vnpy.InsSolutionEcefRegister.velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>The velocity field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionEcefRegister.att_uncertainty">
+<code class="descclassname">InsSolutionEcefRegister.</code><code class="descname">att_uncertainty</code><a class="headerlink" href="#vnpy.InsSolutionEcefRegister.att_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>The attUncertainty field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionEcefRegister.pos_uncertainty">
+<code class="descclassname">InsSolutionEcefRegister.</code><code class="descname">pos_uncertainty</code><a class="headerlink" href="#vnpy.InsSolutionEcefRegister.pos_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>The posUncertainty field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionEcefRegister.vel_uncertainty">
+<code class="descclassname">InsSolutionEcefRegister.</code><code class="descname">vel_uncertainty</code><a class="headerlink" href="#vnpy.InsSolutionEcefRegister.vel_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>The velUncertainty field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="inssolutionllaregister">
+<h2><a class="reference internal" href="#vnpy.InsSolutionLlaRegister" title="vnpy.InsSolutionLlaRegister"><code class="xref py py-class docutils literal"><span class="pre">InsSolutionLlaRegister</span></code></a><a class="headerlink" href="#inssolutionllaregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.InsSolutionLlaRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">InsSolutionLlaRegister</code><a class="headerlink" href="#vnpy.InsSolutionLlaRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the INS Solution - LLA register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionLlaRegister.time">
+<code class="descclassname">InsSolutionLlaRegister.</code><code class="descname">time</code><a class="headerlink" href="#vnpy.InsSolutionLlaRegister.time" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionLlaRegister.week">
+<code class="descclassname">InsSolutionLlaRegister.</code><code class="descname">week</code><a class="headerlink" href="#vnpy.InsSolutionLlaRegister.week" title="Permalink to this definition">¶</a></dt>
+<dd><p>The week field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionLlaRegister.status">
+<code class="descclassname">InsSolutionLlaRegister.</code><code class="descname">status</code><a class="headerlink" href="#vnpy.InsSolutionLlaRegister.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>The status field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionLlaRegister.yaw_pitch_roll">
+<code class="descclassname">InsSolutionLlaRegister.</code><code class="descname">yaw_pitch_roll</code><a class="headerlink" href="#vnpy.InsSolutionLlaRegister.yaw_pitch_roll" title="Permalink to this definition">¶</a></dt>
+<dd><p>The yawPitchRoll field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionLlaRegister.position">
+<code class="descclassname">InsSolutionLlaRegister.</code><code class="descname">position</code><a class="headerlink" href="#vnpy.InsSolutionLlaRegister.position" title="Permalink to this definition">¶</a></dt>
+<dd><p>The position field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionLlaRegister.ned_vel">
+<code class="descclassname">InsSolutionLlaRegister.</code><code class="descname">ned_vel</code><a class="headerlink" href="#vnpy.InsSolutionLlaRegister.ned_vel" title="Permalink to this definition">¶</a></dt>
+<dd><p>The nedVel field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionLlaRegister.att_uncertainty">
+<code class="descclassname">InsSolutionLlaRegister.</code><code class="descname">att_uncertainty</code><a class="headerlink" href="#vnpy.InsSolutionLlaRegister.att_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>The attUncertainty field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionLlaRegister.pos_uncertainty">
+<code class="descclassname">InsSolutionLlaRegister.</code><code class="descname">pos_uncertainty</code><a class="headerlink" href="#vnpy.InsSolutionLlaRegister.pos_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>The posUncertainty field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsSolutionLlaRegister.vel_uncertainty">
+<code class="descclassname">InsSolutionLlaRegister.</code><code class="descname">vel_uncertainty</code><a class="headerlink" href="#vnpy.InsSolutionLlaRegister.vel_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>The velUncertainty field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="insstateecefregister">
+<h2><a class="reference internal" href="#vnpy.InsStateEcefRegister" title="vnpy.InsStateEcefRegister"><code class="xref py py-class docutils literal"><span class="pre">InsStateEcefRegister</span></code></a><a class="headerlink" href="#insstateecefregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.InsStateEcefRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">InsStateEcefRegister</code><a class="headerlink" href="#vnpy.InsStateEcefRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the INS State - ECEF register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsStateLlaRegister.yaw_pitch_roll">
+<code class="descclassname">InsStateLlaRegister.</code><code class="descname">yaw_pitch_roll</code><a class="headerlink" href="#vnpy.InsStateLlaRegister.yaw_pitch_roll" title="Permalink to this definition">¶</a></dt>
+<dd><p>The yawPitchRoll field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsStateLlaRegister.position">
+<code class="descclassname">InsStateLlaRegister.</code><code class="descname">position</code><a class="headerlink" href="#vnpy.InsStateLlaRegister.position" title="Permalink to this definition">¶</a></dt>
+<dd><p>The position field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsStateLlaRegister.velocity">
+<code class="descclassname">InsStateLlaRegister.</code><code class="descname">velocity</code><a class="headerlink" href="#vnpy.InsStateLlaRegister.velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>The velocity field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsStateLlaRegister.accel">
+<code class="descclassname">InsStateLlaRegister.</code><code class="descname">accel</code><a class="headerlink" href="#vnpy.InsStateLlaRegister.accel" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accel field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.InsStateLlaRegister.angular_rate">
+<code class="descclassname">InsStateLlaRegister.</code><code class="descname">angular_rate</code><a class="headerlink" href="#vnpy.InsStateLlaRegister.angular_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>The angularRate field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="insstatellaregister">
+<h2><a class="reference internal" href="#vnpy.InsStateLlaRegister" title="vnpy.InsStateLlaRegister"><code class="xref py py-class docutils literal"><span class="pre">InsStateLlaRegister</span></code></a><a class="headerlink" href="#insstatellaregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.InsStateLlaRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">InsStateLlaRegister</code><a class="headerlink" href="#vnpy.InsStateLlaRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the INS State - LLA register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descclassname">InsStateLlaRegister.</code><code class="descname">yaw_pitch_roll</code></dt>
+<dd><p>The yawPitchRoll field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descclassname">InsStateLlaRegister.</code><code class="descname">position</code></dt>
+<dd><p>The position field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descclassname">InsStateLlaRegister.</code><code class="descname">velocity</code></dt>
+<dd><p>The velocity field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descclassname">InsStateLlaRegister.</code><code class="descname">accel</code></dt>
+<dd><p>The accel field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descclassname">InsStateLlaRegister.</code><code class="descname">angular_rate</code></dt>
+<dd><p>The angularRate field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="magneticaccelerationandangularratesregister">
+<h2><a class="reference internal" href="#vnpy.MagneticAccelerationAndAngularRatesRegister" title="vnpy.MagneticAccelerationAndAngularRatesRegister"><code class="xref py py-class docutils literal"><span class="pre">MagneticAccelerationAndAngularRatesRegister</span></code></a><a class="headerlink" href="#magneticaccelerationandangularratesregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.MagneticAccelerationAndAngularRatesRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">MagneticAccelerationAndAngularRatesRegister</code><a class="headerlink" href="#vnpy.MagneticAccelerationAndAngularRatesRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Magnetic and Gravity Reference Vectors register.</p>
+</dd></dl>
+
+<p>Class attributes are:</p>
+<dl class="attribute">
+<dt id="vnpy.MagneticAccelerationAndAngularRatesRegister.mag">
+<code class="descclassname">MagneticAccelerationAndAngularRatesRegister.</code><code class="descname">mag</code><a class="headerlink" href="#vnpy.MagneticAccelerationAndAngularRatesRegister.mag" title="Permalink to this definition">¶</a></dt>
+<dd><p>The mag field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.MagneticAccelerationAndAngularRatesRegister.accel">
+<code class="descclassname">MagneticAccelerationAndAngularRatesRegister.</code><code class="descname">accel</code><a class="headerlink" href="#vnpy.MagneticAccelerationAndAngularRatesRegister.accel" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accel field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.MagneticAccelerationAndAngularRatesRegister.gyro">
+<code class="descclassname">MagneticAccelerationAndAngularRatesRegister.</code><code class="descname">gyro</code><a class="headerlink" href="#vnpy.MagneticAccelerationAndAngularRatesRegister.gyro" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gyro field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="magneticandgravityreferencevectorsregister">
+<h2><a class="reference internal" href="#vnpy.MagneticAndGravityReferenceVectorsRegister" title="vnpy.MagneticAndGravityReferenceVectorsRegister"><code class="xref py py-class docutils literal"><span class="pre">MagneticAndGravityReferenceVectorsRegister</span></code></a><a class="headerlink" href="#magneticandgravityreferencevectorsregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.MagneticAndGravityReferenceVectorsRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">MagneticAndGravityReferenceVectorsRegister</code><a class="headerlink" href="#vnpy.MagneticAndGravityReferenceVectorsRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Magnetic and Gravity Reference Vectors register.</p>
+</dd></dl>
+
+<p>Class attributes are:</p>
+<dl class="attribute">
+<dt id="vnpy.MagneticAndGravityReferenceVectorsRegister.mag_ref">
+<code class="descclassname">MagneticAndGravityReferenceVectorsRegister.</code><code class="descname">mag_ref</code><a class="headerlink" href="#vnpy.MagneticAndGravityReferenceVectorsRegister.mag_ref" title="Permalink to this definition">¶</a></dt>
+<dd><p>The magRef field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.MagneticAndGravityReferenceVectorsRegister.acc_ref">
+<code class="descclassname">MagneticAndGravityReferenceVectorsRegister.</code><code class="descname">acc_ref</code><a class="headerlink" href="#vnpy.MagneticAndGravityReferenceVectorsRegister.acc_ref" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accRef field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="magnetometercalibrationcontrolregister">
+<h2><a class="reference internal" href="#vnpy.MagnetometerCalibrationControlRegister" title="vnpy.MagnetometerCalibrationControlRegister"><code class="xref py py-class docutils literal"><span class="pre">MagnetometerCalibrationControlRegister</span></code></a><a class="headerlink" href="#magnetometercalibrationcontrolregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.MagnetometerCalibrationControlRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">MagnetometerCalibrationControlRegister</code><a class="headerlink" href="#vnpy.MagnetometerCalibrationControlRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Magnetometer Calibration Control register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.MagnetometerCalibrationControlRegister.hsi_mode">
+<code class="descclassname">MagnetometerCalibrationControlRegister.</code><code class="descname">hsi_mode</code><a class="headerlink" href="#vnpy.MagnetometerCalibrationControlRegister.hsi_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The hsiMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.MagnetometerCalibrationControlRegister.hsi_output">
+<code class="descclassname">MagnetometerCalibrationControlRegister.</code><code class="descname">hsi_output</code><a class="headerlink" href="#vnpy.MagnetometerCalibrationControlRegister.hsi_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>The hsiOutput field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.MagnetometerCalibrationControlRegister.converge_rate">
+<code class="descclassname">MagnetometerCalibrationControlRegister.</code><code class="descname">converge_rate</code><a class="headerlink" href="#vnpy.MagnetometerCalibrationControlRegister.converge_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>The convergeRate field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="magnetometercompensationregister">
+<h2><a class="reference internal" href="#vnpy.MagnetometerCompensationRegister" title="vnpy.MagnetometerCompensationRegister"><code class="xref py py-class docutils literal"><span class="pre">MagnetometerCompensationRegister</span></code></a><a class="headerlink" href="#magnetometercompensationregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.MagnetometerCompensationRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">MagnetometerCompensationRegister</code><a class="headerlink" href="#vnpy.MagnetometerCompensationRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Magnetometer Compensation register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.MagnetometerCompensationRegister.c">
+<code class="descclassname">MagnetometerCompensationRegister.</code><code class="descname">c</code><a class="headerlink" href="#vnpy.MagnetometerCompensationRegister.c" title="Permalink to this definition">¶</a></dt>
+<dd><p>The c field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.MagnetometerCompensationRegister.b">
+<code class="descclassname">MagnetometerCompensationRegister.</code><code class="descname">b</code><a class="headerlink" href="#vnpy.MagnetometerCompensationRegister.b" title="Permalink to this definition">¶</a></dt>
+<dd><p>The b field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="quaternionmagneticaccelerationandangularratesregister">
+<h2><a class="reference internal" href="#vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister" title="vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister"><code class="xref py py-class docutils literal"><span class="pre">QuaternionMagneticAccelerationAndAngularRatesRegister</span></code></a><a class="headerlink" href="#quaternionmagneticaccelerationandangularratesregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">QuaternionMagneticAccelerationAndAngularRatesRegister</code><a class="headerlink" href="#vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Quaternion, Magnetic, Acceleration and Angular Rates register.</p>
+</dd></dl>
+
+<p>Class attributes are:</p>
+<dl class="attribute">
+<dt id="vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister.quat">
+<code class="descclassname">QuaternionMagneticAccelerationAndAngularRatesRegister.</code><code class="descname">quat</code><a class="headerlink" href="#vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister.quat" title="Permalink to this definition">¶</a></dt>
+<dd><p>The quat field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister.mag">
+<code class="descclassname">QuaternionMagneticAccelerationAndAngularRatesRegister.</code><code class="descname">mag</code><a class="headerlink" href="#vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister.mag" title="Permalink to this definition">¶</a></dt>
+<dd><p>The mag field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister.accel">
+<code class="descclassname">QuaternionMagneticAccelerationAndAngularRatesRegister.</code><code class="descname">accel</code><a class="headerlink" href="#vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister.accel" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accel field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister.gyro">
+<code class="descclassname">QuaternionMagneticAccelerationAndAngularRatesRegister.</code><code class="descname">gyro</code><a class="headerlink" href="#vnpy.QuaternionMagneticAccelerationAndAngularRatesRegister.gyro" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gyro field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="referencevectorconfigurationregister">
+<h2><a class="reference internal" href="#vnpy.ReferenceVectorConfigurationRegister" title="vnpy.ReferenceVectorConfigurationRegister"><code class="xref py py-class docutils literal"><span class="pre">ReferenceVectorConfigurationRegister</span></code></a><a class="headerlink" href="#referencevectorconfigurationregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.ReferenceVectorConfigurationRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">ReferenceVectorConfigurationRegister</code><a class="headerlink" href="#vnpy.ReferenceVectorConfigurationRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Reference Vector Configuration register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ReferenceVectorConfigurationRegister.use_mag_model">
+<code class="descclassname">ReferenceVectorConfigurationRegister.</code><code class="descname">use_mag_model</code><a class="headerlink" href="#vnpy.ReferenceVectorConfigurationRegister.use_mag_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>The useMagModel field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ReferenceVectorConfigurationRegister.use_gravity_model">
+<code class="descclassname">ReferenceVectorConfigurationRegister.</code><code class="descname">use_gravity_model</code><a class="headerlink" href="#vnpy.ReferenceVectorConfigurationRegister.use_gravity_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>The useGravityModel field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ReferenceVectorConfigurationRegister.recalc_threshold">
+<code class="descclassname">ReferenceVectorConfigurationRegister.</code><code class="descname">recalc_threshold</code><a class="headerlink" href="#vnpy.ReferenceVectorConfigurationRegister.recalc_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>The recaldThreshold field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ReferenceVectorConfigurationRegister.year">
+<code class="descclassname">ReferenceVectorConfigurationRegister.</code><code class="descname">year</code><a class="headerlink" href="#vnpy.ReferenceVectorConfigurationRegister.year" title="Permalink to this definition">¶</a></dt>
+<dd><p>The year field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.ReferenceVectorConfigurationRegister.position">
+<code class="descclassname">ReferenceVectorConfigurationRegister.</code><code class="descname">position</code><a class="headerlink" href="#vnpy.ReferenceVectorConfigurationRegister.position" title="Permalink to this definition">¶</a></dt>
+<dd><p>The position field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="startupfilterbiasestimateregister">
+<h2><a class="reference internal" href="#vnpy.StartupFilterBiasEstimateRegister" title="vnpy.StartupFilterBiasEstimateRegister"><code class="xref py py-class docutils literal"><span class="pre">StartupFilterBiasEstimateRegister</span></code></a><a class="headerlink" href="#startupfilterbiasestimateregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.StartupFilterBiasEstimateRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">StartupFilterBiasEstimateRegister</code><a class="headerlink" href="#vnpy.StartupFilterBiasEstimateRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Startup Filter Bias Estimate register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.StartupFilterBiasEstimateRegister.gyro_bias">
+<code class="descclassname">StartupFilterBiasEstimateRegister.</code><code class="descname">gyro_bias</code><a class="headerlink" href="#vnpy.StartupFilterBiasEstimateRegister.gyro_bias" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gyroBias field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.StartupFilterBiasEstimateRegister.accel_bias">
+<code class="descclassname">StartupFilterBiasEstimateRegister.</code><code class="descname">accel_bias</code><a class="headerlink" href="#vnpy.StartupFilterBiasEstimateRegister.accel_bias" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accelBias field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.StartupFilterBiasEstimateRegister.pressure_bias">
+<code class="descclassname">StartupFilterBiasEstimateRegister.</code><code class="descname">pressure_bias</code><a class="headerlink" href="#vnpy.StartupFilterBiasEstimateRegister.pressure_bias" title="Permalink to this definition">¶</a></dt>
+<dd><p>The pressureBias field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="synchronizationcontrolregister">
+<h2><a class="reference internal" href="#vnpy.SynchronizationControlRegister" title="vnpy.SynchronizationControlRegister"><code class="xref py py-class docutils literal"><span class="pre">SynchronizationControlRegister</span></code></a><a class="headerlink" href="#synchronizationcontrolregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.SynchronizationControlRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">SynchronizationControlRegister</code><a class="headerlink" href="#vnpy.SynchronizationControlRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Synchronization Control register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.SynchronizationControlRegister.sync_in_mode">
+<code class="descclassname">SynchronizationControlRegister.</code><code class="descname">sync_in_mode</code><a class="headerlink" href="#vnpy.SynchronizationControlRegister.sync_in_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The syncInMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.SynchronizationControlRegister.sync_in_edge">
+<code class="descclassname">SynchronizationControlRegister.</code><code class="descname">sync_in_edge</code><a class="headerlink" href="#vnpy.SynchronizationControlRegister.sync_in_edge" title="Permalink to this definition">¶</a></dt>
+<dd><p>The syncInEdge field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.SynchronizationControlRegister.sync_in_skip_factor">
+<code class="descclassname">SynchronizationControlRegister.</code><code class="descname">sync_in_skip_factor</code><a class="headerlink" href="#vnpy.SynchronizationControlRegister.sync_in_skip_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The syncInSkipFactor field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.SynchronizationControlRegister.sync_out_mode">
+<code class="descclassname">SynchronizationControlRegister.</code><code class="descname">sync_out_mode</code><a class="headerlink" href="#vnpy.SynchronizationControlRegister.sync_out_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The syncOutMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.SynchronizationControlRegister.sync_out_polarity">
+<code class="descclassname">SynchronizationControlRegister.</code><code class="descname">sync_out_polarity</code><a class="headerlink" href="#vnpy.SynchronizationControlRegister.sync_out_polarity" title="Permalink to this definition">¶</a></dt>
+<dd><p>The syncOutPolarity field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.SynchronizationControlRegister.sync_out_skip_factor">
+<code class="descclassname">SynchronizationControlRegister.</code><code class="descname">sync_out_skip_factor</code><a class="headerlink" href="#vnpy.SynchronizationControlRegister.sync_out_skip_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The syncOutSkipFactor field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.SynchronizationControlRegister.sync_out_pulse_width">
+<code class="descclassname">SynchronizationControlRegister.</code><code class="descname">sync_out_pulse_width</code><a class="headerlink" href="#vnpy.SynchronizationControlRegister.sync_out_pulse_width" title="Permalink to this definition">¶</a></dt>
+<dd><p>The syncOutPulseWidth field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="synchronizationstatusregister">
+<h2><a class="reference internal" href="#vnpy.SynchronizationStatusRegister" title="vnpy.SynchronizationStatusRegister"><code class="xref py py-class docutils literal"><span class="pre">SynchronizationStatusRegister</span></code></a><a class="headerlink" href="#synchronizationstatusregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.SynchronizationStatusRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">SynchronizationStatusRegister</code><a class="headerlink" href="#vnpy.SynchronizationStatusRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Synchronization Status register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.SynchronizationStatusRegister.sync_in_count">
+<code class="descclassname">SynchronizationStatusRegister.</code><code class="descname">sync_in_count</code><a class="headerlink" href="#vnpy.SynchronizationStatusRegister.sync_in_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>The syncInCount field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.SynchronizationStatusRegister.sync_in_time">
+<code class="descclassname">SynchronizationStatusRegister.</code><code class="descname">sync_in_time</code><a class="headerlink" href="#vnpy.SynchronizationStatusRegister.sync_in_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>The syncInTime field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.SynchronizationStatusRegister.sync_out_count">
+<code class="descclassname">SynchronizationStatusRegister.</code><code class="descname">sync_out_count</code><a class="headerlink" href="#vnpy.SynchronizationStatusRegister.sync_out_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>The syncOutCount field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="velocitycompensationcontrolregister">
+<h2><a class="reference internal" href="#vnpy.VelocityCompensationControlRegister" title="vnpy.VelocityCompensationControlRegister"><code class="xref py py-class docutils literal"><span class="pre">VelocityCompensationControlRegister</span></code></a><a class="headerlink" href="#velocitycompensationcontrolregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.VelocityCompensationControlRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">VelocityCompensationControlRegister</code><a class="headerlink" href="#vnpy.VelocityCompensationControlRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Velocity Compensation Control register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VelocityCompensationControlRegister.mode">
+<code class="descclassname">VelocityCompensationControlRegister.</code><code class="descname">mode</code><a class="headerlink" href="#vnpy.VelocityCompensationControlRegister.mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The mode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VelocityCompensationControlRegister.velocity_tuning">
+<code class="descclassname">VelocityCompensationControlRegister.</code><code class="descname">velocity_tuning</code><a class="headerlink" href="#vnpy.VelocityCompensationControlRegister.velocity_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>The velocityTuning field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VelocityCompensationControlRegister.rate_tuning">
+<code class="descclassname">VelocityCompensationControlRegister.</code><code class="descname">rate_tuning</code><a class="headerlink" href="#vnpy.VelocityCompensationControlRegister.rate_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>The rateTuning field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="velocitycompensationstatusregister">
+<h2><a class="reference internal" href="#vnpy.VelocityCompensationStatusRegister" title="vnpy.VelocityCompensationStatusRegister"><code class="xref py py-class docutils literal"><span class="pre">VelocityCompensationStatusRegister</span></code></a><a class="headerlink" href="#velocitycompensationstatusregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.VelocityCompensationStatusRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">VelocityCompensationStatusRegister</code><a class="headerlink" href="#vnpy.VelocityCompensationStatusRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Velocity Compensation Status register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VelocityCompensationStatusRegister.x">
+<code class="descclassname">VelocityCompensationStatusRegister.</code><code class="descname">x</code><a class="headerlink" href="#vnpy.VelocityCompensationStatusRegister.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>The x field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VelocityCompensationStatusRegister.x_dot">
+<code class="descclassname">VelocityCompensationStatusRegister.</code><code class="descname">x_dot</code><a class="headerlink" href="#vnpy.VelocityCompensationStatusRegister.x_dot" title="Permalink to this definition">¶</a></dt>
+<dd><p>The xDot field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VelocityCompensationStatusRegister.accel_offset">
+<code class="descclassname">VelocityCompensationStatusRegister.</code><code class="descname">accel_offset</code><a class="headerlink" href="#vnpy.VelocityCompensationStatusRegister.accel_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accelOffset field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VelocityCompensationStatusRegister.omega">
+<code class="descclassname">VelocityCompensationStatusRegister.</code><code class="descname">omega</code><a class="headerlink" href="#vnpy.VelocityCompensationStatusRegister.omega" title="Permalink to this definition">¶</a></dt>
+<dd><p>The omega field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="vpeaccelerometeradvancedtuningregister">
+<h2><a class="reference internal" href="#vnpy.VpeAccelerometerAdvancedTuningRegister" title="vnpy.VpeAccelerometerAdvancedTuningRegister"><code class="xref py py-class docutils literal"><span class="pre">VpeAccelerometerAdvancedTuningRegister</span></code></a><a class="headerlink" href="#vpeaccelerometeradvancedtuningregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.VpeAccelerometerAdvancedTuningRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">VpeAccelerometerAdvancedTuningRegister</code><a class="headerlink" href="#vnpy.VpeAccelerometerAdvancedTuningRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the VPE Accelerometer Advanced Tuning register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeAccelerometerAdvancedTuningRegister.min_filtering">
+<code class="descclassname">VpeAccelerometerAdvancedTuningRegister.</code><code class="descname">min_filtering</code><a class="headerlink" href="#vnpy.VpeAccelerometerAdvancedTuningRegister.min_filtering" title="Permalink to this definition">¶</a></dt>
+<dd><p>The minFiltering field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeAccelerometerAdvancedTuningRegister.max_filtering">
+<code class="descclassname">VpeAccelerometerAdvancedTuningRegister.</code><code class="descname">max_filtering</code><a class="headerlink" href="#vnpy.VpeAccelerometerAdvancedTuningRegister.max_filtering" title="Permalink to this definition">¶</a></dt>
+<dd><p>The maxFiltering field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeAccelerometerAdvancedTuningRegister.max_adapt_rate">
+<code class="descclassname">VpeAccelerometerAdvancedTuningRegister.</code><code class="descname">max_adapt_rate</code><a class="headerlink" href="#vnpy.VpeAccelerometerAdvancedTuningRegister.max_adapt_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>The maxAdaptRate field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeAccelerometerAdvancedTuningRegister.disturbance_window">
+<code class="descclassname">VpeAccelerometerAdvancedTuningRegister.</code><code class="descname">disturbance_window</code><a class="headerlink" href="#vnpy.VpeAccelerometerAdvancedTuningRegister.disturbance_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>The disturbanceWindow field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeAccelerometerAdvancedTuningRegister.max_tuning">
+<code class="descclassname">VpeAccelerometerAdvancedTuningRegister.</code><code class="descname">max_tuning</code><a class="headerlink" href="#vnpy.VpeAccelerometerAdvancedTuningRegister.max_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>The maxTuning field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="vpeaccelerometerbasictuningregister">
+<h2><a class="reference internal" href="#vnpy.VpeAccelerometerBasicTuningRegister" title="vnpy.VpeAccelerometerBasicTuningRegister"><code class="xref py py-class docutils literal"><span class="pre">VpeAccelerometerBasicTuningRegister</span></code></a><a class="headerlink" href="#vpeaccelerometerbasictuningregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.VpeAccelerometerBasicTuningRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">VpeAccelerometerBasicTuningRegister</code><a class="headerlink" href="#vnpy.VpeAccelerometerBasicTuningRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the VPE Accelerometer Basic Tuning register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeAccelerometerBasicTuningRegister.base_tuning">
+<code class="descclassname">VpeAccelerometerBasicTuningRegister.</code><code class="descname">base_tuning</code><a class="headerlink" href="#vnpy.VpeAccelerometerBasicTuningRegister.base_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>The baseTuning field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeAccelerometerBasicTuningRegister.adaptive_tuning">
+<code class="descclassname">VpeAccelerometerBasicTuningRegister.</code><code class="descname">adaptive_tuning</code><a class="headerlink" href="#vnpy.VpeAccelerometerBasicTuningRegister.adaptive_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>The adaptiveTuning field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeAccelerometerBasicTuningRegister.adaptive_filtering">
+<code class="descclassname">VpeAccelerometerBasicTuningRegister.</code><code class="descname">adaptive_filtering</code><a class="headerlink" href="#vnpy.VpeAccelerometerBasicTuningRegister.adaptive_filtering" title="Permalink to this definition">¶</a></dt>
+<dd><p>The adaptiveFiltering field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="vpebasiccontrolregister">
+<h2><a class="reference internal" href="#vnpy.VpeBasicControlRegister" title="vnpy.VpeBasicControlRegister"><code class="xref py py-class docutils literal"><span class="pre">VpeBasicControlRegister</span></code></a><a class="headerlink" href="#vpebasiccontrolregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.VpeBasicControlRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">VpeBasicControlRegister</code><a class="headerlink" href="#vnpy.VpeBasicControlRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the VPE Basic Control register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeBasicControlRegister.enable">
+<code class="descclassname">VpeBasicControlRegister.</code><code class="descname">enable</code><a class="headerlink" href="#vnpy.VpeBasicControlRegister.enable" title="Permalink to this definition">¶</a></dt>
+<dd><p>The enable field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeBasicControlRegister.heading_mode">
+<code class="descclassname">VpeBasicControlRegister.</code><code class="descname">heading_mode</code><a class="headerlink" href="#vnpy.VpeBasicControlRegister.heading_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The headingMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeBasicControlRegister.filtering_mode">
+<code class="descclassname">VpeBasicControlRegister.</code><code class="descname">filtering_mode</code><a class="headerlink" href="#vnpy.VpeBasicControlRegister.filtering_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The filteringMode field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeBasicControlRegister.tuning_mode">
+<code class="descclassname">VpeBasicControlRegister.</code><code class="descname">tuning_mode</code><a class="headerlink" href="#vnpy.VpeBasicControlRegister.tuning_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The tuningMode field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="vpegryobasictuningregister">
+<h2><a class="reference internal" href="#vnpy.VpeGryoBasicTuningRegister" title="vnpy.VpeGryoBasicTuningRegister"><code class="xref py py-class docutils literal"><span class="pre">VpeGryoBasicTuningRegister</span></code></a><a class="headerlink" href="#vpegryobasictuningregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.VpeGryoBasicTuningRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">VpeGryoBasicTuningRegister</code><a class="headerlink" href="#vnpy.VpeGryoBasicTuningRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the VPE Gryo Basic Tuning register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeGryoBasicTuningRegister.angular_walk_variance">
+<code class="descclassname">VpeGryoBasicTuningRegister.</code><code class="descname">angular_walk_variance</code><a class="headerlink" href="#vnpy.VpeGryoBasicTuningRegister.angular_walk_variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>The angularWalkVariance field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeGryoBasicTuningRegister.base_tuning">
+<code class="descclassname">VpeGryoBasicTuningRegister.</code><code class="descname">base_tuning</code><a class="headerlink" href="#vnpy.VpeGryoBasicTuningRegister.base_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>The baseTuning field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeGryoBasicTuningRegister.adaptive_tuning">
+<code class="descclassname">VpeGryoBasicTuningRegister.</code><code class="descname">adaptive_tuning</code><a class="headerlink" href="#vnpy.VpeGryoBasicTuningRegister.adaptive_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>The adaptiveTuning field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="vpemagnetometeradvancedtuningregister">
+<h2><a class="reference internal" href="#vnpy.VpeMagnetometerAdvancedTuningRegister" title="vnpy.VpeMagnetometerAdvancedTuningRegister"><code class="xref py py-class docutils literal"><span class="pre">VpeMagnetometerAdvancedTuningRegister</span></code></a><a class="headerlink" href="#vpemagnetometeradvancedtuningregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.VpeMagnetometerAdvancedTuningRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">VpeMagnetometerAdvancedTuningRegister</code><a class="headerlink" href="#vnpy.VpeMagnetometerAdvancedTuningRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the VPE Magnetometer Advanced Tuning register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeMagnetometerAdvancedTuningRegister.min_filtering">
+<code class="descclassname">VpeMagnetometerAdvancedTuningRegister.</code><code class="descname">min_filtering</code><a class="headerlink" href="#vnpy.VpeMagnetometerAdvancedTuningRegister.min_filtering" title="Permalink to this definition">¶</a></dt>
+<dd><p>The minFiltering field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeMagnetometerAdvancedTuningRegister.max_filtering">
+<code class="descclassname">VpeMagnetometerAdvancedTuningRegister.</code><code class="descname">max_filtering</code><a class="headerlink" href="#vnpy.VpeMagnetometerAdvancedTuningRegister.max_filtering" title="Permalink to this definition">¶</a></dt>
+<dd><p>The maxFiltering field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeMagnetometerAdvancedTuningRegister.max_adapt_rate">
+<code class="descclassname">VpeMagnetometerAdvancedTuningRegister.</code><code class="descname">max_adapt_rate</code><a class="headerlink" href="#vnpy.VpeMagnetometerAdvancedTuningRegister.max_adapt_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>The maxAdaptRate field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeMagnetometerAdvancedTuningRegister.disturbance_window">
+<code class="descclassname">VpeMagnetometerAdvancedTuningRegister.</code><code class="descname">disturbance_window</code><a class="headerlink" href="#vnpy.VpeMagnetometerAdvancedTuningRegister.disturbance_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>The disturbanceWindow field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeMagnetometerAdvancedTuningRegister.max_tuning">
+<code class="descclassname">VpeMagnetometerAdvancedTuningRegister.</code><code class="descname">max_tuning</code><a class="headerlink" href="#vnpy.VpeMagnetometerAdvancedTuningRegister.max_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>The maxTuning field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="vpemagnetometerbasictuningregister">
+<h2><a class="reference internal" href="#vnpy.VpeMagnetometerBasicTuningRegister" title="vnpy.VpeMagnetometerBasicTuningRegister"><code class="xref py py-class docutils literal"><span class="pre">VpeMagnetometerBasicTuningRegister</span></code></a><a class="headerlink" href="#vpemagnetometerbasictuningregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.VpeMagnetometerBasicTuningRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">VpeMagnetometerBasicTuningRegister</code><a class="headerlink" href="#vnpy.VpeMagnetometerBasicTuningRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the VPE Magnetometer Basic Tuning register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeMagnetometerBasicTuningRegister.base_tuning">
+<code class="descclassname">VpeMagnetometerBasicTuningRegister.</code><code class="descname">base_tuning</code><a class="headerlink" href="#vnpy.VpeMagnetometerBasicTuningRegister.base_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>The baseTuning field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeMagnetometerBasicTuningRegister.adaptive_tuning">
+<code class="descclassname">VpeMagnetometerBasicTuningRegister.</code><code class="descname">adaptive_tuning</code><a class="headerlink" href="#vnpy.VpeMagnetometerBasicTuningRegister.adaptive_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>The adaptiveTuning field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VpeMagnetometerBasicTuningRegister.adaptive_filtering">
+<code class="descclassname">VpeMagnetometerBasicTuningRegister.</code><code class="descname">adaptive_filtering</code><a class="headerlink" href="#vnpy.VpeMagnetometerBasicTuningRegister.adaptive_filtering" title="Permalink to this definition">¶</a></dt>
+<dd><p>The adaptiveFiltering field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="yawpitchrollmagneticaccelerationandangularratesregister">
+<h2><a class="reference internal" href="#vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister" title="vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister"><code class="xref py py-class docutils literal"><span class="pre">YawPitchRollMagneticAccelerationAndAngularRatesRegister</span></code></a><a class="headerlink" href="#yawpitchrollmagneticaccelerationandangularratesregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">YawPitchRollMagneticAccelerationAndAngularRatesRegister</code><a class="headerlink" href="#vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Yaw, Pitch, Roll, Magnetic, Acceleration and Angular Rates register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister.yaw_pitch_roll">
+<code class="descclassname">YawPitchRollMagneticAccelerationAndAngularRatesRegister.</code><code class="descname">yaw_pitch_roll</code><a class="headerlink" href="#vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister.yaw_pitch_roll" title="Permalink to this definition">¶</a></dt>
+<dd><p>The yawPitchRoll field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister.mag">
+<code class="descclassname">YawPitchRollMagneticAccelerationAndAngularRatesRegister.</code><code class="descname">mag</code><a class="headerlink" href="#vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister.mag" title="Permalink to this definition">¶</a></dt>
+<dd><p>The mag field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister.accel">
+<code class="descclassname">YawPitchRollMagneticAccelerationAndAngularRatesRegister.</code><code class="descname">accel</code><a class="headerlink" href="#vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister.accel" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accel field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister.gyro">
+<code class="descclassname">YawPitchRollMagneticAccelerationAndAngularRatesRegister.</code><code class="descname">gyro</code><a class="headerlink" href="#vnpy.YawPitchRollMagneticAccelerationAndAngularRatesRegister.gyro" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gyro field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="yawpitchrolltruebodyaccelerationandangularratesregister">
+<h2><a class="reference internal" href="#vnpy.YawPitchRollTrueBodyAccelerationAndAngularRatesRegister" title="vnpy.YawPitchRollTrueBodyAccelerationAndAngularRatesRegister"><code class="xref py py-class docutils literal"><span class="pre">YawPitchRollTrueBodyAccelerationAndAngularRatesRegister</span></code></a><a class="headerlink" href="#yawpitchrolltruebodyaccelerationandangularratesregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.YawPitchRollTrueBodyAccelerationAndAngularRatesRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">YawPitchRollTrueBodyAccelerationAndAngularRatesRegister</code><a class="headerlink" href="#vnpy.YawPitchRollTrueBodyAccelerationAndAngularRatesRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Yaw, Pitch, Roll, True Body Acceleration and Angular Rates register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.YawPitchRollTrueBodyAccelerationAndAngularRatesRegister.yaw_pitch_roll">
+<code class="descclassname">YawPitchRollTrueBodyAccelerationAndAngularRatesRegister.</code><code class="descname">yaw_pitch_roll</code><a class="headerlink" href="#vnpy.YawPitchRollTrueBodyAccelerationAndAngularRatesRegister.yaw_pitch_roll" title="Permalink to this definition">¶</a></dt>
+<dd><p>The yawPitchRoll field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.YawPitchRollTrueBodyAccelerationAndAngularRatesRegister.body_accel">
+<code class="descclassname">YawPitchRollTrueBodyAccelerationAndAngularRatesRegister.</code><code class="descname">body_accel</code><a class="headerlink" href="#vnpy.YawPitchRollTrueBodyAccelerationAndAngularRatesRegister.body_accel" title="Permalink to this definition">¶</a></dt>
+<dd><p>The bodyAccel field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.YawPitchRollTrueBodyAccelerationAndAngularRatesRegister.gyro">
+<code class="descclassname">YawPitchRollTrueBodyAccelerationAndAngularRatesRegister.</code><code class="descname">gyro</code><a class="headerlink" href="#vnpy.YawPitchRollTrueBodyAccelerationAndAngularRatesRegister.gyro" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gyro field.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="yawpitchrolltrueinertialaccelerationandangularratesregister">
+<h2><a class="reference internal" href="#vnpy.YawPitchRollTrueInertialAccelerationAndAngularRatesRegister" title="vnpy.YawPitchRollTrueInertialAccelerationAndAngularRatesRegister"><code class="xref py py-class docutils literal"><span class="pre">YawPitchRollTrueInertialAccelerationAndAngularRatesRegister</span></code></a><a class="headerlink" href="#yawpitchrolltrueinertialaccelerationandangularratesregister" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.YawPitchRollTrueInertialAccelerationAndAngularRatesRegister">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">YawPitchRollTrueInertialAccelerationAndAngularRatesRegister</code><a class="headerlink" href="#vnpy.YawPitchRollTrueInertialAccelerationAndAngularRatesRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure representing the Yaw, Pitch, Roll, True Inertial Acceleration and Angular Rates register.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.YawPitchRollTrueInertialAccelerationAndAngularRatesRegister.yaw_pitch_roll">
+<code class="descclassname">YawPitchRollTrueInertialAccelerationAndAngularRatesRegister.</code><code class="descname">yaw_pitch_roll</code><a class="headerlink" href="#vnpy.YawPitchRollTrueInertialAccelerationAndAngularRatesRegister.yaw_pitch_roll" title="Permalink to this definition">¶</a></dt>
+<dd><p>The yawPitchRoll field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.YawPitchRollTrueInertialAccelerationAndAngularRatesRegister.inertial_accel">
+<code class="descclassname">YawPitchRollTrueInertialAccelerationAndAngularRatesRegister.</code><code class="descname">inertial_accel</code><a class="headerlink" href="#vnpy.YawPitchRollTrueInertialAccelerationAndAngularRatesRegister.inertial_accel" title="Permalink to this definition">¶</a></dt>
+<dd><p>The inertialAccel field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.YawPitchRollTrueInertialAccelerationAndAngularRatesRegister.gyro">
+<code class="descclassname">YawPitchRollTrueInertialAccelerationAndAngularRatesRegister.</code><code class="descname">gyro</code><a class="headerlink" href="#vnpy.YawPitchRollTrueInertialAccelerationAndAngularRatesRegister.gyro" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gyro field.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">VectorNav Sensor Registers</a><ul>
+<li><a class="reference internal" href="#accelerationcompensationregister"><code class="docutils literal"><span class="pre">AccelerationCompensationRegister</span></code></a></li>
+<li><a class="reference internal" href="#binaryoutputregister"><code class="docutils literal"><span class="pre">BinaryOutputRegister</span></code></a></li>
+<li><a class="reference internal" href="#calculatedmagnetometercalibrationregister"><code class="docutils literal"><span class="pre">CalculatedMagnetometerCalibrationRegister</span></code></a></li>
+<li><a class="reference internal" href="#communicationprotocolcontrolregister"><code class="docutils literal"><span class="pre">CommunicationProtocolControlRegister</span></code></a></li>
+<li><a class="reference internal" href="#deltathetaanddeltavelocityconfigurationregister"><code class="docutils literal"><span class="pre">DeltaThetaAndDeltaVelocityConfigurationRegister</span></code></a></li>
+<li><a class="reference internal" href="#deltathetaanddeltavelocityregister"><code class="docutils literal"><span class="pre">DeltaThetaAndDeltaVelocityRegister</span></code></a></li>
+<li><a class="reference internal" href="#filteractivetuningparametersregister"><code class="docutils literal"><span class="pre">FilterActiveTuningParametersRegister</span></code></a></li>
+<li><a class="reference internal" href="#filterbasiccontrolregister"><code class="docutils literal"><span class="pre">FilterBasicControlRegister</span></code></a></li>
+<li><a class="reference internal" href="#filtermeasurementsvarianceparametersregister"><code class="docutils literal"><span class="pre">FilterMeasurementsVarianceParametersRegister</span></code></a></li>
+<li><a class="reference internal" href="#gpscompassbaselineregister"><code class="docutils literal"><span class="pre">GpsCompassBaselineRegister</span></code></a></li>
+<li><a class="reference internal" href="#gpscompassestimatedbaselineregister"><code class="docutils literal"><span class="pre">GpsCompassEstimatedBaselineRegister</span></code></a></li>
+<li><a class="reference internal" href="#gpsconfigurationregister"><code class="docutils literal"><span class="pre">GpsConfigurationRegister</span></code></a></li>
+<li><a class="reference internal" href="#gpssolutionecefregister"><code class="docutils literal"><span class="pre">GpsSolutionEcefRegister</span></code></a></li>
+<li><a class="reference internal" href="#gpssolutionllaregister"><code class="docutils literal"><span class="pre">GpsSolutionLlaRegister</span></code></a></li>
+<li><a class="reference internal" href="#gyrocompensationregister"><code class="docutils literal"><span class="pre">GyroCompensationRegister</span></code></a></li>
+<li><a class="reference internal" href="#imufilteringconfigurationregister"><code class="docutils literal"><span class="pre">ImuFilteringConfigurationRegister</span></code></a></li>
+<li><a class="reference internal" href="#imumeasurementsregister"><code class="docutils literal"><span class="pre">ImuMeasurementsRegister</span></code></a></li>
+<li><a class="reference internal" href="#imurateconfigurationregister"><code class="docutils literal"><span class="pre">ImuRateConfigurationRegister</span></code></a></li>
+<li><a class="reference internal" href="#insadvancedconfigurationregister"><code class="docutils literal"><span class="pre">InsAdvancedConfigurationRegister</span></code></a></li>
+<li><a class="reference internal" href="#insbasicconfigurationregistervn200"><code class="docutils literal"><span class="pre">InsBasicConfigurationRegisterVn200</span></code></a></li>
+<li><a class="reference internal" href="#insbasicconfigurationregistervn300"><code class="docutils literal"><span class="pre">InsBasicConfigurationRegisterVn300</span></code></a></li>
+<li><a class="reference internal" href="#inssolutionecefregister"><code class="docutils literal"><span class="pre">InsSolutionEcefRegister</span></code></a></li>
+<li><a class="reference internal" href="#inssolutionllaregister"><code class="docutils literal"><span class="pre">InsSolutionLlaRegister</span></code></a></li>
+<li><a class="reference internal" href="#insstateecefregister"><code class="docutils literal"><span class="pre">InsStateEcefRegister</span></code></a></li>
+<li><a class="reference internal" href="#insstatellaregister"><code class="docutils literal"><span class="pre">InsStateLlaRegister</span></code></a></li>
+<li><a class="reference internal" href="#magneticaccelerationandangularratesregister"><code class="docutils literal"><span class="pre">MagneticAccelerationAndAngularRatesRegister</span></code></a></li>
+<li><a class="reference internal" href="#magneticandgravityreferencevectorsregister"><code class="docutils literal"><span class="pre">MagneticAndGravityReferenceVectorsRegister</span></code></a></li>
+<li><a class="reference internal" href="#magnetometercalibrationcontrolregister"><code class="docutils literal"><span class="pre">MagnetometerCalibrationControlRegister</span></code></a></li>
+<li><a class="reference internal" href="#magnetometercompensationregister"><code class="docutils literal"><span class="pre">MagnetometerCompensationRegister</span></code></a></li>
+<li><a class="reference internal" href="#quaternionmagneticaccelerationandangularratesregister"><code class="docutils literal"><span class="pre">QuaternionMagneticAccelerationAndAngularRatesRegister</span></code></a></li>
+<li><a class="reference internal" href="#referencevectorconfigurationregister"><code class="docutils literal"><span class="pre">ReferenceVectorConfigurationRegister</span></code></a></li>
+<li><a class="reference internal" href="#startupfilterbiasestimateregister"><code class="docutils literal"><span class="pre">StartupFilterBiasEstimateRegister</span></code></a></li>
+<li><a class="reference internal" href="#synchronizationcontrolregister"><code class="docutils literal"><span class="pre">SynchronizationControlRegister</span></code></a></li>
+<li><a class="reference internal" href="#synchronizationstatusregister"><code class="docutils literal"><span class="pre">SynchronizationStatusRegister</span></code></a></li>
+<li><a class="reference internal" href="#velocitycompensationcontrolregister"><code class="docutils literal"><span class="pre">VelocityCompensationControlRegister</span></code></a></li>
+<li><a class="reference internal" href="#velocitycompensationstatusregister"><code class="docutils literal"><span class="pre">VelocityCompensationStatusRegister</span></code></a></li>
+<li><a class="reference internal" href="#vpeaccelerometeradvancedtuningregister"><code class="docutils literal"><span class="pre">VpeAccelerometerAdvancedTuningRegister</span></code></a></li>
+<li><a class="reference internal" href="#vpeaccelerometerbasictuningregister"><code class="docutils literal"><span class="pre">VpeAccelerometerBasicTuningRegister</span></code></a></li>
+<li><a class="reference internal" href="#vpebasiccontrolregister"><code class="docutils literal"><span class="pre">VpeBasicControlRegister</span></code></a></li>
+<li><a class="reference internal" href="#vpegryobasictuningregister"><code class="docutils literal"><span class="pre">VpeGryoBasicTuningRegister</span></code></a></li>
+<li><a class="reference internal" href="#vpemagnetometeradvancedtuningregister"><code class="docutils literal"><span class="pre">VpeMagnetometerAdvancedTuningRegister</span></code></a></li>
+<li><a class="reference internal" href="#vpemagnetometerbasictuningregister"><code class="docutils literal"><span class="pre">VpeMagnetometerBasicTuningRegister</span></code></a></li>
+<li><a class="reference internal" href="#yawpitchrollmagneticaccelerationandangularratesregister"><code class="docutils literal"><span class="pre">YawPitchRollMagneticAccelerationAndAngularRatesRegister</span></code></a></li>
+<li><a class="reference internal" href="#yawpitchrolltruebodyaccelerationandangularratesregister"><code class="docutils literal"><span class="pre">YawPitchRollTrueBodyAccelerationAndAngularRatesRegister</span></code></a></li>
+<li><a class="reference internal" href="#yawpitchrolltrueinertialaccelerationandangularratesregister"><code class="docutils literal"><span class="pre">YawPitchRollTrueInertialAccelerationAndAngularRatesRegister</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ezasyncdata.html"
+                        title="previous chapter">EzAsyncData</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="vnpy_conv.html"
+                        title="next chapter"><code class="docutils literal"><span class="pre">vnpy.conv</span></code> &#8212; Conversion utilities</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/registers.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="vnpy_conv.html" title="vnpy.conv — Conversion utilities"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ezasyncdata.html" title="EzAsyncData"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">VectorNav Python Library 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016 (c) VectorNav Technologies, LLC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
+    </div>
+  </body>
+</html>

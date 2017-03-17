@@ -1,0 +1,55 @@
+VectorNav Python Library
+========================
+
+The VectorNav Python Library (``vnpy``) provides easy access to VectorNav's sensors.
+
+.. toctree::
+    :maxdepth: 1
+
+    version_history
+    known_issues
+    examples
+    vnpyapi
+
+
+Installation
+------------
+Before taking a look at the examples, Python and ``vnpy`` will need to be installed.
+
+1) First may sure you have Python 3.4 or greater installed and callable from the command line.
+
+2) Open a terminal and change directory to ``vnproglib-X.X/python``.
+
+3) For Windows, execute the command ``python setup.py install``. For Linux, execute the command
+   ``sudo python3 setup.py install``.
+
+
+Examples
+--------
+Now that `vnpy` is installed, we recommend going through the examples listed below.
+
+.. toctree::
+    :maxdepth: 1
+
+    getting_started
+    ezasyncdata
+
+
+Modules
+-------
+Documentation links to the ``vnpy`` modules are listed below.
+
+.. toctree::
+    :maxdepth: 1
+
+    vnpyapi
+    registers
+    vnpy_conv
+
+
+Indices and tables
+------------------
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

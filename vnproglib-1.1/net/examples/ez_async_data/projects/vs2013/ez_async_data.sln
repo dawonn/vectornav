@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ez_async_data", "ez_async_data.csproj", "{C55A26BB-AF2D-4A59-8983-D79F72E77228}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lib", "..\..\..\..\src\lib.csproj", "{EC9638D2-8869-4CAE-B5B1-6BB6D4CB8788}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C55A26BB-AF2D-4A59-8983-D79F72E77228}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C55A26BB-AF2D-4A59-8983-D79F72E77228}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C55A26BB-AF2D-4A59-8983-D79F72E77228}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C55A26BB-AF2D-4A59-8983-D79F72E77228}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC9638D2-8869-4CAE-B5B1-6BB6D4CB8788}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC9638D2-8869-4CAE-B5B1-6BB6D4CB8788}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC9638D2-8869-4CAE-B5B1-6BB6D4CB8788}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC9638D2-8869-4CAE-B5B1-6BB6D4CB8788}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,13 @@
+Version History
+===============
+
+This page contains the version history for the VectorNav Python Library.
+
+1.1
+---
+* Renamed method names to be more pythonic.
+* Reorganized into modules to reflect the namespaces used in the C++ library.
+
+1.0
+---
+* Basic sensor connectivity.

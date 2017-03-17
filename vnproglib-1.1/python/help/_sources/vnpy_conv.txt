@@ -1,0 +1,71 @@
+:mod:`vnpy.conv` --- Conversion utilities
+=========================================
+
+.. module:: vnpy.conv
+	:synopsis: Conversion utilities.
+
+The :mod:`vnpy.conv` module provides basic conversion utilities.
+
+
+.. method:: rad2deg(val)
+			deg2rad(val)
+
+	Conversion methods between radians and degrees.
+
+
+.. method:: celsius2fahren(val)
+			fahren2celsius(val)
+			celsius2kelvin(val)
+			kelvin2celsius(val)
+			fahren2kelvin(val)
+			kelvin2fahren(val)
+
+	Conversion methods between Celsius, Fahrenheit and Kelvin.
+
+
+.. method:: ypr_degs2quat(val)
+			ypr_rads2quat(val)
+			ypr_degs2dcm(val)
+			ypr_rads2dcm(val)
+			quat2ypr_degs(val)
+			quat2ypr_rads(val)
+			quat2dcm(val)
+			dcm2ypr_degs(val)
+			dcm2ypr_rads(val)
+			dcm2quat(val)
+
+	Conversion methods between yaw, pitch, roll in degrees (``ypr_degs``) and radians (``ypr_rads``), quaternion
+	(``quat``), and direction cosine matrix (``dcm``).
+
+
+.. method:: velocity_ned_xy2course_over_ground(velocity_x, velocity_y)
+
+	Converts x,y velocity components in NED frame to course over ground.
+
+.. method:: velocity_ned2course_over_ground(velocity_ned)
+
+	Converts velocity in NED frame to course over ground.
+
+.. method:: velocity_ned_xy2speed_over_ground(velocity_x, velocity_y)
+
+	Converts x,y velocity components in NED frame to speed over ground.
+
+.. method:: velocity_ned2speed_over_ground(velocity_ned)
+
+	Converts velocity in NED frame to speed over ground.
+
+.. method:: quat2omega_phi_kappa_rads(val)
+
+	Converts an orientation in quaternion representation to omega, phi, kappa in radians.
+
+.. method:: dcm2omega_phi_kappa_rads(val)
+
+	Converts an orientation in direction cosine matrix representation to omega, phi, kappa in radians.
+
+.. method:: ypr_degs2omega_phi_kappa_rads(val)
+
+	Converts an orientation in yaw, pitch, roll in degrees to omega, phi, kappa in radians.
+
+.. method:: ypr_rads2omega_phi_kappa_rads(val)
+
+	Converts an orientation in yaw, pitch, roll in radians to omega, phi, kappa in radians.

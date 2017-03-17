@@ -1,0 +1,116 @@
+Getting Started
+===============
+
+This page walks through the basics of using ``vnpy`` in a Python console to
+connect and read data from a VectorNav sensor.
+
+1. Open a terminal window and execute the command ``python`` (Windows) or
+   ``python3`` (Linux).
+
+
+2. Import all objects from the ``vnpy`` namespace::
+
+    >>> from vnpy import *
+
+
+3. Create a new ``VnSensor`` object and connect to the sensor, substituting the
+   appropriate connection parameters::
+   
+    >>> s = VnSensor()
+    >>> s.connect('COM1', 115200)
+
+
+4. Verify connectivity with the sensor by reading the model number::
+
+    >>> s.read_model_number()
+    'VN-100T-CR'
+
+  .. note:: All methods that read register values from the sensor start with
+      `read` followed by the register's name as listed in the sensor's user
+      manual.
+
+
+5. Query some orientation data by reading the current values of the `Yaw Pitch Roll` register::
+   
+    >>> s.read_yaw_pitch_roll()
+    vec3f([ -43.977, 13.571, 165.119 ])
+
+   Individual components of the yaw, pitch, roll can be accessed from the :class:`vec3f` object.
+
+    >>> ypr = s.read_yaw_pitch_roll()
+    >>> ypr.x
+    -43.917999267578125
+    >>> ypr.y
+    13.586000442504883
+    >>> ypr.z
+    165.1219940185547
+
+    
+6. Most registers are accessed using structured objects since their are usually
+   many fields in the register. The previous register was structured using a
+   :class:`vec3f` object that holds the 3-components of yaw, pitch and roll. More
+   complex register are futher structured depending on the fields present. Let's
+   see what happens when we query the Yaw, Pitch, Roll, Magnetic, Acceleration,
+   and Angular Rates register::
+   
+    >>> reg = s.read_yaw_pitch_roll_magnetic_acceleration_and_angular_rates()
+    
+  You can easily see the structure of the returned object by performing a
+  ``dir`` on the object::
+   
+    >>> dir(reg)
+    ['__class__', '__del__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq_
+	_', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__'
+	, '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce
+	_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__',
+	'__swig_destroy__', '__weakref__', 'accel', 'gyro', 'mag', 'this', 'thisown', 'y
+	aw_pitch_roll']
+   
+  The displayed listing shows a lot of built-in attributes, but at the end,
+  you can see the fields ``accel``, ``gyro``, ``mag`` and ``yaw_pitch_roll``.
+  Let's see what the values for ``accel`` are::
+   
+	>>> reg.accel
+	vec3f([ 2.247, -2.36, 8.885 ])
+
+    
+7. Let's do a simple reconfiguration of the sensor to illustrate a write operation.
+   The factory default for asynchronous data output frequency is 40 Hz. You can
+   change this setting to 10 Hz by issuing the commands below.
+   
+	>>> s.write_async_data_output_frequency(10)
+	>>> s.read_async_data_output_frequency()
+	10
+    
+8. In the previous step, it is possible to send a single value to set the
+   register because the register has a simple arrangement of two fields with
+   the second field being optional. However, many configuration registers have
+   an assortment of many fields. The preferred way to configure these
+   registers is to first read the existing settings, modifying the desired
+   fields in the returned object, and then sending the object to update the
+   register. The commands below illustrate this sequence for the register
+   VPE Basic Control::
+    
+	>>> reg = s.read_vpe_basic_control()
+	>>> reg.heading_mode
+	1
+	>>> reg.heading_mode == HEADINGMODE_RELATIVE
+	True
+	>>> reg.heading_mode = HEADINGMODE_ABSOLUTE
+	>>> s.write_vpe_basic_control(reg)
+	>>> reg = s.read_vpe_basic_control()
+	>>> reg.heading_mode == HEADINGMODE_ABSOLUTE
+	True
+    
+  This example also illustrates the use of enums for register fields that
+  only accept a certain range of values.
+    
+  If you prefer to not do a read of the existing register values followed by
+  modification of only the fields you wish to change, you can also fully
+  specify the fields of the register by creating a new structure with the
+  desired values. The commands below show how to set the register back to 
+  its original setting::
+    
+	>>> reg = VpeBasicControlRegister(VPEENABLE_ENABLE, HEADINGMODE_RELATIVE, VPEMODE_MODE1, VPEMODE_MODE1)
+	>>> s.write_vpe_basic_control(reg)
+  

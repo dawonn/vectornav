@@ -1,0 +1,36 @@
+EzAsyncData
+===========
+
+This example walks through using the EzAsyncData class to easily access
+asynchronous data from a VectorNav sensor.
+
+
+1. Open a terminal window and execute the command ``python`` (Windows) or
+   ``python3`` (Linux).
+
+
+2. Import all objects from the ``vnpy`` namespace::
+
+   >>> from vnpy import *
+
+
+3. Connect to the VectorNav sensor. This call will return a new EzAsyncData object.
+
+    >>> ez = EzAsyncData.connect('COM1', 115200)
+
+
+4. Grab the latest cached data received from the VectorNav sensor and display the
+   yaw, pitch, roll. Note that any configuration you have done to the sensor may
+   disable the factory default output containing yaw, pitch roll.
+
+    >>> cd = ez.current_data
+    >>> cd.yaw_pitch_roll
+    vec3f([ -43.793, 13.607, 165.152 ])
+
+
+5. ``EzAsyncData`` wraps a ``VnSensor`` object. Low-level register configuration
+   of the VectorNav sensor can be performed via this wrapped object.
+
+    >>> ez.sensor.write_async_data_output_frequency(1)
+    >>> ez.sensor.read_async_data_output_frequency()
+    1

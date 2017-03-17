@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['uart_20ascii_20response_20packet_20parsers',['UART ASCII Response Packet Parsers',['../group__uart_ascii_response_parsers.html',1,'']]],
+  ['uart_20ascii_20asynchronous_20packet_20parsers',['UART ASCII Asynchronous Packet Parsers',['../group__uart_packet_ascii_async_parsers.html',1,'']]],
+  ['uart_20binary_20data_20extractors',['UART Binary Data Extractors',['../group__uart_packet_binary_extractors.html',1,'']]],
+  ['uncertainty',['uncertainty',['../structvn_1_1sensors_1_1_gps_compass_baseline_register.html#ab83967ae5b924071b01cf987a1a009b8',1,'vn::sensors::GpsCompassBaselineRegister::uncertainty()'],['../structvn_1_1sensors_1_1_gps_compass_estimated_baseline_register.html#a910685b4ab47d342d2ef81df9993d801',1,'vn::sensors::GpsCompassEstimatedBaselineRegister::uncertainty()']]],
+  ['unitw',['unitW',['../structvn_1_1math_1_1vec_3_014_00_01_t_01_4.html#a94b0695bcdda5e4e6430914571a259f0',1,'vn::math::vec&lt; 4, T &gt;']]],
+  ['unitx',['unitX',['../structvn_1_1math_1_1vec_3_012_00_01_t_01_4.html#aef6e45bb99d743171cc7a13cf17b2cb6',1,'vn::math::vec&lt; 2, T &gt;::unitX()'],['../structvn_1_1math_1_1vec_3_013_00_01_t_01_4.html#a8791dab55afa8e463c9517c53565f789',1,'vn::math::vec&lt; 3, T &gt;::unitX()'],['../structvn_1_1math_1_1vec_3_014_00_01_t_01_4.html#ad8d844208993c6f1a8f26b413720fdc0',1,'vn::math::vec&lt; 4, T &gt;::unitX()']]],
+  ['unity',['unitY',['../structvn_1_1math_1_1vec_3_012_00_01_t_01_4.html#a2f025e516ad48dde98b61f17a5a63dd2',1,'vn::math::vec&lt; 2, T &gt;::unitY()'],['../structvn_1_1math_1_1vec_3_013_00_01_t_01_4.html#a48b2c5de3e0c8f5737e6011d9630f60c',1,'vn::math::vec&lt; 3, T &gt;::unitY()'],['../structvn_1_1math_1_1vec_3_014_00_01_t_01_4.html#a42813be44037e06b15fdca30dcbba94e',1,'vn::math::vec&lt; 4, T &gt;::unitY()']]],
+  ['unitz',['unitZ',['../structvn_1_1math_1_1vec_3_013_00_01_t_01_4.html#a2aefc47c36500975e7c773df85897fc2',1,'vn::math::vec&lt; 3, T &gt;::unitZ()'],['../structvn_1_1math_1_1vec_3_014_00_01_t_01_4.html#ad799c5c8a5e4c822cb98f3b2e7099837',1,'vn::math::vec&lt; 4, T &gt;::unitZ()']]],
+  ['unknown',['UNKNOWN',['../classvn_1_1xplat_1_1_signal.html#ad02f356a444decae6c3a894a9694173dab9511a1a04f043b9f8f30401baa69a8c',1,'vn::xplat::Signal']]],
+  ['unknown_5ferror',['unknown_error',['../classvn_1_1unknown__error.html',1,'vn']]],
+  ['unregisterasyncpacketreceivedhandler',['unregisterAsyncPacketReceivedHandler',['../group__vn_sensor_events.html#gafa6a1671d3ab64c76fd7de2e27dc6d35',1,'vn::sensors::VnSensor']]],
+  ['unregisterdatareceivedhandler',['unregisterDataReceivedHandler',['../classvn_1_1util_1_1_memory_port.html#af90dbb72dfa7a3fde2e725a3fd3c3b0d',1,'vn::util::MemoryPort::unregisterDataReceivedHandler()'],['../classvn_1_1xplat_1_1_i_port.html#a072ac8e3b8511780d7a735b0a82922a4',1,'vn::xplat::IPort::unregisterDataReceivedHandler()'],['../classvn_1_1xplat_1_1_serial_port.html#a5bcba0ba1a766e25c21bd96a26a38634',1,'vn::xplat::SerialPort::unregisterDataReceivedHandler()']]],
+  ['unregisterdatawrittenhandler',['unregisterDataWrittenHandler',['../classvn_1_1util_1_1_memory_port.html#ae77bf1bcbcb958485fc0c13da1ceaacd',1,'vn::util::MemoryPort']]],
+  ['unregistererrorpacketreceivedhandler',['unregisterErrorPacketReceivedHandler',['../group__vn_sensor_events.html#ga72886b1a60204dd25154201df32a13d1',1,'vn::sensors::VnSensor']]],
+  ['unregisterforsignalnotifications',['UnregisterForSignalNotifications',['../classvn_1_1xplat_1_1_signal.html#a05e832bd0daac441cc0a45cc8ca632f9',1,'vn::xplat::Signal']]],
+  ['unregisterpossiblepacketfoundhandler',['unregisterPossiblePacketFoundHandler',['../classvn_1_1protocol_1_1uart_1_1_packet_finder.html#a1486099e454c462e9fa37b64bbdda89a',1,'vn::protocol::uart::PacketFinder::unregisterPossiblePacketFoundHandler()'],['../group__vn_sensor_events.html#gacb79684c24ecd5d7943ab72a88d607f1',1,'vn::sensors::VnSensor::unregisterPossiblePacketFoundHandler()']]],
+  ['unregisterrawdatareceivedhandler',['unregisterRawDataReceivedHandler',['../group__vn_sensor_events.html#ga0d1ef910c2a3eb533fed0ad89a1fa5d9',1,'vn::sensors::VnSensor']]],
+  ['unregistersignalobserver',['UnregisterSignalObserver',['../classvn_1_1xplat_1_1_signal.html#add16c6efb4a8178a4b72660ea174d2ef',1,'vn::xplat::Signal']]],
+  ['usefoam',['useFoam',['../structvn_1_1sensors_1_1_ins_advanced_configuration_register.html#a702aab72b9272118402a4cf22d2a4b86',1,'vn::sensors::InsAdvancedConfigurationRegister']]],
+  ['usegravitymodel',['useGravityModel',['../structvn_1_1sensors_1_1_reference_vector_configuration_register.html#a59715a8f6f0b3eee59ae0a716a7120c3',1,'vn::sensors::ReferenceVectorConfigurationRegister']]],
+  ['usemag',['useMag',['../structvn_1_1sensors_1_1_ins_advanced_configuration_register.html#a73d546397dcf55f9436aa48b5f4a5043',1,'vn::sensors::InsAdvancedConfigurationRegister']]],
+  ['usemagmodel',['useMagModel',['../structvn_1_1sensors_1_1_reference_vector_configuration_register.html#aa4f319f7bb3c103c1894791ed1062819',1,'vn::sensors::ReferenceVectorConfigurationRegister']]],
+  ['usepres',['usePres',['../structvn_1_1sensors_1_1_ins_advanced_configuration_register.html#a764e2cdce02d41fa244fd33dfa5ec0a7',1,'vn::sensors::InsAdvancedConfigurationRegister']]],
+  ['utilities_2eh',['utilities.h',['../utilities_8h.html',1,'']]]
+];

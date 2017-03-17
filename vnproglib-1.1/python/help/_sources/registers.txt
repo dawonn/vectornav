@@ -1,0 +1,1248 @@
+VectorNav Sensor Registers
+==========================
+
+.. module:: vnpy
+	:noindex:
+
+VectorNav sensors contains a large set of configurable registers with various fields for each one. Listed below are the
+list of register classes that are used for reading and writing to the sensor's registers.
+
+* :class:`AccelerationCompensationRegister`
+* :class:`BinaryOutputRegister`
+* :class:`CalculatedMagnetometerCalibrationRegister`
+* :class:`CommunicationProtocolControlRegister`
+* :class:`DeltaThetaAndDeltaVelocityConfigurationRegister`
+* :class:`DeltaThetaAndDeltaVelocityRegister`
+* :class:`FilterActiveTuningParametersRegister`
+* :class:`FilterBasicControlRegister`
+* :class:`FilterMeasurementsVarianceParametersRegister`
+* :class:`GpsCompassBaselineRegister`
+* :class:`GpsCompassEstimatedBaselineRegister`
+* :class:`GpsConfigurationRegister`
+* :class:`GpsSolutionEcefRegister`
+* :class:`GpsSolutionLlaRegister`
+* :class:`GyroCompensationRegister`
+* :class:`ImuFilteringConfigurationRegister`
+* :class:`ImuMeasurementsRegister`
+* :class:`ImuRateConfigurationRegister`
+* :class:`InsAdvancedConfigurationRegister`
+* :class:`InsBasicConfigurationRegisterVn200`
+* :class:`InsBasicConfigurationRegisterVn300`
+* :class:`InsSolutionEcefRegister`
+* :class:`InsSolutionLlaRegister`
+* :class:`InsStateEcefRegister`
+* :class:`InsStateLlaRegister`
+* :class:`MagneticAccelerationAndAngularRatesRegister`
+* :class:`MagneticAndGravityReferenceVectorsRegister`
+* :class:`MagnetometerCalibrationControlRegister`
+* :class:`MagnetometerCompensationRegister`
+* :class:`QuaternionMagneticAccelerationAndAngularRatesRegister`
+* :class:`ReferenceVectorConfigurationRegister`
+* :class:`StartupFilterBiasEstimateRegister`
+* :class:`SynchronizationControlRegister`
+* :class:`SynchronizationStatusRegister`
+* :class:`VelocityCompensationControlRegister`
+* :class:`VelocityCompensationStatusRegister`
+* :class:`VpeAccelerometerAdvancedTuningRegister`
+* :class:`VpeAccelerometerBasicTuningRegister`
+* :class:`VpeBasicControlRegister`
+* :class:`VpeGryoBasicTuningRegister`
+* :class:`VpeMagnetometerAdvancedTuningRegister`
+* :class:`VpeMagnetometerBasicTuningRegister`
+* :class:`YawPitchRollMagneticAccelerationAndAngularRatesRegister`
+* :class:`YawPitchRollTrueBodyAccelerationAndAngularRatesRegister`
+* :class:`YawPitchRollTrueInertialAccelerationAndAngularRatesRegister`
+
+
+:class:`AccelerationCompensationRegister`
+-----------------------------------------
+
+.. class:: AccelerationCompensationRegister
+
+	Structure representing the Acceleration Compensation register.
+
+Class attributes are:
+
+.. attribute:: AccelerationCompensationRegister.c
+
+	The c field.
+
+.. attribute:: AccelerationCompensationRegister.b
+
+	The b field.
+
+
+:class:`BinaryOutputRegister`
+-----------------------------
+
+.. class:: BinaryOutputRegister
+
+	Structure representing a Binary Output register.
+
+	The field outputGroup available on the sensor's register is not necessary in this structure since all read/writes
+	operations will automatically determine this from the settings for the individual groups within this structure.
+
+Class attributes are:
+
+.. attribute:: BinaryOutputRegister.async_mode
+
+	The asyncMode field.
+
+.. attribute:: BinaryOutputRegister.rate_divisor
+
+	The rateDivisor field.
+
+.. attribute:: BinaryOutputRegister.common_field
+
+	Group 1 (Common)
+
+.. attribute:: BinaryOutputRegister.time_field
+
+	Group 2 (Time)
+
+.. attribute:: BinaryOutputRegister.imu_field
+
+	Group 3 (IMU)
+
+.. attribute:: BinaryOutputRegister.gps_field
+
+	Group 4 (GPS)
+
+.. attribute:: BinaryOutputRegister.attitude_field
+
+	Group 5 (Attitude)
+
+.. attribute:: BinaryOutputRegister.ins_field
+
+	Group 6 (INS)
+
+
+:class:`CalculatedMagnetometerCalibrationRegister`
+--------------------------------------------------
+
+.. class:: CalculatedMagnetometerCalibrationRegister
+
+	Structure representing the Calculated Magnetometer Calibration register.
+
+.. attribute:: CalculatedMagnetometerCalibrationRegister.c
+
+	The c field.
+
+.. attribute:: CalculatedMagnetometerCalibrationRegister.b
+
+	The b field.
+
+
+:class:`CommunicationProtocolControlRegister`
+---------------------------------------------
+
+.. class:: CommunicationProtocolControlRegister
+
+	Structure representing the Communication Protocol Control register.
+
+.. attribute:: CommunicationProtocolControlRegister.serial_count
+
+	The serialCount field.
+
+.. attribute:: CommunicationProtocolControlRegister.serial_status
+
+	The serialStatus field.
+
+.. attribute:: CommunicationProtocolControlRegister.spi_count
+
+	The spiCount field.
+
+.. attribute:: CommunicationProtocolControlRegister.spi_status
+
+	The spiStatus field.
+
+.. attribute:: CommunicationProtocolControlRegister.serial_checksum
+
+	The serialChecksum field.
+
+.. attribute:: CommunicationProtocolControlRegister.spi_checksum
+
+	The spiChecksum field.
+
+.. attribute:: CommunicationProtocolControlRegister.error_mode
+
+	The errorMode field.
+
+
+:class:`DeltaThetaAndDeltaVelocityConfigurationRegister`
+--------------------------------------------------------
+
+.. class:: DeltaThetaAndDeltaVelocityConfigurationRegister
+
+	Structure representing the Delta Theta and Delta Velocity Configuration register.
+
+.. attribute:: DeltaThetaAndDeltaVelocityConfigurationRegister.integration_frame
+
+	The integrationFrame field.
+
+.. attribute:: DeltaThetaAndDeltaVelocityConfigurationRegister.gyro_compensation
+
+	The gyroCompensation field.
+
+.. attribute:: DeltaThetaAndDeltaVelocityConfigurationRegister.accel_compensation
+
+	The accelCompensation field.
+
+
+:class:`DeltaThetaAndDeltaVelocityRegister`
+-------------------------------------------
+
+.. class:: DeltaThetaAndDeltaVelocityRegister
+
+	Structure representing the Delta Theta and Delta Velocity register.
+
+.. attribute:: DeltaThetaAndDeltaVelocityRegister.delta_time
+
+	The deltaTime field.
+
+.. attribute:: DeltaThetaAndDeltaVelocityRegister.delta_theta
+
+	The deltaTheta field.
+
+.. attribute:: DeltaThetaAndDeltaVelocityRegister.delta_velocity
+
+	The deltaVelocity field.
+
+
+:class:`FilterActiveTuningParametersRegister`
+---------------------------------------------
+
+.. class:: FilterActiveTuningParametersRegister
+
+	Structure representing the Filter Active Tuning Parameters register.
+
+.. attribute:: FilterActiveTuningParametersRegister.magnetic_disturbance_gain
+
+	The magneticDisturbanceGain field.
+
+.. attribute:: FilterActiveTuningParametersRegister.acceleration_disturbance_gain
+
+	The accelerationDisturbanceGain field.
+
+.. attribute:: FilterActiveTuningParametersRegister.magnetic_disturbance_memory
+
+	The accelerationDisturbanceGain field.
+
+.. attribute:: FilterActiveTuningParametersRegister.acceleration_disturbance_memory
+
+	The accelerationDisturbanceMemory field.
+
+
+:class:`FilterBasicControlRegister`
+-----------------------------------
+
+.. class:: FilterBasicControlRegister
+
+	Structure representing the Filter Basic Control register.
+
+.. attribute:: FilterBasicControlRegister.mag_mode
+
+	The magMode field.
+
+.. attribute:: FilterBasicControlRegister.extMagMode
+
+	The extMagMode field.
+
+.. attribute:: FilterBasicControlRegister.ext_acc_mode
+
+	The extAccMode field.
+
+.. attribute:: FilterBasicControlRegister.ext_gyro_mode
+
+	The extGyroMode field.
+
+.. attribute:: FilterBasicControlRegister.gyro_limit
+
+	The gyroLimit field.
+
+
+:class:`FilterMeasurementsVarianceParametersRegister`
+-----------------------------------------------------
+
+.. class:: FilterMeasurementsVarianceParametersRegister
+
+	Structure representing the Filter Measurements Variance Parameters register.
+
+.. attribute:: FilterMeasurementsVarianceParametersRegister.angular_walk_variance
+
+	The angularWalkVariance field.
+
+.. attribute:: FilterMeasurementsVarianceParametersRegister.angular_rate_variance
+
+	The angularRateVariance field.
+
+.. attribute:: FilterMeasurementsVarianceParametersRegister.magnetic_variance
+
+	The magneticVariance field.
+
+.. attribute:: FilterMeasurementsVarianceParametersRegister.acceleration_variance
+
+	The accelerationVariance field.
+
+
+:class:`GpsCompassBaselineRegister`
+-----------------------------------
+
+.. class:: GpsCompassBaselineRegister
+
+	Structure representing the GPS Compass Baseline register.
+
+.. attribute:: GpsCompassBaselineRegister.position
+
+	The position field.
+
+.. attribute:: GpsCompassBaselineRegister.uncertainty
+
+	The uncertainty field.
+
+
+:class:`GpsCompassEstimatedBaselineRegister`
+--------------------------------------------
+
+.. class:: GpsCompassEstimatedBaselineRegister
+
+	Structure representing the GPS Compass Estimated Baseline register.
+
+.. attribute:: GpsCompassEstimatedBaselineRegister.est_baseline_used
+
+	The estBaselineUsed field.
+
+.. attribute:: GpsCompassEstimatedBaselineRegister.num_meas
+
+	The numMeas field.
+
+.. attribute:: GpsCompassEstimatedBaselineRegister.position
+
+	The position field.
+
+.. attribute:: GpsCompassEstimatedBaselineRegister.uncertainty
+
+	The uncertainty field.
+
+
+:class:`GpsConfigurationRegister`
+---------------------------------
+
+.. class:: GpsConfigurationRegister
+
+	Structure representing the GPS Configuration register.
+
+.. attribute:: GpsConfigurationRegister.mode
+
+	The mode field.
+
+.. attribute:: GpsConfigurationRegister.pps_source
+
+	The ppsSource field.
+
+
+:class:`GpsSolutionEcefRegister`
+--------------------------------
+
+.. class:: GpsSolutionEcefRegister
+
+	Structure representing the GPS Solution - ECEF register.
+
+.. attribute:: GpsSolutionEcefRegister.tow
+
+	The tow field.
+
+.. attribute:: GpsSolutionEcefRegister.week
+
+	The week field.
+
+.. attribute:: GpsSolutionEcefRegister.gps_fix
+
+	The gpsFix field.
+
+.. attribute:: GpsSolutionEcefRegister.num_sats
+
+	The numSats field.
+
+.. attribute:: GpsSolutionEcefRegister.position
+
+	The position field.
+
+.. attribute:: GpsSolutionEcefRegister.velocity
+
+	The velocity field.
+
+.. attribute:: GpsSolutionEcefRegister.pos_acc
+
+	The posAcc field.
+
+.. attribute:: GpsSolutionEcefRegister.speed_acc
+
+	The speedAcc field.
+
+.. attribute:: GpsSolutionEcefRegister.time_acc
+
+	The timeAcc field.
+
+
+:class:`GpsSolutionLlaRegister`
+-------------------------------
+
+.. class:: GpsSolutionLlaRegister
+
+	Structure representing the GPS Solution - LLA register.
+
+.. attribute:: GpsSolutionLlaRegister.time
+
+	The time field.
+
+.. attribute:: GpsSolutionLlaRegister.week
+
+	The week field.
+
+.. attribute:: GpsSolutionLlaRegister.gps_fix
+
+	The gpsFix field.
+
+.. attribute:: GpsSolutionLlaRegister.num_sats
+
+	The numSats field.
+
+.. attribute:: GpsSolutionLlaRegister.lla
+
+	The lla field.
+
+.. attribute:: GpsSolutionLlaRegister.ned_vel
+
+	The nedVel field.
+
+.. attribute:: GpsSolutionLlaRegister.ned_acc
+
+	The nedAcc field.
+
+.. attribute:: GpsSolutionLlaRegister.speed_acc
+
+	The speedAcc field.
+
+.. attribute:: GpsSolutionLlaRegister.time_acc
+
+	The timeAcc field.
+
+
+:class:`GyroCompensationRegister`
+---------------------------------
+
+.. class:: GyroCompensationRegister
+
+	Structure representing the Gyro Compensation register.
+
+.. attribute:: GyroCompensationRegister.c
+
+	The c field.
+
+.. attribute:: GyroCompensationRegister.b
+
+	The b field.
+
+
+:class:`ImuFilteringConfigurationRegister`
+------------------------------------------
+
+.. class:: ImuFilteringConfigurationRegister
+
+	Structure representing the IMU Filtering Configuration register.
+
+.. attribute:: ImuFilteringConfigurationRegister.mag_window_size
+
+	The magWindowSize field.
+
+.. attribute:: ImuFilteringConfigurationRegister.accel_window_size
+
+	The accelWindowSize field.
+
+.. attribute:: ImuFilteringConfigurationRegister.gyro_window_size
+
+	The gyroWindowSize field.
+
+.. attribute:: ImuFilteringConfigurationRegister.temp_window_size
+
+	The tempWindowSize field.
+
+.. attribute:: ImuFilteringConfigurationRegister.pres_window_size
+
+	The presWindowSize field.
+
+.. attribute:: ImuFilteringConfigurationRegister.mag_filter_mode
+
+	The magFilterMode field.
+
+.. attribute:: ImuFilteringConfigurationRegister.accel_filter_mode
+
+	The accelFilterMode field.
+
+.. attribute:: ImuFilteringConfigurationRegister.gyro_filter_mode
+
+	The gyroFilterMode field.
+
+.. attribute:: ImuFilteringConfigurationRegister.temp_filter_mode
+
+	The tempFilterMode field.
+
+.. attribute:: ImuFilteringConfigurationRegister.pres_filter_mode
+
+	The presFilterMode field.
+
+
+:class:`ImuMeasurementsRegister`
+--------------------------------
+
+.. class:: ImuMeasurementsRegister
+
+	Structure representing the IMU Measurements register.
+
+.. attribute:: ImuMeasurementsRegister.mag
+
+	The mag field.
+
+.. attribute:: ImuMeasurementsRegister.accel
+
+	The accel field.
+
+.. attribute:: ImuMeasurementsRegister.gyro
+
+	The gyro field.
+
+.. attribute:: ImuMeasurementsRegister.temp
+
+	The temp field.
+
+.. attribute:: ImuMeasurementsRegister.pressure
+
+	The pressure field.
+
+
+:class:`ImuRateConfigurationRegister`
+-------------------------------------
+
+.. class:: ImuRateConfigurationRegister
+
+	Structure representing the IMU Rate Configuration register.
+
+.. attribute:: ImuRateConfigurationRegister.imu_rate
+
+	The imuRate field.
+
+.. attribute:: ImuRateConfigurationRegister.nav_divisor
+
+	The navDivisor field.
+
+.. attribute:: ImuRateConfigurationRegister.filter_target_rate
+
+	The filterTargetRate field.
+
+.. attribute:: ImuRateConfigurationRegister.filter_min_rate
+
+	The filterMinRate field.
+
+
+:class:`InsAdvancedConfigurationRegister`
+-----------------------------------------
+
+.. class:: InsAdvancedConfigurationRegister
+
+	Structure representing the INS Advanced Configuration register.
+
+.. attribute:: InsAdvancedConfigurationRegister.use_mag
+
+	The useMag field.
+
+.. attribute:: InsAdvancedConfigurationRegister.use_pres
+
+	The usePres field.
+
+.. attribute:: InsAdvancedConfigurationRegister.pos_att
+
+	The posAtt field.
+
+.. attribute:: InsAdvancedConfigurationRegister.vel_att
+
+	The velAtt field.
+
+.. attribute:: InsAdvancedConfigurationRegister.vel_bias
+
+	The velBias field.
+
+.. attribute:: InsAdvancedConfigurationRegister.use_foam
+
+	The useFoam field.
+
+.. attribute:: InsAdvancedConfigurationRegister.gps_conv_type
+
+	The gpsConvType field.
+
+.. attribute:: InsAdvancedConfigurationRegister.vel_count
+
+	The velCount field.
+
+.. attribute:: InsAdvancedConfigurationRegister.vel_init
+
+	The velInit field.
+
+.. attribute:: InsAdvancedConfigurationRegister.move_origin
+
+	The moveOrigin field.
+
+.. attribute:: InsAdvancedConfigurationRegister.gps_timeout
+
+	The gpsTimeout field.
+
+.. attribute:: InsAdvancedConfigurationRegister.delta_limit_pos
+
+	The deltaLimitPos field.
+
+.. attribute:: InsAdvancedConfigurationRegister.delta_limit_vel
+
+	The deltaLimitVel field.
+
+.. attribute:: InsAdvancedConfigurationRegister.min_pos_uncertainty
+
+	The minPosUncertainty field.
+
+.. attribute:: InsAdvancedConfigurationRegister.min_vel_uncertainty
+
+	The minVelUncertainty field.
+
+
+:class:`InsBasicConfigurationRegisterVn200`
+-------------------------------------------
+
+.. class:: InsBasicConfigurationRegisterVn200
+
+	Structure representing the INS Basic Configuration register for a VN-200 sensor.
+
+.. attribute:: InsBasicConfigurationRegisterVn200.scenario
+
+	The scenario field.
+
+.. attribute:: InsBasicConfigurationRegisterVn200.ahrs_aiding
+
+	The ahrsAiding field.
+
+
+:class:`InsBasicConfigurationRegisterVn300`
+-------------------------------------------
+
+.. class:: InsBasicConfigurationRegisterVn300
+
+	Structure representing the INS Basic Configuration register for a VN-300 sensor.
+
+.. attribute:: InsBasicConfigurationRegisterVn300.scenario
+
+	The scenario field.
+
+.. attribute:: InsBasicConfigurationRegisterVn300.ahrs_aiding
+
+	The ahrsAiding field.
+
+.. attribute:: InsBasicConfigurationRegisterVn300.est_baseline
+
+	The estBaseline field.
+
+
+:class:`InsSolutionEcefRegister`
+--------------------------------
+
+.. class:: InsSolutionEcefRegister
+
+	Structure representing the INS Solution - ECEF register.
+
+.. attribute:: InsSolutionEcefRegister.time
+
+	The time field.
+
+.. attribute:: InsSolutionEcefRegister.week
+
+	The week field.
+
+.. attribute:: InsSolutionEcefRegister.status
+
+	The status field.
+
+.. attribute:: InsSolutionEcefRegister.yaw_pitch_roll
+
+	The yawPitchRoll field.
+
+.. attribute::InsSolutionEcefRegister.position
+
+	The position field.
+
+.. attribute:: InsSolutionEcefRegister.velocity
+
+	The velocity field.
+
+.. attribute:: InsSolutionEcefRegister.att_uncertainty
+
+	The attUncertainty field.
+
+.. attribute:: InsSolutionEcefRegister.pos_uncertainty
+
+	The posUncertainty field.
+
+.. attribute:: InsSolutionEcefRegister.vel_uncertainty
+
+	The velUncertainty field.
+
+
+:class:`InsSolutionLlaRegister`
+-------------------------------
+
+.. class:: InsSolutionLlaRegister
+
+	Structure representing the INS Solution - LLA register.
+
+.. attribute:: InsSolutionLlaRegister.time
+
+	The time field.
+
+.. attribute:: InsSolutionLlaRegister.week
+
+	The week field.
+
+.. attribute:: InsSolutionLlaRegister.status
+
+	The status field.
+
+.. attribute:: InsSolutionLlaRegister.yaw_pitch_roll
+
+	The yawPitchRoll field.
+
+.. attribute:: InsSolutionLlaRegister.position
+
+	The position field.
+
+.. attribute:: InsSolutionLlaRegister.ned_vel
+
+	The nedVel field.
+
+.. attribute:: InsSolutionLlaRegister.att_uncertainty
+
+	The attUncertainty field.
+
+.. attribute:: InsSolutionLlaRegister.pos_uncertainty
+
+	The posUncertainty field.
+
+.. attribute:: InsSolutionLlaRegister.vel_uncertainty
+
+	The velUncertainty field.
+
+
+:class:`InsStateEcefRegister`
+-----------------------------
+
+.. class:: InsStateEcefRegister
+
+	Structure representing the INS State - ECEF register.
+
+
+.. attribute:: InsStateLlaRegister.yaw_pitch_roll
+
+	The yawPitchRoll field.
+
+.. attribute:: InsStateLlaRegister.position
+
+	The position field.
+
+.. attribute:: InsStateLlaRegister.velocity
+
+	The velocity field.
+
+.. attribute:: InsStateLlaRegister.accel
+
+	The accel field.
+
+.. attribute:: InsStateLlaRegister.angular_rate
+
+	The angularRate field.
+
+
+:class:`InsStateLlaRegister`
+----------------------------
+
+.. class:: InsStateLlaRegister
+
+	Structure representing the INS State - LLA register.
+
+.. attribute:: InsStateLlaRegister.yaw_pitch_roll
+
+	The yawPitchRoll field.
+
+.. attribute:: InsStateLlaRegister.position
+
+	The position field.
+
+.. attribute:: InsStateLlaRegister.velocity
+
+	The velocity field.
+
+.. attribute:: InsStateLlaRegister.accel
+
+	The accel field.
+
+.. attribute:: InsStateLlaRegister.angular_rate
+
+	The angularRate field.
+
+
+:class:`MagneticAccelerationAndAngularRatesRegister`
+----------------------------------------------------
+
+.. class:: MagneticAccelerationAndAngularRatesRegister
+
+	Structure representing the Magnetic and Gravity Reference Vectors register.
+
+Class attributes are:
+
+.. attribute:: MagneticAccelerationAndAngularRatesRegister.mag
+
+	The mag field.
+
+.. attribute:: MagneticAccelerationAndAngularRatesRegister.accel
+
+	The accel field.
+
+.. attribute:: MagneticAccelerationAndAngularRatesRegister.gyro
+
+	The gyro field.
+
+
+:class:`MagneticAndGravityReferenceVectorsRegister`
+---------------------------------------------------
+
+.. class:: MagneticAndGravityReferenceVectorsRegister
+
+	Structure representing the Magnetic and Gravity Reference Vectors register.
+
+Class attributes are:
+
+.. attribute:: MagneticAndGravityReferenceVectorsRegister.mag_ref
+
+	The magRef field.
+
+.. attribute:: MagneticAndGravityReferenceVectorsRegister.acc_ref
+
+	The accRef field.
+
+
+:class:`MagnetometerCalibrationControlRegister`
+-----------------------------------------------
+
+.. class:: MagnetometerCalibrationControlRegister
+
+	Structure representing the Magnetometer Calibration Control register.
+
+.. attribute:: MagnetometerCalibrationControlRegister.hsi_mode
+
+	The hsiMode field.
+
+.. attribute:: MagnetometerCalibrationControlRegister.hsi_output
+
+	The hsiOutput field.
+
+.. attribute:: MagnetometerCalibrationControlRegister.converge_rate
+
+	The convergeRate field.
+
+
+:class:`MagnetometerCompensationRegister`
+-----------------------------------------
+
+.. class:: MagnetometerCompensationRegister
+
+	Structure representing the Magnetometer Compensation register.
+
+.. attribute:: MagnetometerCompensationRegister.c
+
+	The c field.
+
+.. attribute:: MagnetometerCompensationRegister.b
+
+	The b field.
+
+
+:class:`QuaternionMagneticAccelerationAndAngularRatesRegister`
+--------------------------------------------------------------
+
+.. class:: QuaternionMagneticAccelerationAndAngularRatesRegister
+
+	Structure representing the Quaternion, Magnetic, Acceleration and Angular Rates register.
+
+Class attributes are:
+
+.. attribute:: QuaternionMagneticAccelerationAndAngularRatesRegister.quat
+
+	The quat field.
+
+.. attribute:: QuaternionMagneticAccelerationAndAngularRatesRegister.mag
+
+	The mag field.
+
+.. attribute:: QuaternionMagneticAccelerationAndAngularRatesRegister.accel
+
+	The accel field.
+
+.. attribute:: QuaternionMagneticAccelerationAndAngularRatesRegister.gyro
+
+	The gyro field.
+
+
+:class:`ReferenceVectorConfigurationRegister`
+---------------------------------------------
+
+.. class:: ReferenceVectorConfigurationRegister
+
+	Structure representing the Reference Vector Configuration register.
+
+.. attribute:: ReferenceVectorConfigurationRegister.use_mag_model
+
+	The useMagModel field.
+
+.. attribute:: ReferenceVectorConfigurationRegister.use_gravity_model
+
+	The useGravityModel field.
+
+.. attribute:: ReferenceVectorConfigurationRegister.recalc_threshold
+
+	The recaldThreshold field.
+
+.. attribute:: ReferenceVectorConfigurationRegister.year
+
+	The year field.
+
+.. attribute:: ReferenceVectorConfigurationRegister.position
+
+	The position field.
+
+
+:class:`StartupFilterBiasEstimateRegister`
+------------------------------------------
+
+.. class:: StartupFilterBiasEstimateRegister
+
+	Structure representing the Startup Filter Bias Estimate register.
+
+.. attribute:: StartupFilterBiasEstimateRegister.gyro_bias
+
+	The gyroBias field.
+
+.. attribute:: StartupFilterBiasEstimateRegister.accel_bias
+
+	The accelBias field.
+
+.. attribute:: StartupFilterBiasEstimateRegister.pressure_bias
+
+	The pressureBias field.
+
+
+:class:`SynchronizationControlRegister`
+---------------------------------------
+
+.. class:: SynchronizationControlRegister
+
+	Structure representing the Synchronization Control register.
+
+.. attribute:: SynchronizationControlRegister.sync_in_mode
+
+	The syncInMode field.
+
+.. attribute:: SynchronizationControlRegister.sync_in_edge
+
+	The syncInEdge field.
+
+.. attribute:: SynchronizationControlRegister.sync_in_skip_factor
+
+	The syncInSkipFactor field.
+
+.. attribute:: SynchronizationControlRegister.sync_out_mode
+
+	The syncOutMode field.
+
+.. attribute:: SynchronizationControlRegister.sync_out_polarity
+
+	The syncOutPolarity field.
+
+.. attribute:: SynchronizationControlRegister.sync_out_skip_factor
+
+	The syncOutSkipFactor field.
+
+.. attribute:: SynchronizationControlRegister.sync_out_pulse_width
+
+	The syncOutPulseWidth field.
+
+
+:class:`SynchronizationStatusRegister`
+--------------------------------------
+
+.. class:: SynchronizationStatusRegister
+
+	Structure representing the Synchronization Status register.
+
+.. attribute:: SynchronizationStatusRegister.sync_in_count
+
+	The syncInCount field.
+
+.. attribute:: SynchronizationStatusRegister.sync_in_time
+
+	The syncInTime field.
+
+.. attribute:: SynchronizationStatusRegister.sync_out_count
+
+	The syncOutCount field.
+
+
+:class:`VelocityCompensationControlRegister`
+--------------------------------------------
+
+.. class:: VelocityCompensationControlRegister
+
+	Structure representing the Velocity Compensation Control register.
+
+.. attribute:: VelocityCompensationControlRegister.mode
+
+	The mode field.
+
+.. attribute:: VelocityCompensationControlRegister.velocity_tuning
+
+	The velocityTuning field.
+
+.. attribute:: VelocityCompensationControlRegister.rate_tuning
+
+	The rateTuning field.
+
+
+:class:`VelocityCompensationStatusRegister`
+-------------------------------------------
+
+.. class:: VelocityCompensationStatusRegister
+
+	Structure representing the Velocity Compensation Status register.
+
+.. attribute:: VelocityCompensationStatusRegister.x
+
+	The x field.
+
+.. attribute:: VelocityCompensationStatusRegister.x_dot
+
+	The xDot field.
+
+.. attribute:: VelocityCompensationStatusRegister.accel_offset
+
+	The accelOffset field.
+
+.. attribute:: VelocityCompensationStatusRegister.omega
+
+	The omega field.
+
+
+:class:`VpeAccelerometerAdvancedTuningRegister`
+------------------------------------------------
+
+.. class:: VpeAccelerometerAdvancedTuningRegister
+
+	Structure representing the VPE Accelerometer Advanced Tuning register.
+
+.. attribute:: VpeAccelerometerAdvancedTuningRegister.min_filtering
+
+	The minFiltering field.
+
+.. attribute:: VpeAccelerometerAdvancedTuningRegister.max_filtering
+
+	The maxFiltering field.
+
+.. attribute:: VpeAccelerometerAdvancedTuningRegister.max_adapt_rate
+
+	The maxAdaptRate field.
+
+.. attribute:: VpeAccelerometerAdvancedTuningRegister.disturbance_window
+
+	The disturbanceWindow field.
+
+.. attribute:: VpeAccelerometerAdvancedTuningRegister.max_tuning
+
+	The maxTuning field.
+
+
+:class:`VpeAccelerometerBasicTuningRegister`
+---------------------------------------------
+
+.. class:: VpeAccelerometerBasicTuningRegister
+
+	Structure representing the VPE Accelerometer Basic Tuning register.
+
+.. attribute:: VpeAccelerometerBasicTuningRegister.base_tuning
+
+	The baseTuning field.
+
+.. attribute:: VpeAccelerometerBasicTuningRegister.adaptive_tuning
+
+	The adaptiveTuning field.
+
+.. attribute:: VpeAccelerometerBasicTuningRegister.adaptive_filtering
+
+	The adaptiveFiltering field.
+
+
+:class:`VpeBasicControlRegister`
+---------------------------------
+
+.. class:: VpeBasicControlRegister
+
+	Structure representing the VPE Basic Control register.
+
+.. attribute:: VpeBasicControlRegister.enable
+
+	The enable field.
+
+.. attribute:: VpeBasicControlRegister.heading_mode
+
+	The headingMode field.
+
+.. attribute:: VpeBasicControlRegister.filtering_mode
+
+	The filteringMode field.
+
+.. attribute:: VpeBasicControlRegister.tuning_mode
+
+	The tuningMode field.
+
+
+:class:`VpeGryoBasicTuningRegister`
+------------------------------------
+
+.. class:: VpeGryoBasicTuningRegister
+
+	Structure representing the VPE Gryo Basic Tuning register.
+
+.. attribute:: VpeGryoBasicTuningRegister.angular_walk_variance
+
+	The angularWalkVariance field.
+
+.. attribute:: VpeGryoBasicTuningRegister.base_tuning
+
+	The baseTuning field.
+
+.. attribute:: VpeGryoBasicTuningRegister.adaptive_tuning
+
+	The adaptiveTuning field.
+
+
+:class:`VpeMagnetometerAdvancedTuningRegister`
+-----------------------------------------------
+
+.. class:: VpeMagnetometerAdvancedTuningRegister
+
+	Structure representing the VPE Magnetometer Advanced Tuning register.
+
+.. attribute:: VpeMagnetometerAdvancedTuningRegister.min_filtering
+
+	The minFiltering field.
+
+.. attribute:: VpeMagnetometerAdvancedTuningRegister.max_filtering
+
+	The maxFiltering field.
+
+.. attribute:: VpeMagnetometerAdvancedTuningRegister.max_adapt_rate
+
+	The maxAdaptRate field.
+
+.. attribute:: VpeMagnetometerAdvancedTuningRegister.disturbance_window
+
+	The disturbanceWindow field.
+
+.. attribute:: VpeMagnetometerAdvancedTuningRegister.max_tuning
+
+	The maxTuning field.
+
+
+:class:`VpeMagnetometerBasicTuningRegister`
+--------------------------------------------
+
+.. class:: VpeMagnetometerBasicTuningRegister
+
+	Structure representing the VPE Magnetometer Basic Tuning register.
+
+.. attribute:: VpeMagnetometerBasicTuningRegister.base_tuning
+
+	The baseTuning field.
+
+.. attribute:: VpeMagnetometerBasicTuningRegister.adaptive_tuning
+
+	The adaptiveTuning field.
+
+.. attribute:: VpeMagnetometerBasicTuningRegister.adaptive_filtering
+
+	The adaptiveFiltering field.
+
+
+:class:`YawPitchRollMagneticAccelerationAndAngularRatesRegister`
+----------------------------------------------------------------
+
+.. class:: YawPitchRollMagneticAccelerationAndAngularRatesRegister
+
+	Structure representing the Yaw, Pitch, Roll, Magnetic, Acceleration and Angular Rates register.
+
+.. attribute:: YawPitchRollMagneticAccelerationAndAngularRatesRegister.yaw_pitch_roll
+
+	The yawPitchRoll field.
+
+.. attribute:: YawPitchRollMagneticAccelerationAndAngularRatesRegister.mag
+
+	The mag field.
+
+.. attribute:: YawPitchRollMagneticAccelerationAndAngularRatesRegister.accel
+
+	The accel field.
+
+.. attribute:: YawPitchRollMagneticAccelerationAndAngularRatesRegister.gyro
+
+	The gyro field.
+
+
+:class:`YawPitchRollTrueBodyAccelerationAndAngularRatesRegister`
+----------------------------------------------------------------
+
+.. class:: YawPitchRollTrueBodyAccelerationAndAngularRatesRegister
+
+	Structure representing the Yaw, Pitch, Roll, True Body Acceleration and Angular Rates register.
+
+.. attribute:: YawPitchRollTrueBodyAccelerationAndAngularRatesRegister.yaw_pitch_roll
+
+	The yawPitchRoll field.
+
+.. attribute:: YawPitchRollTrueBodyAccelerationAndAngularRatesRegister.body_accel
+
+	The bodyAccel field.
+
+.. attribute:: YawPitchRollTrueBodyAccelerationAndAngularRatesRegister.gyro
+
+	The gyro field.
+
+
+:class:`YawPitchRollTrueInertialAccelerationAndAngularRatesRegister`
+--------------------------------------------------------------------
+
+.. class:: YawPitchRollTrueInertialAccelerationAndAngularRatesRegister
+
+	Structure representing the Yaw, Pitch, Roll, True Inertial Acceleration and Angular Rates register.
+
+.. attribute:: YawPitchRollTrueInertialAccelerationAndAngularRatesRegister.yaw_pitch_roll
+
+	The yawPitchRoll field.
+
+.. attribute:: YawPitchRollTrueInertialAccelerationAndAngularRatesRegister.inertial_accel
+
+	The inertialAccel field.
+
+.. attribute:: YawPitchRollTrueInertialAccelerationAndAngularRatesRegister.gyro
+
+	The gyro field.

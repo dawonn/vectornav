@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>vnpy.conv — Conversion utilities &mdash; VectorNav Python Library 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="VectorNav Python Library 0.1 documentation" href="index.html" />
+    <link rel="prev" title="VectorNav Sensor Registers" href="registers.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="registers.html" title="VectorNav Sensor Registers"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">VectorNav Python Library 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-vnpy.conv">
+<span id="vnpy-conv-conversion-utilities"></span><h1><a class="reference internal" href="#module-vnpy.conv" title="vnpy.conv: Conversion utilities."><code class="xref py py-mod docutils literal"><span class="pre">vnpy.conv</span></code></a> &#8212; Conversion utilities<a class="headerlink" href="#module-vnpy.conv" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#module-vnpy.conv" title="vnpy.conv: Conversion utilities."><code class="xref py py-mod docutils literal"><span class="pre">vnpy.conv</span></code></a> module provides basic conversion utilities.</p>
+<dl class="method">
+<dt id="vnpy.conv.rad2deg">
+<code class="descclassname">vnpy.conv.</code><code class="descname">rad2deg</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.rad2deg" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.deg2rad">
+<code class="descclassname">vnpy.conv.</code><code class="descname">deg2rad</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.deg2rad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conversion methods between radians and degrees.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.conv.celsius2fahren">
+<code class="descclassname">vnpy.conv.</code><code class="descname">celsius2fahren</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.celsius2fahren" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.fahren2celsius">
+<code class="descclassname">vnpy.conv.</code><code class="descname">fahren2celsius</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.fahren2celsius" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.celsius2kelvin">
+<code class="descclassname">vnpy.conv.</code><code class="descname">celsius2kelvin</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.celsius2kelvin" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.kelvin2celsius">
+<code class="descclassname">vnpy.conv.</code><code class="descname">kelvin2celsius</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.kelvin2celsius" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.fahren2kelvin">
+<code class="descclassname">vnpy.conv.</code><code class="descname">fahren2kelvin</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.fahren2kelvin" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.kelvin2fahren">
+<code class="descclassname">vnpy.conv.</code><code class="descname">kelvin2fahren</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.kelvin2fahren" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conversion methods between Celsius, Fahrenheit and Kelvin.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.conv.ypr_degs2quat">
+<code class="descclassname">vnpy.conv.</code><code class="descname">ypr_degs2quat</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.ypr_degs2quat" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.ypr_rads2quat">
+<code class="descclassname">vnpy.conv.</code><code class="descname">ypr_rads2quat</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.ypr_rads2quat" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.ypr_degs2dcm">
+<code class="descclassname">vnpy.conv.</code><code class="descname">ypr_degs2dcm</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.ypr_degs2dcm" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.ypr_rads2dcm">
+<code class="descclassname">vnpy.conv.</code><code class="descname">ypr_rads2dcm</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.ypr_rads2dcm" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.quat2ypr_degs">
+<code class="descclassname">vnpy.conv.</code><code class="descname">quat2ypr_degs</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.quat2ypr_degs" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.quat2ypr_rads">
+<code class="descclassname">vnpy.conv.</code><code class="descname">quat2ypr_rads</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.quat2ypr_rads" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.quat2dcm">
+<code class="descclassname">vnpy.conv.</code><code class="descname">quat2dcm</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.quat2dcm" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.dcm2ypr_degs">
+<code class="descclassname">vnpy.conv.</code><code class="descname">dcm2ypr_degs</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.dcm2ypr_degs" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.dcm2ypr_rads">
+<code class="descclassname">vnpy.conv.</code><code class="descname">dcm2ypr_rads</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.dcm2ypr_rads" title="Permalink to this definition">¶</a></dt>
+<dt id="vnpy.conv.dcm2quat">
+<code class="descclassname">vnpy.conv.</code><code class="descname">dcm2quat</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.dcm2quat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conversion methods between yaw, pitch, roll in degrees (<code class="docutils literal"><span class="pre">ypr_degs</span></code>) and radians (<code class="docutils literal"><span class="pre">ypr_rads</span></code>), quaternion
+(<code class="docutils literal"><span class="pre">quat</span></code>), and direction cosine matrix (<code class="docutils literal"><span class="pre">dcm</span></code>).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.conv.velocity_ned_xy2course_over_ground">
+<code class="descclassname">vnpy.conv.</code><code class="descname">velocity_ned_xy2course_over_ground</code><span class="sig-paren">(</span><em>velocity_x</em>, <em>velocity_y</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.velocity_ned_xy2course_over_ground" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts x,y velocity components in NED frame to course over ground.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.conv.velocity_ned2course_over_ground">
+<code class="descclassname">vnpy.conv.</code><code class="descname">velocity_ned2course_over_ground</code><span class="sig-paren">(</span><em>velocity_ned</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.velocity_ned2course_over_ground" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts velocity in NED frame to course over ground.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.conv.velocity_ned_xy2speed_over_ground">
+<code class="descclassname">vnpy.conv.</code><code class="descname">velocity_ned_xy2speed_over_ground</code><span class="sig-paren">(</span><em>velocity_x</em>, <em>velocity_y</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.velocity_ned_xy2speed_over_ground" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts x,y velocity components in NED frame to speed over ground.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.conv.velocity_ned2speed_over_ground">
+<code class="descclassname">vnpy.conv.</code><code class="descname">velocity_ned2speed_over_ground</code><span class="sig-paren">(</span><em>velocity_ned</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.velocity_ned2speed_over_ground" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts velocity in NED frame to speed over ground.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.conv.quat2omega_phi_kappa_rads">
+<code class="descclassname">vnpy.conv.</code><code class="descname">quat2omega_phi_kappa_rads</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.quat2omega_phi_kappa_rads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an orientation in quaternion representation to omega, phi, kappa in radians.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.conv.dcm2omega_phi_kappa_rads">
+<code class="descclassname">vnpy.conv.</code><code class="descname">dcm2omega_phi_kappa_rads</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.dcm2omega_phi_kappa_rads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an orientation in direction cosine matrix representation to omega, phi, kappa in radians.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.conv.ypr_degs2omega_phi_kappa_rads">
+<code class="descclassname">vnpy.conv.</code><code class="descname">ypr_degs2omega_phi_kappa_rads</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.ypr_degs2omega_phi_kappa_rads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an orientation in yaw, pitch, roll in degrees to omega, phi, kappa in radians.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.conv.ypr_rads2omega_phi_kappa_rads">
+<code class="descclassname">vnpy.conv.</code><code class="descname">ypr_rads2omega_phi_kappa_rads</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.conv.ypr_rads2omega_phi_kappa_rads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an orientation in yaw, pitch, roll in radians to omega, phi, kappa in radians.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="registers.html"
+                        title="previous chapter">VectorNav Sensor Registers</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/vnpy_conv.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="registers.html" title="VectorNav Sensor Registers"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">VectorNav Python Library 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016 (c) VectorNav Technologies, LLC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
+    </div>
+  </body>
+</html>

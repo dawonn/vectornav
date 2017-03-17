@@ -1,0 +1,241 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting Started &mdash; VectorNav Python Library 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="VectorNav Python Library 0.1 documentation" href="index.html" />
+    <link rel="next" title="EzAsyncData" href="ezasyncdata.html" />
+    <link rel="prev" title="Library API Documentation" href="vnpyapi.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ezasyncdata.html" title="EzAsyncData"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="vnpyapi.html" title="Library API Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">VectorNav Python Library 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>This page walks through the basics of using <code class="docutils literal"><span class="pre">vnpy</span></code> in a Python console to
+connect and read data from a VectorNav sensor.</p>
+<ol class="arabic">
+<li><p class="first">Open a terminal window and execute the command <code class="docutils literal"><span class="pre">python</span></code> (Windows) or
+<code class="docutils literal"><span class="pre">python3</span></code> (Linux).</p>
+</li>
+<li><p class="first">Import all objects from the <code class="docutils literal"><span class="pre">vnpy</span></code> namespace:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">vnpy</span> <span class="k">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Create a new <code class="docutils literal"><span class="pre">VnSensor</span></code> object and connect to the sensor, substituting the
+appropriate connection parameters:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">VnSensor</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;COM1&#39;</span><span class="p">,</span> <span class="mi">115200</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Verify connectivity with the sensor by reading the model number:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">read_model_number</span><span class="p">()</span>
+<span class="go">&#39;VN-100T-CR&#39;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<blockquote>
+<div><div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All methods that read register values from the sensor start with
+<cite>read</cite> followed by the register&#8217;s name as listed in the sensor&#8217;s user
+manual.</p>
+</div>
+</div></blockquote>
+<ol class="arabic" start="5">
+<li><p class="first">Query some orientation data by reading the current values of the <cite>Yaw Pitch Roll</cite> register:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">read_yaw_pitch_roll</span><span class="p">()</span>
+<span class="go">vec3f([ -43.977, 13.571, 165.119 ])</span>
+</pre></div>
+</div>
+<p>Individual components of the yaw, pitch, roll can be accessed from the <code class="xref py py-class docutils literal"><span class="pre">vec3f</span></code> object.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ypr</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">read_yaw_pitch_roll</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ypr</span><span class="o">.</span><span class="n">x</span>
+<span class="go">-43.917999267578125</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ypr</span><span class="o">.</span><span class="n">y</span>
+<span class="go">13.586000442504883</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ypr</span><span class="o">.</span><span class="n">z</span>
+<span class="go">165.1219940185547</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Most registers are accessed using structured objects since their are usually
+many fields in the register. The previous register was structured using a
+<code class="xref py py-class docutils literal"><span class="pre">vec3f</span></code> object that holds the 3-components of yaw, pitch and roll. More
+complex register are futher structured depending on the fields present. Let&#8217;s
+see what happens when we query the Yaw, Pitch, Roll, Magnetic, Acceleration,
+and Angular Rates register:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">read_yaw_pitch_roll_magnetic_acceleration_and_angular_rates</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<blockquote>
+<div><p>You can easily see the structure of the returned object by performing a
+<code class="docutils literal"><span class="pre">dir</span></code> on the object:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">dir</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
+<span class="go">[&#39;__class__&#39;, &#39;__del__&#39;, &#39;__delattr__&#39;, &#39;__dict__&#39;, &#39;__dir__&#39;, &#39;__doc__&#39;, &#39;__eq_</span>
+<span class="go">    _&#39;, &#39;__format__&#39;, &#39;__ge__&#39;, &#39;__getattribute__&#39;, &#39;__gt__&#39;, &#39;__hash__&#39;, &#39;__init__&#39;</span>
+<span class="go">    , &#39;__le__&#39;, &#39;__lt__&#39;, &#39;__module__&#39;, &#39;__ne__&#39;, &#39;__new__&#39;, &#39;__reduce__&#39;, &#39;__reduce</span>
+<span class="go">    _ex__&#39;, &#39;__repr__&#39;, &#39;__setattr__&#39;, &#39;__sizeof__&#39;, &#39;__str__&#39;, &#39;__subclasshook__&#39;,</span>
+<span class="go">    &#39;__swig_destroy__&#39;, &#39;__weakref__&#39;, &#39;accel&#39;, &#39;gyro&#39;, &#39;mag&#39;, &#39;this&#39;, &#39;thisown&#39;, &#39;y</span>
+<span class="go">    aw_pitch_roll&#39;]</span>
+</pre></div>
+</div>
+<p>The displayed listing shows a lot of built-in attributes, but at the end,
+you can see the fields <code class="docutils literal"><span class="pre">accel</span></code>, <code class="docutils literal"><span class="pre">gyro</span></code>, <code class="docutils literal"><span class="pre">mag</span></code> and <code class="docutils literal"><span class="pre">yaw_pitch_roll</span></code>.
+Let&#8217;s see what the values for <code class="docutils literal"><span class="pre">accel</span></code> are:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">accel</span>
+<span class="go">vec3f([ 2.247, -2.36, 8.885 ])</span>
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic" start="7">
+<li><p class="first">Let&#8217;s do a simple reconfiguration of the sensor to illustrate a write operation.
+The factory default for asynchronous data output frequency is 40 Hz. You can
+change this setting to 10 Hz by issuing the commands below.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">write_async_data_output_frequency</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">read_async_data_output_frequency</span><span class="p">()</span>
+<span class="go">10</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">In the previous step, it is possible to send a single value to set the
+register because the register has a simple arrangement of two fields with
+the second field being optional. However, many configuration registers have
+an assortment of many fields. The preferred way to configure these
+registers is to first read the existing settings, modifying the desired
+fields in the returned object, and then sending the object to update the
+register. The commands below illustrate this sequence for the register
+VPE Basic Control:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">read_vpe_basic_control</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">heading_mode</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">heading_mode</span> <span class="o">==</span> <span class="n">HEADINGMODE_RELATIVE</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">heading_mode</span> <span class="o">=</span> <span class="n">HEADINGMODE_ABSOLUTE</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">write_vpe_basic_control</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">read_vpe_basic_control</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">heading_mode</span> <span class="o">==</span> <span class="n">HEADINGMODE_ABSOLUTE</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<blockquote>
+<div><p>This example also illustrates the use of enums for register fields that
+only accept a certain range of values.</p>
+<p>If you prefer to not do a read of the existing register values followed by
+modification of only the fields you wish to change, you can also fully
+specify the fields of the register by creating a new structure with the
+desired values. The commands below show how to set the register back to
+its original setting:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span> <span class="o">=</span> <span class="n">VpeBasicControlRegister</span><span class="p">(</span><span class="n">VPEENABLE_ENABLE</span><span class="p">,</span> <span class="n">HEADINGMODE_RELATIVE</span><span class="p">,</span> <span class="n">VPEMODE_MODE1</span><span class="p">,</span> <span class="n">VPEMODE_MODE1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">write_vpe_basic_control</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="vnpyapi.html"
+                        title="previous chapter">Library API Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ezasyncdata.html"
+                        title="next chapter">EzAsyncData</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/getting_started.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ezasyncdata.html" title="EzAsyncData"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="vnpyapi.html" title="Library API Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">VectorNav Python Library 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016 (c) VectorNav Technologies, LLC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
+    </div>
+  </body>
+</html>

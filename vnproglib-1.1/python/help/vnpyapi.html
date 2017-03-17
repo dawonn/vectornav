@@ -1,0 +1,2140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Library API Documentation &mdash; VectorNav Python Library 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="VectorNav Python Library 0.1 documentation" href="index.html" />
+    <link rel="next" title="Getting Started" href="getting_started.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="examples.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="getting_started.html" title="Getting Started"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="&lt;no title&gt;"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">VectorNav Python Library 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-vnpy">
+<span id="library-api-documentation"></span><h1>Library API Documentation<a class="headerlink" href="#module-vnpy" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="available-types">
+<h2>Available Types<a class="headerlink" href="#available-types" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">CompositeData</code></dt>
+<dd><p>Mega class that consolidates all data output types available from VectorNav sensors.</p>
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">EzAsyncData</code></dt>
+<dd><p>Wraps class <a class="reference internal" href="#vnpy.VnSensor" title="vnpy.VnSensor"><code class="xref py py-class docutils literal"><span class="pre">VnSensor</span></code></a> and provides easy methods for accessing the sensor&#8217;s asynchronous data messages.</p>
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">VnSensor</code></dt>
+<dd><p>Base class for interfacing with VectorNav sensors.</p>
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">Attitude</code></dt>
+<dd><p>Represents attitude of an object that may be represented in either yaw, pitch, roll, quaternion, or direction
+cosine matrix.</p>
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">Packet</code></dt>
+<dd><p>Wraps a VectorNav UART packet with associated tools for parsing.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="compositedata-objects">
+<h2><a class="reference internal" href="#vnpy.CompositeData" title="vnpy.CompositeData"><code class="xref py py-class docutils literal"><span class="pre">CompositeData</span></code></a> Objects<a class="headerlink" href="#compositedata-objects" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.CompositeData">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">CompositeData</code><a class="headerlink" href="#vnpy.CompositeData" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is able to hold all data output types from VectorNav sensors.</p>
+</dd></dl>
+
+<p>Class attributes are:</p>
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_any_attitude">
+<code class="descclassname">CompositeData.</code><code class="descname">has_any_attitude</code><a class="headerlink" href="#vnpy.CompositeData.has_any_attitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.any_attitude" title="vnpy.CompositeData.any_attitude"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.any_attitude</span></code></a> contains any data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.any_attitude">
+<code class="descclassname">CompositeData.</code><code class="descname">any_attitude</code><a class="headerlink" href="#vnpy.CompositeData.any_attitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets and converts the latest attitude data regardless of the received underlying type. Based on which type of
+attitude data that was last received and processed, this value may be based on either received yaw, pitch, roll,
+quaternion, or direction cosine matrix data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_yaw_pitch_roll">
+<code class="descclassname">CompositeData.</code><code class="descname">has_yaw_pitch_roll</code><a class="headerlink" href="#vnpy.CompositeData.has_yaw_pitch_roll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.yaw_pitch_roll" title="vnpy.CompositeData.yaw_pitch_roll"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.yaw_pitch_roll</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.yaw_pitch_roll">
+<code class="descclassname">CompositeData.</code><code class="descname">yaw_pitch_roll</code><a class="headerlink" href="#vnpy.CompositeData.yaw_pitch_roll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yaw, pitch, roll data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_quaternion">
+<code class="descclassname">CompositeData.</code><code class="descname">has_quaternion</code><a class="headerlink" href="#vnpy.CompositeData.has_quaternion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.quaternion" title="vnpy.CompositeData.quaternion"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.quaternion</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.quaternion">
+<code class="descclassname">CompositeData.</code><code class="descname">quaternion</code><a class="headerlink" href="#vnpy.CompositeData.quaternion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quaternion data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_direction_cosine_matrix">
+<code class="descclassname">CompositeData.</code><code class="descname">has_direction_cosine_matrix</code><a class="headerlink" href="#vnpy.CompositeData.has_direction_cosine_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.direction_cosine_matrix" title="vnpy.CompositeData.direction_cosine_matrix"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.direction_cosine_matrix</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.direction_cosine_matrix">
+<code class="descclassname">CompositeData.</code><code class="descname">direction_cosine_matrix</code><a class="headerlink" href="#vnpy.CompositeData.direction_cosine_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Direction cosine matrix data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_any_magnetic">
+<code class="descclassname">CompositeData.</code><code class="descname">has_any_magnetic</code><a class="headerlink" href="#vnpy.CompositeData.has_any_magnetic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.any_magnetic" title="vnpy.CompositeData.any_magnetic"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.any_magnetic</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.any_magnetic">
+<code class="descclassname">CompositeData.</code><code class="descname">any_magnetic</code><a class="headerlink" href="#vnpy.CompositeData.any_magnetic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the latest magnetic data regardless of the received underlying type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_magnetic">
+<code class="descclassname">CompositeData.</code><code class="descname">has_magnetic</code><a class="headerlink" href="#vnpy.CompositeData.has_magnetic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.magnetic" title="vnpy.CompositeData.magnetic"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.magnetic</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.magnetic">
+<code class="descclassname">CompositeData.</code><code class="descname">magnetic</code><a class="headerlink" href="#vnpy.CompositeData.magnetic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Magnetic data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_magnetic_uncompensated">
+<code class="descclassname">CompositeData.</code><code class="descname">has_magnetic_uncompensated</code><a class="headerlink" href="#vnpy.CompositeData.has_magnetic_uncompensated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.magnetic_uncompensated" title="vnpy.CompositeData.magnetic_uncompensated"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.magnetic_uncompensated</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.magnetic_uncompensated">
+<code class="descclassname">CompositeData.</code><code class="descname">magnetic_uncompensated</code><a class="headerlink" href="#vnpy.CompositeData.magnetic_uncompensated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Magnetic uncompensated data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_magnetic_ned">
+<code class="descclassname">CompositeData.</code><code class="descname">has_magnetic_ned</code><a class="headerlink" href="#vnpy.CompositeData.has_magnetic_ned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.magnetic_ned" title="vnpy.CompositeData.magnetic_ned"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.magnetic_ned</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.magnetic_ned">
+<code class="descclassname">CompositeData.</code><code class="descname">magnetic_ned</code><a class="headerlink" href="#vnpy.CompositeData.magnetic_ned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Magnetic NED data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_magnetic_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">has_magnetic_ecef</code><a class="headerlink" href="#vnpy.CompositeData.has_magnetic_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.magnetic_ecef" title="vnpy.CompositeData.magnetic_ecef"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.magnetic_ecef</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.magnetic_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">magnetic_ecef</code><a class="headerlink" href="#vnpy.CompositeData.magnetic_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Magnetic ECEF data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_any_acceleration">
+<code class="descclassname">CompositeData.</code><code class="descname">has_any_acceleration</code><a class="headerlink" href="#vnpy.CompositeData.has_any_acceleration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.any_acceleration" title="vnpy.CompositeData.any_acceleration"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.any_acceleration</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.any_acceleration">
+<code class="descclassname">CompositeData.</code><code class="descname">any_acceleration</code><a class="headerlink" href="#vnpy.CompositeData.any_acceleration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the latest acceleration data regardless of the received underlying type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_acceleration">
+<code class="descclassname">CompositeData.</code><code class="descname">has_acceleration</code><a class="headerlink" href="#vnpy.CompositeData.has_acceleration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.acceleration" title="vnpy.CompositeData.acceleration"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.acceleration</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.acceleration">
+<code class="descclassname">CompositeData.</code><code class="descname">acceleration</code><a class="headerlink" href="#vnpy.CompositeData.acceleration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acceleration data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_acceleration_linear_body">
+<code class="descclassname">CompositeData.</code><code class="descname">has_acceleration_linear_body</code><a class="headerlink" href="#vnpy.CompositeData.has_acceleration_linear_body" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.acceleration_linear_body" title="vnpy.CompositeData.acceleration_linear_body"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.acceleration_linear_body</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.acceleration_linear_body">
+<code class="descclassname">CompositeData.</code><code class="descname">acceleration_linear_body</code><a class="headerlink" href="#vnpy.CompositeData.acceleration_linear_body" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acceleration linear body data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_acceleration_uncompensated">
+<code class="descclassname">CompositeData.</code><code class="descname">has_acceleration_uncompensated</code><a class="headerlink" href="#vnpy.CompositeData.has_acceleration_uncompensated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.acceleration_uncompensated" title="vnpy.CompositeData.acceleration_uncompensated"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.acceleration_uncompensated</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.acceleration_uncompensated">
+<code class="descclassname">CompositeData.</code><code class="descname">acceleration_uncompensated</code><a class="headerlink" href="#vnpy.CompositeData.acceleration_uncompensated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acceleration uncompensated data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_acceleration_linear_ned">
+<code class="descclassname">CompositeData.</code><code class="descname">has_acceleration_linear_ned</code><a class="headerlink" href="#vnpy.CompositeData.has_acceleration_linear_ned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.acceleration_linear_ned" title="vnpy.CompositeData.acceleration_linear_ned"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.acceleration_linear_ned</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.acceleration_linear_ned">
+<code class="descclassname">CompositeData.</code><code class="descname">acceleration_linear_ned</code><a class="headerlink" href="#vnpy.CompositeData.acceleration_linear_ned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acceleration linear NED data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_acceleration_linear_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">has_acceleration_linear_ecef</code><a class="headerlink" href="#vnpy.CompositeData.has_acceleration_linear_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.acceleration_linear_ecef" title="vnpy.CompositeData.acceleration_linear_ecef"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.acceleration_linear_ecef</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.acceleration_linear_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">acceleration_linear_ecef</code><a class="headerlink" href="#vnpy.CompositeData.acceleration_linear_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acceleration linear ECEF data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_acceleration_ned">
+<code class="descclassname">CompositeData.</code><code class="descname">has_acceleration_ned</code><a class="headerlink" href="#vnpy.CompositeData.has_acceleration_ned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.acceleration_ned" title="vnpy.CompositeData.acceleration_ned"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.acceleration_ned</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.acceleration_ned">
+<code class="descclassname">CompositeData.</code><code class="descname">acceleration_ned</code><a class="headerlink" href="#vnpy.CompositeData.acceleration_ned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acceleration NED data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_acceleration_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">has_acceleration_ecef</code><a class="headerlink" href="#vnpy.CompositeData.has_acceleration_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.acceleration_ecef" title="vnpy.CompositeData.acceleration_ecef"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.acceleration_ecef</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.acceleration_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">acceleration_ecef</code><a class="headerlink" href="#vnpy.CompositeData.acceleration_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acceleration ECEF data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_any_angular_rate">
+<code class="descclassname">CompositeData.</code><code class="descname">has_any_angular_rate</code><a class="headerlink" href="#vnpy.CompositeData.has_any_angular_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.any_angular_rate" title="vnpy.CompositeData.any_angular_rate"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.any_angular_rate</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.any_angular_rate">
+<code class="descclassname">CompositeData.</code><code class="descname">any_angular_rate</code><a class="headerlink" href="#vnpy.CompositeData.any_angular_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the latest angular rate data regardless of the received underlying type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_angular_rate">
+<code class="descclassname">CompositeData.</code><code class="descname">has_angular_rate</code><a class="headerlink" href="#vnpy.CompositeData.has_angular_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.angular_rate" title="vnpy.CompositeData.angular_rate"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.angular_rate</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.angular_rate">
+<code class="descclassname">CompositeData.</code><code class="descname">angular_rate</code><a class="headerlink" href="#vnpy.CompositeData.angular_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Angular rate data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_angular_rate_uncompensated">
+<code class="descclassname">CompositeData.</code><code class="descname">has_angular_rate_uncompensated</code><a class="headerlink" href="#vnpy.CompositeData.has_angular_rate_uncompensated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.angular_rate_uncompensated" title="vnpy.CompositeData.angular_rate_uncompensated"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.angular_rate_uncompensated</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.angular_rate_uncompensated">
+<code class="descclassname">CompositeData.</code><code class="descname">angular_rate_uncompensated</code><a class="headerlink" href="#vnpy.CompositeData.angular_rate_uncompensated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Angular rate uncompensated data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_any_temperature">
+<code class="descclassname">CompositeData.</code><code class="descname">has_any_temperature</code><a class="headerlink" href="#vnpy.CompositeData.has_any_temperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.any_temperature" title="vnpy.CompositeData.any_temperature"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.any_temperature</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.any_temperature">
+<code class="descclassname">CompositeData.</code><code class="descname">any_temperature</code><a class="headerlink" href="#vnpy.CompositeData.any_temperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the latest temperature data regardless of the received underlying type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_temperature">
+<code class="descclassname">CompositeData.</code><code class="descname">has_temperature</code><a class="headerlink" href="#vnpy.CompositeData.has_temperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.temperature" title="vnpy.CompositeData.temperature"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.temperature</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.temperature">
+<code class="descclassname">CompositeData.</code><code class="descname">temperature</code><a class="headerlink" href="#vnpy.CompositeData.temperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temperature data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_any_pressure">
+<code class="descclassname">CompositeData.</code><code class="descname">has_any_pressure</code><a class="headerlink" href="#vnpy.CompositeData.has_any_pressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.any_pressure" title="vnpy.CompositeData.any_pressure"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.any_pressure</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.any_pressure">
+<code class="descclassname">CompositeData.</code><code class="descname">any_pressure</code><a class="headerlink" href="#vnpy.CompositeData.any_pressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the latest pressure data regardless of the received underlying type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_pressure">
+<code class="descclassname">CompositeData.</code><code class="descname">has_pressure</code><a class="headerlink" href="#vnpy.CompositeData.has_pressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.pressure" title="vnpy.CompositeData.pressure"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.pressure</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.pressure">
+<code class="descclassname">CompositeData.</code><code class="descname">pressure</code><a class="headerlink" href="#vnpy.CompositeData.pressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temperature data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_any_position">
+<code class="descclassname">CompositeData.</code><code class="descname">has_any_position</code><a class="headerlink" href="#vnpy.CompositeData.has_any_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.any_position" title="vnpy.CompositeData.any_position"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.any_position</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.any_position">
+<code class="descclassname">CompositeData.</code><code class="descname">any_position</code><a class="headerlink" href="#vnpy.CompositeData.any_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the latest position data regardless of the received underlying type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_position_gps_lla">
+<code class="descclassname">CompositeData.</code><code class="descname">has_position_gps_lla</code><a class="headerlink" href="#vnpy.CompositeData.has_position_gps_lla" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.position_gps_lla" title="vnpy.CompositeData.position_gps_lla"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.position_gps_lla</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.position_gps_lla">
+<code class="descclassname">CompositeData.</code><code class="descname">position_gps_lla</code><a class="headerlink" href="#vnpy.CompositeData.position_gps_lla" title="Permalink to this definition">¶</a></dt>
+<dd><p>Position GPS LLA data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_position_gps_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">has_position_gps_ecef</code><a class="headerlink" href="#vnpy.CompositeData.has_position_gps_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.position_gps_ecef" title="vnpy.CompositeData.position_gps_ecef"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.position_gps_ecef</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.position_gps_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">position_gps_ecef</code><a class="headerlink" href="#vnpy.CompositeData.position_gps_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Position GPS ECEF data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_position_estimated_lla">
+<code class="descclassname">CompositeData.</code><code class="descname">has_position_estimated_lla</code><a class="headerlink" href="#vnpy.CompositeData.has_position_estimated_lla" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.position_estimated_lla" title="vnpy.CompositeData.position_estimated_lla"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.position_estimated_lla</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.position_estimated_lla">
+<code class="descclassname">CompositeData.</code><code class="descname">position_estimated_lla</code><a class="headerlink" href="#vnpy.CompositeData.position_estimated_lla" title="Permalink to this definition">¶</a></dt>
+<dd><p>Position estimated LLA data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_position_estimated_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">has_position_estimated_ecef</code><a class="headerlink" href="#vnpy.CompositeData.has_position_estimated_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.position_estimated_ecef" title="vnpy.CompositeData.position_estimated_ecef"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.position_estimated_ecef</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.position_estimated_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">position_estimated_ecef</code><a class="headerlink" href="#vnpy.CompositeData.position_estimated_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Position estimated ECEF data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_any_velocity">
+<code class="descclassname">CompositeData.</code><code class="descname">has_any_velocity</code><a class="headerlink" href="#vnpy.CompositeData.has_any_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.any_velocity" title="vnpy.CompositeData.any_velocity"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.any_velocity</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.any_velocity">
+<code class="descclassname">CompositeData.</code><code class="descname">any_velocity</code><a class="headerlink" href="#vnpy.CompositeData.any_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the latest velocity data regardless of the received underlying type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_velocity_gps_ned">
+<code class="descclassname">CompositeData.</code><code class="descname">has_velocity_gps_ned</code><a class="headerlink" href="#vnpy.CompositeData.has_velocity_gps_ned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.velocity_gps_ned" title="vnpy.CompositeData.velocity_gps_ned"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.velocity_gps_ned</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.velocity_gps_ned">
+<code class="descclassname">CompositeData.</code><code class="descname">velocity_gps_ned</code><a class="headerlink" href="#vnpy.CompositeData.velocity_gps_ned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Velocity GPS NED data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_velocity_gps_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">has_velocity_gps_ecef</code><a class="headerlink" href="#vnpy.CompositeData.has_velocity_gps_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.velocity_gps_ecef" title="vnpy.CompositeData.velocity_gps_ecef"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.velocity_gps_ecef</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.velocity_gps_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">velocity_gps_ecef</code><a class="headerlink" href="#vnpy.CompositeData.velocity_gps_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Velocity GPS ECEF data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_velocity_estimated_ned">
+<code class="descclassname">CompositeData.</code><code class="descname">has_velocity_estimated_ned</code><a class="headerlink" href="#vnpy.CompositeData.has_velocity_estimated_ned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.velocity_estimated_ned" title="vnpy.CompositeData.velocity_estimated_ned"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.velocity_estimated_ned</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.velocity_estimated_ned">
+<code class="descclassname">CompositeData.</code><code class="descname">velocity_estimated_ned</code><a class="headerlink" href="#vnpy.CompositeData.velocity_estimated_ned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Velocity estimated NED data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_velocity_estimated_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">has_velocity_estimated_ecef</code><a class="headerlink" href="#vnpy.CompositeData.has_velocity_estimated_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.velocity_estimated_ecef" title="vnpy.CompositeData.velocity_estimated_ecef"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.velocity_estimated_ecef</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.velocity_estimated_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">velocity_estimated_ecef</code><a class="headerlink" href="#vnpy.CompositeData.velocity_estimated_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Velocity estimated ECEF data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_velocity_estimated_body">
+<code class="descclassname">CompositeData.</code><code class="descname">has_velocity_estimated_body</code><a class="headerlink" href="#vnpy.CompositeData.has_velocity_estimated_body" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.velocity_estimated_body" title="vnpy.CompositeData.velocity_estimated_body"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.velocity_estimated_body</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.velocity_estimated_body">
+<code class="descclassname">CompositeData.</code><code class="descname">velocity_estimated_body</code><a class="headerlink" href="#vnpy.CompositeData.velocity_estimated_body" title="Permalink to this definition">¶</a></dt>
+<dd><p>Velocity estimated body data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_delta_time">
+<code class="descclassname">CompositeData.</code><code class="descname">has_delta_time</code><a class="headerlink" href="#vnpy.CompositeData.has_delta_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.delta_time" title="vnpy.CompositeData.delta_time"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.delta_time</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.delta_time">
+<code class="descclassname">CompositeData.</code><code class="descname">delta_time</code><a class="headerlink" href="#vnpy.CompositeData.delta_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delta time data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_delta_theta">
+<code class="descclassname">CompositeData.</code><code class="descname">has_delta_theta</code><a class="headerlink" href="#vnpy.CompositeData.has_delta_theta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.delta_theta" title="vnpy.CompositeData.delta_theta"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.delta_theta</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.delta_theta">
+<code class="descclassname">CompositeData.</code><code class="descname">delta_theta</code><a class="headerlink" href="#vnpy.CompositeData.delta_theta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delta theta data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_delta_velocity">
+<code class="descclassname">CompositeData.</code><code class="descname">has_delta_velocity</code><a class="headerlink" href="#vnpy.CompositeData.has_delta_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.delta_velocity" title="vnpy.CompositeData.delta_velocity"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.delta_velocity</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.delta_velocity">
+<code class="descclassname">CompositeData.</code><code class="descname">delta_velocity</code><a class="headerlink" href="#vnpy.CompositeData.delta_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delta velocity data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_time_startup">
+<code class="descclassname">CompositeData.</code><code class="descname">has_time_startup</code><a class="headerlink" href="#vnpy.CompositeData.has_time_startup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.time_startup" title="vnpy.CompositeData.time_startup"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.time_startup</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.time_startup">
+<code class="descclassname">CompositeData.</code><code class="descname">time_startup</code><a class="headerlink" href="#vnpy.CompositeData.time_startup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time startup data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_time_gps">
+<code class="descclassname">CompositeData.</code><code class="descname">has_time_gps</code><a class="headerlink" href="#vnpy.CompositeData.has_time_gps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.time_gps" title="vnpy.CompositeData.time_gps"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.time_gps</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.time_gps">
+<code class="descclassname">CompositeData.</code><code class="descname">time_gps</code><a class="headerlink" href="#vnpy.CompositeData.time_gps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time GPS data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_tow">
+<code class="descclassname">CompositeData.</code><code class="descname">has_tow</code><a class="headerlink" href="#vnpy.CompositeData.has_tow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.tow" title="vnpy.CompositeData.tow"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.tow</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.tow">
+<code class="descclassname">CompositeData.</code><code class="descname">tow</code><a class="headerlink" href="#vnpy.CompositeData.tow" title="Permalink to this definition">¶</a></dt>
+<dd><p>GPS time of week data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_week">
+<code class="descclassname">CompositeData.</code><code class="descname">has_week</code><a class="headerlink" href="#vnpy.CompositeData.has_week" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.week" title="vnpy.CompositeData.week"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.week</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.week">
+<code class="descclassname">CompositeData.</code><code class="descname">week</code><a class="headerlink" href="#vnpy.CompositeData.week" title="Permalink to this definition">¶</a></dt>
+<dd><p>Week data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_num_sats">
+<code class="descclassname">CompositeData.</code><code class="descname">has_num_sats</code><a class="headerlink" href="#vnpy.CompositeData.has_num_sats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.num_sats" title="vnpy.CompositeData.num_sats"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.num_sats</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.num_sats">
+<code class="descclassname">CompositeData.</code><code class="descname">num_sats</code><a class="headerlink" href="#vnpy.CompositeData.num_sats" title="Permalink to this definition">¶</a></dt>
+<dd><p>NumSats data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_time_sync_in">
+<code class="descclassname">CompositeData.</code><code class="descname">has_time_sync_in</code><a class="headerlink" href="#vnpy.CompositeData.has_time_sync_in" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.time_sync_in" title="vnpy.CompositeData.time_sync_in"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.time_sync_in</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.time_sync_in">
+<code class="descclassname">CompositeData.</code><code class="descname">time_sync_in</code><a class="headerlink" href="#vnpy.CompositeData.time_sync_in" title="Permalink to this definition">¶</a></dt>
+<dd><p>TimeSyncIn data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_vpe_status">
+<code class="descclassname">CompositeData.</code><code class="descname">has_vpe_status</code><a class="headerlink" href="#vnpy.CompositeData.has_vpe_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.vpe_status" title="vnpy.CompositeData.vpe_status"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.vpe_status</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.vpe_status">
+<code class="descclassname">CompositeData.</code><code class="descname">vpe_status</code><a class="headerlink" href="#vnpy.CompositeData.vpe_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>VpeStatus data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_ins_status">
+<code class="descclassname">CompositeData.</code><code class="descname">has_ins_status</code><a class="headerlink" href="#vnpy.CompositeData.has_ins_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.ins_status" title="vnpy.CompositeData.ins_status"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.ins_status</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.ins_status">
+<code class="descclassname">CompositeData.</code><code class="descname">ins_status</code><a class="headerlink" href="#vnpy.CompositeData.ins_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>InsStatus data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_sync_in_cnt">
+<code class="descclassname">CompositeData.</code><code class="descname">has_sync_in_cnt</code><a class="headerlink" href="#vnpy.CompositeData.has_sync_in_cnt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.sync_in_cnt" title="vnpy.CompositeData.sync_in_cnt"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.sync_in_cnt</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.sync_in_cnt">
+<code class="descclassname">CompositeData.</code><code class="descname">sync_in_cnt</code><a class="headerlink" href="#vnpy.CompositeData.sync_in_cnt" title="Permalink to this definition">¶</a></dt>
+<dd><p>SyncInCnt data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_time_gps_pps">
+<code class="descclassname">CompositeData.</code><code class="descname">has_time_gps_pps</code><a class="headerlink" href="#vnpy.CompositeData.has_time_gps_pps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.time_gps_pps" title="vnpy.CompositeData.time_gps_pps"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.time_gps_pps</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.time_gps_pps">
+<code class="descclassname">CompositeData.</code><code class="descname">time_gps_pps</code><a class="headerlink" href="#vnpy.CompositeData.time_gps_pps" title="Permalink to this definition">¶</a></dt>
+<dd><p>TimeGpsPps data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_gps_tow">
+<code class="descclassname">CompositeData.</code><code class="descname">has_gps_tow</code><a class="headerlink" href="#vnpy.CompositeData.has_gps_tow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.gps_tow" title="vnpy.CompositeData.gps_tow"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.gps_tow</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.gps_tow">
+<code class="descclassname">CompositeData.</code><code class="descname">gps_tow</code><a class="headerlink" href="#vnpy.CompositeData.gps_tow" title="Permalink to this definition">¶</a></dt>
+<dd><p>GpsTow data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_time_utc">
+<code class="descclassname">CompositeData.</code><code class="descname">has_time_utc</code><a class="headerlink" href="#vnpy.CompositeData.has_time_utc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.time_utc" title="vnpy.CompositeData.time_utc"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.time_utc</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.time_utc">
+<code class="descclassname">CompositeData.</code><code class="descname">time_utc</code><a class="headerlink" href="#vnpy.CompositeData.time_utc" title="Permalink to this definition">¶</a></dt>
+<dd><p>TimeUtc data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_sens_sat">
+<code class="descclassname">CompositeData.</code><code class="descname">has_sens_sat</code><a class="headerlink" href="#vnpy.CompositeData.has_sens_sat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.sens_sat" title="vnpy.CompositeData.sens_sat"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.sens_sat</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.sens_sat">
+<code class="descclassname">CompositeData.</code><code class="descname">sens_sat</code><a class="headerlink" href="#vnpy.CompositeData.sens_sat" title="Permalink to this definition">¶</a></dt>
+<dd><p>SensSat data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_fix">
+<code class="descclassname">CompositeData.</code><code class="descname">has_fix</code><a class="headerlink" href="#vnpy.CompositeData.has_fix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.fix" title="vnpy.CompositeData.fix"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.fix</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.fix">
+<code class="descclassname">CompositeData.</code><code class="descname">fix</code><a class="headerlink" href="#vnpy.CompositeData.fix" title="Permalink to this definition">¶</a></dt>
+<dd><p>GPS fix data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_any_position_uncertainty">
+<code class="descclassname">CompositeData.</code><code class="descname">has_any_position_uncertainty</code><a class="headerlink" href="#vnpy.CompositeData.has_any_position_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.any_position_uncertainty" title="vnpy.CompositeData.any_position_uncertainty"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.any_position_uncertainty</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.any_position_uncertainty">
+<code class="descclassname">CompositeData.</code><code class="descname">any_position_uncertainty</code><a class="headerlink" href="#vnpy.CompositeData.any_position_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the latest position uncertainty data regardless of the received underlying type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_position_uncertainty_gps_ned">
+<code class="descclassname">CompositeData.</code><code class="descname">has_position_uncertainty_gps_ned</code><a class="headerlink" href="#vnpy.CompositeData.has_position_uncertainty_gps_ned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.position_uncertainty_gps_ned" title="vnpy.CompositeData.position_uncertainty_gps_ned"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.position_uncertainty_gps_ned</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.position_uncertainty_gps_ned">
+<code class="descclassname">CompositeData.</code><code class="descname">position_uncertainty_gps_ned</code><a class="headerlink" href="#vnpy.CompositeData.position_uncertainty_gps_ned" title="Permalink to this definition">¶</a></dt>
+<dd><p>GPS position uncertainty NED data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_position_uncertainty_gps_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">has_position_uncertainty_gps_ecef</code><a class="headerlink" href="#vnpy.CompositeData.has_position_uncertainty_gps_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.position_uncertainty_gps_ecef" title="vnpy.CompositeData.position_uncertainty_gps_ecef"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.position_uncertainty_gps_ecef</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.position_uncertainty_gps_ecef">
+<code class="descclassname">CompositeData.</code><code class="descname">position_uncertainty_gps_ecef</code><a class="headerlink" href="#vnpy.CompositeData.position_uncertainty_gps_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>GPS position uncertainty ECEF data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_position_uncertainty_estimated">
+<code class="descclassname">CompositeData.</code><code class="descname">has_position_uncertainty_estimated</code><a class="headerlink" href="#vnpy.CompositeData.has_position_uncertainty_estimated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.position_uncertainty_estimated" title="vnpy.CompositeData.position_uncertainty_estimated"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.position_uncertainty_estimated</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.position_uncertainty_estimated">
+<code class="descclassname">CompositeData.</code><code class="descname">position_uncertainty_estimated</code><a class="headerlink" href="#vnpy.CompositeData.position_uncertainty_estimated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimated position uncertainty data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_any_velocity_uncertainty">
+<code class="descclassname">CompositeData.</code><code class="descname">has_any_velocity_uncertainty</code><a class="headerlink" href="#vnpy.CompositeData.has_any_velocity_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.any_velocity_uncertainty" title="vnpy.CompositeData.any_velocity_uncertainty"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.any_velocity_uncertainty</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.any_velocity_uncertainty">
+<code class="descclassname">CompositeData.</code><code class="descname">any_velocity_uncertainty</code><a class="headerlink" href="#vnpy.CompositeData.any_velocity_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the latest velocity uncertainty data regardless of the received underlying type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_velocity_uncertainty_gps">
+<code class="descclassname">CompositeData.</code><code class="descname">has_velocity_uncertainty_gps</code><a class="headerlink" href="#vnpy.CompositeData.has_velocity_uncertainty_gps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.velocity_uncertainty_gps" title="vnpy.CompositeData.velocity_uncertainty_gps"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.velocity_uncertainty_gps</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.velocity_uncertainty_gps">
+<code class="descclassname">CompositeData.</code><code class="descname">velocity_uncertainty_gps</code><a class="headerlink" href="#vnpy.CompositeData.velocity_uncertainty_gps" title="Permalink to this definition">¶</a></dt>
+<dd><p>GPS velocity uncertainty data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_velocity_uncertainty_estimated">
+<code class="descclassname">CompositeData.</code><code class="descname">has_velocity_uncertainty_estimated</code><a class="headerlink" href="#vnpy.CompositeData.has_velocity_uncertainty_estimated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.velocity_uncertainty_estimated" title="vnpy.CompositeData.velocity_uncertainty_estimated"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.velocity_uncertainty_estimated</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.velocity_uncertainty_estimated">
+<code class="descclassname">CompositeData.</code><code class="descname">velocity_uncertainty_estimated</code><a class="headerlink" href="#vnpy.CompositeData.velocity_uncertainty_estimated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimated velocity uncertainty data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_time_uncertainty">
+<code class="descclassname">CompositeData.</code><code class="descname">has_time_uncertainty</code><a class="headerlink" href="#vnpy.CompositeData.has_time_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.time_uncertainty" title="vnpy.CompositeData.time_uncertainty"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.time_uncertainty</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.time_uncertainty">
+<code class="descclassname">CompositeData.</code><code class="descname">time_uncertainty</code><a class="headerlink" href="#vnpy.CompositeData.time_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time uncertainty data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.has_attitude_uncertainty">
+<code class="descclassname">CompositeData.</code><code class="descname">has_attitude_uncertainty</code><a class="headerlink" href="#vnpy.CompositeData.has_attitude_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if <a class="reference internal" href="#vnpy.CompositeData.attitude_uncertainty" title="vnpy.CompositeData.attitude_uncertainty"><code class="xref py py-attr docutils literal"><span class="pre">CompositeData.attitude_uncertainty</span></code></a> has valid data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.CompositeData.attitude_uncertainty">
+<code class="descclassname">CompositeData.</code><code class="descname">attitude_uncertainty</code><a class="headerlink" href="#vnpy.CompositeData.attitude_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attitude uncertainty data.</p>
+</dd></dl>
+
+<p>Class methods are:</p>
+<dl class="classmethod">
+<dt id="vnpy.CompositeData.parse">
+<em class="property">classmethod </em><code class="descclassname">CompositeData.</code><code class="descname">parse</code><span class="sig-paren">(</span><em>packet</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.CompositeData.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses a packet.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="ezasyncdata-objects">
+<h2><a class="reference internal" href="#vnpy.EzAsyncData" title="vnpy.EzAsyncData"><code class="xref py py-class docutils literal"><span class="pre">EzAsyncData</span></code></a> Objects<a class="headerlink" href="#ezasyncdata-objects" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.EzAsyncData">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">EzAsyncData</code><a class="headerlink" href="#vnpy.EzAsyncData" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class internally wraps a <a class="reference internal" href="#vnpy.VnSensor" title="vnpy.VnSensor"><code class="xref py py-class docutils literal"><span class="pre">VnSensor</span></code></a> object and provides easy methods for accessing asynchronous data
+from a VectorNav sensor. All low-level access functionality is still available through the property
+<a class="reference internal" href="#vnpy.EzAsyncData.sensor" title="vnpy.EzAsyncData.sensor"><code class="xref py py-attr docutils literal"><span class="pre">EzAsyncData.sensor</span></code></a>.</p>
+<p>Typically a call to <a class="reference internal" href="#vnpy.EzAsyncData.connect" title="vnpy.EzAsyncData.connect"><code class="xref py py-func docutils literal"><span class="pre">EzAsyncData.connect()</span></code></a> is used to create this object.</p>
+</dd></dl>
+
+<p>Class attributes are:</p>
+<dl class="attribute">
+<dt id="vnpy.EzAsyncData.sensor">
+<code class="descclassname">EzAsyncData.</code><code class="descname">sensor</code><a class="headerlink" href="#vnpy.EzAsyncData.sensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The wrapped <a class="reference internal" href="#vnpy.VnSensor" title="vnpy.VnSensor"><code class="xref py py-class docutils literal"><span class="pre">VnSensor</span></code></a> object which can be used to query the VectorNav sensor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.EzAsyncData.currentdata">
+<code class="descclassname">EzAsyncData.</code><code class="descname">currentdata</code><a class="headerlink" href="#vnpy.EzAsyncData.currentdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>The most recently cached asynchronous data processed.</p>
+</dd></dl>
+
+<p>Class methods are:</p>
+<dl class="classmethod">
+<dt id="vnpy.EzAsyncData.connect">
+<em class="property">classmethod </em><code class="descclassname">EzAsyncData.</code><code class="descname">connect</code><span class="sig-paren">(</span><em>portname</em>, <em>baudrate</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.EzAsyncData.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Immediately connects to a VectorNav sensor using the provided port parameters and returns an <a class="reference internal" href="#vnpy.EzAsyncData" title="vnpy.EzAsyncData"><code class="xref py py-class docutils literal"><span class="pre">EzAsyncData</span></code></a> object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.EzAsyncData.disconnect">
+<code class="descclassname">EzAsyncData.</code><code class="descname">disconnect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.EzAsyncData.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnects from the VectorNav sensors.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.EzAsyncData.next_data">
+<code class="descclassname">EzAsyncData.</code><code class="descname">next_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; CompositeData<a class="headerlink" href="#vnpy.EzAsyncData.next_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the next available data packet. If a new data packet has not been received since the last call, this
+method will block until a new one is received. See also <a class="reference internal" href="#ezasyncdata-nextdata-timeout-ms"><span class="std std-ref">EzAsyncData.next_data(timeout_ms)</span></a> for a timeout version.</p>
+</dd></dl>
+
+<span class="target" id="ezasyncdata-nextdata-timeout-ms"></span><dl class="method">
+<dt>
+<code class="descclassname">EzAsyncData.</code><code class="descname">next_data</code><span class="sig-paren">(</span><em>timeout_ms</em><span class="sig-paren">)</span> &rarr; CompositeData</dt>
+<dd><p>A timeout version of <a class="reference internal" href="#vnpy.EzAsyncData.next_data" title="vnpy.EzAsyncData.next_data"><code class="xref py py-func docutils literal"><span class="pre">EzAsyncData.next_data()</span></code></a>. If a timeout occurs before a new data packet is received, a
+<code class="xref py py-class docutils literal"><span class="pre">TimeoutError</span></code> will be raised.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="vnsensor-objects">
+<h2><a class="reference internal" href="#vnpy.VnSensor" title="vnpy.VnSensor"><code class="xref py py-class docutils literal"><span class="pre">VnSensor</span></code></a> Objects<a class="headerlink" href="#vnsensor-objects" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.VnSensor">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">VnSensor</code><a class="headerlink" href="#vnpy.VnSensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helpful class for working with VectorNav sensors.</p>
+</dd></dl>
+
+<p>Class attributes are:</p>
+<dl class="attribute">
+<dt id="vnpy.VnSensor.baudrate">
+<code class="descclassname">VnSensor.</code><code class="descname">baudrate</code><a class="headerlink" href="#vnpy.VnSensor.baudrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Baud rate of the serial port connection. Note this is independent of the sensor&#8217;s on-board serial
+baud rate setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VnSensor.is_connected">
+<code class="descclassname">VnSensor.</code><code class="descname">is_connected</code><a class="headerlink" href="#vnpy.VnSensor.is_connected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if the VnSensor is connected.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VnSensor.response_timeout_ms">
+<code class="descclassname">VnSensor.</code><code class="descname">response_timeout_ms</code><a class="headerlink" href="#vnpy.VnSensor.response_timeout_ms" title="Permalink to this definition">¶</a></dt>
+<dd><p>The amount of time in milliseconds to wait for a response during read/write operations with the sensor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VnSensor.retransmit_delay_ms">
+<code class="descclassname">VnSensor.</code><code class="descname">retransmit_delay_ms</code><a class="headerlink" href="#vnpy.VnSensor.retransmit_delay_ms" title="Permalink to this definition">¶</a></dt>
+<dd><p>The delay in milliseconds between retransmitting commands.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VnSensor.send_error_detection_mode">
+<code class="descclassname">VnSensor.</code><code class="descname">send_error_detection_mode</code><a class="headerlink" href="#vnpy.VnSensor.send_error_detection_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The error detection mode used for commands sent to the sensor. Default is CHECKSUM.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.VnSensor.port">
+<code class="descclassname">VnSensor.</code><code class="descname">port</code><a class="headerlink" href="#vnpy.VnSensor.port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the port the sensor is connected to.</p>
+</dd></dl>
+
+<p>Class methods are:</p>
+<dl class="method">
+<dt id="vnpy.VnSensor.acceleration_disturbance_present">
+<code class="descclassname">VnSensor.</code><code class="descname">acceleration_disturbance_present</code><span class="sig-paren">(</span><em>disturbance_present</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.acceleration_disturbance_present" title="Permalink to this definition">¶</a></dt>
+<dd><p>Command to inform the VectorNav Sensor if there is an acceleration disturbance present. Set <cite>disturbance_present</cite> to
+<cite>True</cite> when a disturbance is present. Set it to <cite>False</cite> when the disturbance is gone.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.change_baudrate">
+<code class="descclassname">VnSensor.</code><code class="descname">change_baudrate</code><span class="sig-paren">(</span><em>baudrate</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.change_baudrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Issues a change baudrate to the VectorNav sensor and then reconnects the attached serial port at the new <cite>baudrate</cite>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.connect">
+<code class="descclassname">VnSensor.</code><code class="descname">connect</code><span class="sig-paren">(</span><em>port</em>, <em>baudrate</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects to a VectorNav sensor on the provided <cite>port</cite> and <cite>baudrate</cite>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.determine_device_family">
+<code class="descclassname">VnSensor.</code><code class="descname">determine_device_family</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.determine_device_family" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method will query the attached sensor and determine the device family it belongs to.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.disconnect">
+<code class="descclassname">VnSensor.</code><code class="descname">disconnect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnects from the VectorNav sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.magnetic_disturbance_present">
+<code class="descclassname">VnSensor.</code><code class="descname">magnetic_disturbance_present</code><span class="sig-paren">(</span><em>disturbance_present</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.magnetic_disturbance_present" title="Permalink to this definition">¶</a></dt>
+<dd><p>Command to inform the VectorNav Sensor if there is a magnetic disturbance present. Set <cite>disturbance_present</cite> to
+<cite>True</cite> when a disturbance is present. Set it to <cite>False</cite> when the disturbance is gone.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_acceleration_compensation">
+<code class="descclassname">VnSensor.</code><code class="descname">read_acceleration_compensation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_acceleration_compensation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Acceleration Compensation register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_acceleration_measurements">
+<code class="descclassname">VnSensor.</code><code class="descname">read_acceleration_measurements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_acceleration_measurements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Acceleration Measurements register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_angular_rate_measurements">
+<code class="descclassname">VnSensor.</code><code class="descname">read_angular_rate_measurements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_angular_rate_measurements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Angular Rate Measurements register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_async_data_output_frequency">
+<code class="descclassname">VnSensor.</code><code class="descname">read_async_data_output_frequency</code><span class="sig-paren">(</span><em>port=None</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_async_data_output_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Async Data Output Frequency register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_async_data_output_type">
+<code class="descclassname">VnSensor.</code><code class="descname">read_async_data_output_type</code><span class="sig-paren">(</span><em>port=None</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_async_data_output_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Async Data Output Type register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_attitude_quaternion">
+<code class="descclassname">VnSensor.</code><code class="descname">read_attitude_quaternion</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_attitude_quaternion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Attitude Quaternion register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_binary_output_1">
+<code class="descclassname">VnSensor.</code><code class="descname">read_binary_output_1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_binary_output_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_binary_output_2">
+<code class="descclassname">VnSensor.</code><code class="descname">read_binary_output_2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_binary_output_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_binary_output_3">
+<code class="descclassname">VnSensor.</code><code class="descname">read_binary_output_3</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_binary_output_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Binary Output 1/2/3 register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_calculated_magnetometer_calibration">
+<code class="descclassname">VnSensor.</code><code class="descname">read_calculated_magnetometer_calibration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_calculated_magnetometer_calibration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Calculated Magnetometer Calibration register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_communication_protocol_control">
+<code class="descclassname">VnSensor.</code><code class="descname">read_communication_protocol_control</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_communication_protocol_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Communication Protocol Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_delta_theta_and_delta_velocity">
+<code class="descclassname">VnSensor.</code><code class="descname">read_delta_theta_and_delta_velocity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_delta_theta_and_delta_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Delta Theta and Delta Velocity register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_delta_theta_and_delta_velocity_configuration">
+<code class="descclassname">VnSensor.</code><code class="descname">read_delta_theta_and_delta_velocity_configuration</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_delta_theta_and_delta_velocity_configuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">read_delta_theta_and_delta_velocity_configuration</code><span class="sig-paren">(</span><em>integration_frame</em>, <em>gyro_compensation</em>, <em>accel_compensation</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Delta Theta and Delta Velocity Configuration register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_filter_measurements_variance_parameters">
+<code class="descclassname">VnSensor.</code><code class="descname">read_filter_measurements_variance_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_filter_measurements_variance_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Filter Measurements Variance Parameters register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_filter_active_tuning_parameters">
+<code class="descclassname">VnSensor.</code><code class="descname">read_filter_active_tuning_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_filter_active_tuning_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Filter Active Tuning Parameters register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_filter_basic_control">
+<code class="descclassname">VnSensor.</code><code class="descname">read_filter_basic_control</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_filter_basic_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Filter Basic Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_filter_startup_gyro_bias">
+<code class="descclassname">VnSensor.</code><code class="descname">read_filter_startup_gyro_bias</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_filter_startup_gyro_bias" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Filter Startup Gyro Bias register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_firmware_version">
+<code class="descclassname">VnSensor.</code><code class="descname">read_firmware_version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_firmware_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Firmware Version register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_gps_antenna_offset">
+<code class="descclassname">VnSensor.</code><code class="descname">read_gps_antenna_offset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_gps_antenna_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the GPS Antenna Offset register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_gps_compass_baseline">
+<code class="descclassname">VnSensor.</code><code class="descname">read_gps_compass_baseline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_gps_compass_baseline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the GPS Compass Baseline register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_gps_compass_estimated_baseline">
+<code class="descclassname">VnSensor.</code><code class="descname">read_gps_compass_estimated_baseline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_gps_compass_estimated_baseline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the GPS Compass Estimated Baseline register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_gps_configuration">
+<code class="descclassname">VnSensor.</code><code class="descname">read_gps_configuration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_gps_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the GPS Configuration register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_gps_solution_ecef">
+<code class="descclassname">VnSensor.</code><code class="descname">read_gps_solution_ecef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_gps_solution_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the GPS Solution - ECEF register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_gps_solution_lla">
+<code class="descclassname">VnSensor.</code><code class="descname">read_gps_solution_lla</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_gps_solution_lla" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the GPS Solution - LLA register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_gyro_compensation">
+<code class="descclassname">VnSensor.</code><code class="descname">read_gyro_compensation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_gyro_compensation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Gyro Compensation register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_hardware_revision">
+<code class="descclassname">VnSensor.</code><code class="descname">read_hardware_revision</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_hardware_revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Hardware Revision register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_imu_filtering_configuration">
+<code class="descclassname">VnSensor.</code><code class="descname">read_imu_filtering_configuration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_imu_filtering_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the IMU Filtering Configuration register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_imu_measurements">
+<code class="descclassname">VnSensor.</code><code class="descname">read_imu_measurements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_imu_measurements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the IMU Measurements register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_imu_rate_configuration">
+<code class="descclassname">VnSensor.</code><code class="descname">read_imu_rate_configuration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_imu_rate_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the IMU Rate Configuration register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_indoor_heading_mode_control">
+<code class="descclassname">VnSensor.</code><code class="descname">read_indoor_heading_mode_control</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_indoor_heading_mode_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Indoor Heading Mode Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_ins_advanced_configuration">
+<code class="descclassname">VnSensor.</code><code class="descname">read_ins_advanced_configuration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_ins_advanced_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the INS Advanced Configuration register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_ins_basic_configuration_vn200">
+<code class="descclassname">VnSensor.</code><code class="descname">read_ins_basic_configuration_vn200</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_ins_basic_configuration_vn200" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the INS Basic Configuration register for a VN-200 sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_ins_basic_configuration_vn300">
+<code class="descclassname">VnSensor.</code><code class="descname">read_ins_basic_configuration_vn300</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_ins_basic_configuration_vn300" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the INS Basic Configuration register for a VN-300 sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_ins_solution_ecef">
+<code class="descclassname">VnSensor.</code><code class="descname">read_ins_solution_ecef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_ins_solution_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the INS Solution - ECEF register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_ins_solution_lla">
+<code class="descclassname">VnSensor.</code><code class="descname">read_ins_solution_lla</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_ins_solution_lla" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the INS Solution - LLA register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_ins_state_ecef">
+<code class="descclassname">VnSensor.</code><code class="descname">read_ins_state_ecef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_ins_state_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the INS State - ECEF register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_ins_state_lla">
+<code class="descclassname">VnSensor.</code><code class="descname">read_ins_state_lla</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_ins_state_lla" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the INS State - LLA register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_magnetic_acceleration_and_angular_rates">
+<code class="descclassname">VnSensor.</code><code class="descname">read_magnetic_acceleration_and_angular_rates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_magnetic_acceleration_and_angular_rates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Magnetic, Acceleration and Angular Rates register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_magnetic_and_gravity_reference_vectors">
+<code class="descclassname">VnSensor.</code><code class="descname">read_magnetic_and_gravity_reference_vectors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_magnetic_and_gravity_reference_vectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Magnetic and Gravity Reference Vectors register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_magnetic_measurements">
+<code class="descclassname">VnSensor.</code><code class="descname">read_magnetic_measurements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_magnetic_measurements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Magnetic Measurements register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_magnetometer_calibration_control">
+<code class="descclassname">VnSensor.</code><code class="descname">read_magnetometer_calibration_control</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_magnetometer_calibration_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Magnetometer Calibration Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_magnetometer_compensation">
+<code class="descclassname">VnSensor.</code><code class="descname">read_magnetometer_compensation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_magnetometer_compensation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Magnetometer Compensation register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_model_number">
+<code class="descclassname">VnSensor.</code><code class="descname">read_model_number</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_model_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Model Number register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_quaternion_magnetic_acceleration_and_angular_rates">
+<code class="descclassname">VnSensor.</code><code class="descname">read_quaternion_magnetic_acceleration_and_angular_rates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_quaternion_magnetic_acceleration_and_angular_rates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Quaternion, Magnetic, Acceleration and Angular Rates register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_reference_frame_rotation">
+<code class="descclassname">VnSensor.</code><code class="descname">read_reference_frame_rotation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_reference_frame_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Reference Frame Rotation register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_reference_vector_configuration">
+<code class="descclassname">VnSensor.</code><code class="descname">read_reference_vector_configuration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_reference_vector_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Reference Vector Configuration register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_serial_baudrate">
+<code class="descclassname">VnSensor.</code><code class="descname">read_serial_baudrate</code><span class="sig-paren">(</span><em>port=None</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_serial_baudrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Serial Baud Rate register for the specified <cite>port</cite>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_serial_number">
+<code class="descclassname">VnSensor.</code><code class="descname">read_serial_number</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_serial_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Serial Number register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_startup_filter_bias_estimate">
+<code class="descclassname">VnSensor.</code><code class="descname">read_startup_filter_bias_estimate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_startup_filter_bias_estimate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Startup Filter Bias Estimate register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_synchronization_control">
+<code class="descclassname">VnSensor.</code><code class="descname">read_synchronization_control</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_synchronization_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Synchronization Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_synchronization_status">
+<code class="descclassname">VnSensor.</code><code class="descname">read_synchronization_status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_synchronization_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Synchronization Status register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_user_tag">
+<code class="descclassname">VnSensor.</code><code class="descname">read_user_tag</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_user_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the User Tag register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_velocity_compensation_control">
+<code class="descclassname">VnSensor.</code><code class="descname">read_velocity_compensation_control</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_velocity_compensation_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Velocity Compensation Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_velocity_compensation_measurement">
+<code class="descclassname">VnSensor.</code><code class="descname">read_velocity_compensation_measurement</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_velocity_compensation_measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Velocity Compensation Measurement register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_velocity_compensation_status">
+<code class="descclassname">VnSensor.</code><code class="descname">read_velocity_compensation_status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_velocity_compensation_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Velocity Compensation Status register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_vpe_basic_control">
+<code class="descclassname">VnSensor.</code><code class="descname">read_vpe_basic_control</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_vpe_basic_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the VPE Basic Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_vpe_accelerometer_advanced_tuning">
+<code class="descclassname">VnSensor.</code><code class="descname">read_vpe_accelerometer_advanced_tuning</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_vpe_accelerometer_advanced_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the VPE Accelerometer Advanced Tuning register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_vpe_accelerometer_basic_tuning">
+<code class="descclassname">VnSensor.</code><code class="descname">read_vpe_accelerometer_basic_tuning</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_vpe_accelerometer_basic_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the VPE Accelerometer Basic Tuning register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_vpe_gyro_basic_tuning">
+<code class="descclassname">VnSensor.</code><code class="descname">read_vpe_gyro_basic_tuning</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_vpe_gyro_basic_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the VPE Gryo Basic Tuning register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_vpe_magnetometer_advanced_tuning">
+<code class="descclassname">VnSensor.</code><code class="descname">read_vpe_magnetometer_advanced_tuning</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_vpe_magnetometer_advanced_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the VPE Magnetometer Advanced Tuning register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_vpe_magnetometer_basic_tuning">
+<code class="descclassname">VnSensor.</code><code class="descname">read_vpe_magnetometer_basic_tuning</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_vpe_magnetometer_basic_tuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the VPE Magnetometer Basic Tuning register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_yaw_pitch_roll">
+<code class="descclassname">VnSensor.</code><code class="descname">read_yaw_pitch_roll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_yaw_pitch_roll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Yaw Pitch Roll register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_yaw_pitch_roll_magnetic_acceleration_and_angular_rates">
+<code class="descclassname">VnSensor.</code><code class="descname">read_yaw_pitch_roll_magnetic_acceleration_and_angular_rates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_yaw_pitch_roll_magnetic_acceleration_and_angular_rates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Yaw, Pitch, Roll, Magnetic, Acceleration and Angular Rates register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_yaw_pitch_roll_true_body_acceleration_and_angular_rates_register">
+<code class="descclassname">VnSensor.</code><code class="descname">read_yaw_pitch_roll_true_body_acceleration_and_angular_rates_register</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_yaw_pitch_roll_true_body_acceleration_and_angular_rates_register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Yaw, Pitch, Roll, True Body Acceleration and Angular Rates register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.read_yaw_pitch_roll_true_inertial_acceleration_and_angular_rates_register">
+<code class="descclassname">VnSensor.</code><code class="descname">read_yaw_pitch_roll_true_inertial_acceleration_and_angular_rates_register</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.read_yaw_pitch_roll_true_inertial_acceleration_and_angular_rates_register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Yaw, Pitch, Roll, True Inertial Acceleration and Angular Rates register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.reset">
+<code class="descclassname">VnSensor.</code><code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Issues a Reset command to the VectorNav sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.restore_factory_settings">
+<code class="descclassname">VnSensor.</code><code class="descname">restore_factory_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.restore_factory_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Issues a Restore Factory Settings command to the VectorNav sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.set_gyro_bias">
+<code class="descclassname">VnSensor.</code><code class="descname">set_gyro_bias</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.set_gyro_bias" title="Permalink to this definition">¶</a></dt>
+<dd><p>Issues a command to the VectorNav Sensor to set the gyro&#8217;s bias.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="vnpy.VnSensor.supported_baudrates">
+<em class="property">classmethod </em><code class="descclassname">VnSensor.</code><code class="descname">supported_baudrates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.supported_baudrates" title="Permalink to this definition">¶</a></dt>
+<dd><p>The list of baud rates supported by VectorNav sensors.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.tare">
+<code class="descclassname">VnSensor.</code><code class="descname">tare</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.tare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Issues a tare command to the VectorNav Sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.transaction">
+<code class="descclassname">VnSensor.</code><code class="descname">transaction</code><span class="sig-paren">(</span><em>send</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.transaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends the provided command and returns the response from the sensor.</p>
+<p>If the command does not have an asterisk &#8216;*&#8217;, then a checksum will be performed and appended based on the current
+error detection mode. Also, if the line-ending \r\n is not present, these will be added also.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.verify_sensor_connectivity">
+<code class="descclassname">VnSensor.</code><code class="descname">verify_sensor_connectivity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.verify_sensor_connectivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if we are able to send and receive communication with a sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_acceleration_compensation">
+<code class="descclassname">VnSensor.</code><code class="descname">write_acceleration_compensation</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_acceleration_compensation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_acceleration_compensation</code><span class="sig-paren">(</span><em>c</em>, <em>b</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Acceleration Compensation register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_async_data_output_frequency">
+<code class="descclassname">VnSensor.</code><code class="descname">write_async_data_output_frequency</code><span class="sig-paren">(</span><em>adof</em>, <em>port=None</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_async_data_output_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes to the Async Data Output Frequency register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_async_data_output_type">
+<code class="descclassname">VnSensor.</code><code class="descname">write_async_data_output_type</code><span class="sig-paren">(</span><em>ador</em>, <em>port=None</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_async_data_output_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes to the Async Data Output Type register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_binary_output_1">
+<code class="descclassname">VnSensor.</code><code class="descname">write_binary_output_1</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_binary_output_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_binary_output_2">
+<code class="descclassname">VnSensor.</code><code class="descname">write_binary_output_2</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_binary_output_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_binary_output_3">
+<code class="descclassname">VnSensor.</code><code class="descname">write_binary_output_3</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_binary_output_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes to the Binary Output 1/2/3 register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_communication_protocol_control">
+<code class="descclassname">VnSensor.</code><code class="descname">write_communication_protocol_control</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_communication_protocol_control" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_communication_protocol_control</code><span class="sig-paren">(</span><em>serial_count</em>, <em>serial_status</em>, <em>spi_count</em>, <em>spi_status</em>, <em>serial_checksum</em>, <em>spi_checksum</em>, <em>error_mode</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Communication Protocol Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_filter_active_tuning_parameters">
+<code class="descclassname">VnSensor.</code><code class="descname">write_filter_active_tuning_parameters</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_filter_active_tuning_parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_filter_active_tuning_parameters</code><span class="sig-paren">(</span><em>magnetic_disturbance_gain</em>, <em>acceleration_disturbance_gain</em>, <em>magnetic_disturbance_memory</em>, <em>acceleration_disturbance_memory</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Filter Active Tuning Parameters register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_filter_basic_control">
+<code class="descclassname">VnSensor.</code><code class="descname">write_filter_basic_control</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_filter_basic_control" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_filter_basic_control</code><span class="sig-paren">(</span><em>mag_mode</em>, <em>ext_mag_mode</em>, <em>ext_acc_mode</em>, <em>ext_gyro_mode</em>, <em>gyro_limit</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Filter Basic Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_filter_measurements_variance_parameters">
+<code class="descclassname">VnSensor.</code><code class="descname">write_filter_measurements_variance_parameters</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_filter_measurements_variance_parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_filter_measurements_variance_parameters</code><span class="sig-paren">(</span><em>angular_walk_variance</em>, <em>angular_rate_variance</em>, <em>magnetic_variance</em>, <em>acceleration_variance</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Filter Measurements Variance Parameters register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_filter_startup_gyro_bias">
+<code class="descclassname">VnSensor.</code><code class="descname">write_filter_startup_gyro_bias</code><span class="sig-paren">(</span><em>bias</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_filter_startup_gyro_bias" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes to the Filter Startup Gyro Bias register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_gps_antenna_offset">
+<code class="descclassname">VnSensor.</code><code class="descname">write_gps_antenna_offset</code><span class="sig-paren">(</span><em>position</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_gps_antenna_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes to the GPS Antenna Offset register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_gps_compass_baseline">
+<code class="descclassname">VnSensor.</code><code class="descname">write_gps_compass_baseline</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_gps_compass_baseline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_gps_compass_baseline</code><span class="sig-paren">(</span><em>position</em>, <em>uncertainty</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the GPS Compass Baseline register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_gps_configuration">
+<code class="descclassname">VnSensor.</code><code class="descname">write_gps_configuration</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_gps_configuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_gps_configuration</code><span class="sig-paren">(</span><em>mode</em>, <em>pps_source</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the GPS Configuration register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_gyro_compensation">
+<code class="descclassname">VnSensor.</code><code class="descname">write_gyro_compensation</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_gyro_compensation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_gyro_compensation</code><span class="sig-paren">(</span><em>c</em>, <em>b</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Gyro Compensation register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_imu_filtering_configuration">
+<code class="descclassname">VnSensor.</code><code class="descname">write_imu_filtering_configuration</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_imu_filtering_configuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_imu_filtering_configuration</code><span class="sig-paren">(</span><em>mag_window_size</em>, <em>accel_window_size</em>, <em>gyro_window_size</em>, <em>temp_window_size</em>, <em>pres_window_size</em>, <em>mag_filter_mode</em>, <em>accel_filter_mode</em>, <em>gyro_filter_mode</em>, <em>temp_filter_mode</em>, <em>pres_filter_mode</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the IMU Filtering Configuration register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_imu_rate_configuration">
+<code class="descclassname">VnSensor.</code><code class="descname">write_imu_rate_configuration</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_imu_rate_configuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_imu_rate_configuration</code><span class="sig-paren">(</span><em>imu_rate</em>, <em>nav_divisor</em>, <em>filter_target_rate</em>, <em>filter_min_rate</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the IMU Rate Configuration register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_indoor_heading_mode_control">
+<code class="descclassname">VnSensor.</code><code class="descname">write_indoor_heading_mode_control</code><span class="sig-paren">(</span><em>max_rate_error</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_indoor_heading_mode_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes to the Indoor Heading Mode Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_ins_advanced_configuration">
+<code class="descclassname">VnSensor.</code><code class="descname">write_ins_advanced_configuration</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_ins_advanced_configuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_ins_advanced_configuration</code><span class="sig-paren">(</span><em>use_mag</em>, <em>use_pres</em>, <em>pos_att</em>, <em>vel_att</em>, <em>vel_bias</em>, <em>use_foam</em>, <em>gps_cov_type</em>, <em>vel_count</em>, <em>vel_init</em>, <em>move_origin</em>, <em>gps_timeout</em>, <em>delta_limit_pos</em>, <em>delta_limit_vel</em>, <em>min_pos_uncertainty</em>, <em>min_vel_uncertainty</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the INS Advanced Configuration register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_ins_basic_configuration_vn200">
+<code class="descclassname">VnSensor.</code><code class="descname">write_ins_basic_configuration_vn200</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_ins_basic_configuration_vn200" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_ins_basic_configuration_vn200</code><span class="sig-paren">(</span><em>scenario</em>, <em>ahrs_aiding</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the INS Basic Configuration register for a VN-200 sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_ins_basic_configuration_vn300">
+<code class="descclassname">VnSensor.</code><code class="descname">write_ins_basic_configuration_vn300</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_ins_basic_configuration_vn300" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_ins_basic_configuration_vn300</code><span class="sig-paren">(</span><em>scenario</em>, <em>ahrs_aiding</em>, <em>est_baseline</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the INS Basic Configuration register for a VN-300 sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_magnetic_and_gravity_reference_vectors">
+<code class="descclassname">VnSensor.</code><code class="descname">write_magnetic_and_gravity_reference_vectors</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_magnetic_and_gravity_reference_vectors" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_magnetic_and_gravity_reference_vectors</code><span class="sig-paren">(</span><em>mag_ref</em>, <em>acc_ref</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Magnetic and Gravity Reference Vectors register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_magnetometer_calibration_control">
+<code class="descclassname">VnSensor.</code><code class="descname">write_magnetometer_calibration_control</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_magnetometer_calibration_control" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_magnetometer_calibration_control</code><span class="sig-paren">(</span><em>hsi_mode</em>, <em>hsi_output</em>, <em>converge_rate</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Magnetometer Calibration Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_magnetometer_compensation">
+<code class="descclassname">VnSensor.</code><code class="descname">write_magnetometer_compensation</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_magnetometer_compensation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_magnetometer_compensation</code><span class="sig-paren">(</span><em>c</em>, <em>b</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Magnetometer Compensation register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_reference_frame_rotation">
+<code class="descclassname">VnSensor.</code><code class="descname">write_reference_frame_rotation</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_reference_frame_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes to the Reference Frame Rotation register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_reference_vector_configuration">
+<code class="descclassname">VnSensor.</code><code class="descname">write_reference_vector_configuration</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_reference_vector_configuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_reference_vector_configuration</code><span class="sig-paren">(</span><em>use_mag_model</em>, <em>use_gravity_model</em>, <em>recalc_threshold</em>, <em>year</em>, <em>position</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Reference Vector Configuration register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_serial_baudrate">
+<code class="descclassname">VnSensor.</code><code class="descname">write_serial_baudrate</code><span class="sig-paren">(</span><em>baudrate</em>, <em>port=None</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_serial_baudrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes to the Serial Baud Rate register for the specified port.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_settings">
+<code class="descclassname">VnSensor.</code><code class="descname">write_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Issues a Write Settings command to the VectorNav Sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_startup_filter_bias_estimate">
+<code class="descclassname">VnSensor.</code><code class="descname">write_startup_filter_bias_estimate</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_startup_filter_bias_estimate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_startup_filter_bias_estimate</code><span class="sig-paren">(</span><em>gyro_bias</em>, <em>accel_bias</em>, <em>pressure_bias</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Startup Filter Bias Estimate register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_synchronization_control">
+<code class="descclassname">VnSensor.</code><code class="descname">write_synchronization_control</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_synchronization_control" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_synchronization_control</code><span class="sig-paren">(</span><em>sync_in_mode</em>, <em>sync_in_edge</em>, <em>sync_in_skip_factor</em>, <em>sync_out_mode</em>, <em>sync_out_polarity</em>, <em>sync_out_skip_factor</em>, <em>sync_out_pulse_width</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Synchronization Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_synchronization_status">
+<code class="descclassname">VnSensor.</code><code class="descname">write_synchronization_status</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_synchronization_status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_synchronization_status</code><span class="sig-paren">(</span><em>sync_in_count</em>, <em>sync_in_time</em>, <em>sync_out_count</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Synchronization Status register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_user_tag">
+<code class="descclassname">VnSensor.</code><code class="descname">write_user_tag</code><span class="sig-paren">(</span><em>tag</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_user_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes to the User Tag register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_velocity_compensation_control">
+<code class="descclassname">VnSensor.</code><code class="descname">write_velocity_compensation_control</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_velocity_compensation_control" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_velocity_compensation_control</code><span class="sig-paren">(</span><em>mode</em>, <em>velocity_tuning</em>, <em>rate_tuning</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the Velocity Compensation Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_velocity_compensation_measurement">
+<code class="descclassname">VnSensor.</code><code class="descname">write_velocity_compensation_measurement</code><span class="sig-paren">(</span><em>velocity</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_velocity_compensation_measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes to the Velocity Compensation Measurement register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_vpe_basic_control">
+<code class="descclassname">VnSensor.</code><code class="descname">write_vpe_basic_control</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_vpe_basic_control" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_vpe_basic_control</code><span class="sig-paren">(</span><em>enable</em>, <em>heading_mode</em>, <em>filtering_mode</em>, <em>tuning_mode</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the VPE Basic Control register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_vpe_accelerometer_advanced_tuning">
+<code class="descclassname">VnSensor.</code><code class="descname">write_vpe_accelerometer_advanced_tuning</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_vpe_accelerometer_advanced_tuning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_vpe_accelerometer_advanced_tuning</code><span class="sig-paren">(</span><em>min_filtering</em>, <em>max_filtering</em>, <em>max_adapt_rate</em>, <em>disturbance_window</em>, <em>max_tuning</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the VPE Accelerometer Advanced Tuning register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_vpe_accelerometer_basic_tuning">
+<code class="descclassname">VnSensor.</code><code class="descname">write_vpe_accelerometer_basic_tuning</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_vpe_accelerometer_basic_tuning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_vpe_accelerometer_basic_tuning</code><span class="sig-paren">(</span><em>base_tuning</em>, <em>adaptive_tuning</em>, <em>adaptive_filtering</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the VPE Accelerometer Basic Tuning register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_vpe_gyro_basic_tuning">
+<code class="descclassname">VnSensor.</code><code class="descname">write_vpe_gyro_basic_tuning</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_vpe_gyro_basic_tuning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_vpe_gyro_basic_tuning</code><span class="sig-paren">(</span><em>angular_walk_variance</em>, <em>base_tuning</em>, <em>adaptive_tuning</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the VPE Gryo Basic Tuning register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_vpe_magnetometer_advanced_tuning">
+<code class="descclassname">VnSensor.</code><code class="descname">write_vpe_magnetometer_advanced_tuning</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_vpe_magnetometer_advanced_tuning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_vpe_magnetometer_advanced_tuning</code><span class="sig-paren">(</span><em>min_filtering</em>, <em>max_filtering</em>, <em>max_adapt_rate</em>, <em>disturbance_window</em>, <em>max_tuning</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the VPE Magnetometer Advanced Tuning register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.VnSensor.write_vpe_magnetometer_basic_tuning">
+<code class="descclassname">VnSensor.</code><code class="descname">write_vpe_magnetometer_basic_tuning</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.VnSensor.write_vpe_magnetometer_basic_tuning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descclassname">VnSensor.</code><code class="descname">write_vpe_magnetometer_basic_tuning</code><span class="sig-paren">(</span><em>base_tuning</em>, <em>adaptive_tuning</em>, <em>adaptive_filtering</em><span class="sig-paren">)</span></dt>
+<dd><p>Writes to the VPE Magnetometer Basic Tuning register.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="attitude-objects">
+<h2><a class="reference internal" href="#vnpy.Attitude" title="vnpy.Attitude"><code class="xref py py-class docutils literal"><span class="pre">Attitude</span></code></a> Objects<a class="headerlink" href="#attitude-objects" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.Attitude">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">Attitude</code><a class="headerlink" href="#vnpy.Attitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents an orientation of an object regardless of the underlying data type (i.e. yaw, pitch,
+roll, quaternion, direction cosine matrix). Allows easy conversion between these types.</p>
+</dd></dl>
+
+<p>Class attributes are:</p>
+<dl class="attribute">
+<dt id="vnpy.Attitude.ypr_degs">
+<code class="descclassname">Attitude.</code><code class="descname">ypr_degs</code><a class="headerlink" href="#vnpy.Attitude.ypr_degs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yaw, pitch, roll representation in degrees.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.Attitude.ypr_rads">
+<code class="descclassname">Attitude.</code><code class="descname">ypr_rads</code><a class="headerlink" href="#vnpy.Attitude.ypr_rads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yaw, pitch, roll representation in radians.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.Attitude.quat">
+<code class="descclassname">Attitude.</code><code class="descname">quat</code><a class="headerlink" href="#vnpy.Attitude.quat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quaternion representation.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.Attitude.dcm">
+<code class="descclassname">Attitude.</code><code class="descname">dcm</code><a class="headerlink" href="#vnpy.Attitude.dcm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Direction cosine matrix representation.</p>
+</dd></dl>
+
+<p>Class methods are:</p>
+<dl class="classmethod">
+<dt id="vnpy.Attitude.no_rotation">
+<em class="property">classmethod </em><code class="descclassname">Attitude.</code><code class="descname">no_rotation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.Attitude.no_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a object with no rotation.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="vnpy.Attitude.from_quat">
+<em class="property">classmethod </em><code class="descclassname">Attitude.</code><code class="descname">from_quat</code><span class="sig-paren">(</span><em>quat</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.Attitude.from_quat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an <a class="reference internal" href="#vnpy.Attitude" title="vnpy.Attitude"><code class="xref py py-class docutils literal"><span class="pre">Attitude</span></code></a> object from the provided quaternion representation.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="vnpy.Attitude.from_ypr_degs">
+<em class="property">classmethod </em><code class="descclassname">Attitude.</code><code class="descname">from_ypr_degs</code><span class="sig-paren">(</span><em>ypr</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.Attitude.from_ypr_degs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an <a class="reference internal" href="#vnpy.Attitude" title="vnpy.Attitude"><code class="xref py py-class docutils literal"><span class="pre">Attitude</span></code></a> object from the provided yaw, pitch, roll representation in degrees.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="vnpy.Attitude.from_ypr_rads">
+<em class="property">classmethod </em><code class="descclassname">Attitude.</code><code class="descname">from_ypr_rads</code><span class="sig-paren">(</span><em>ypr</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.Attitude.from_ypr_rads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an <a class="reference internal" href="#vnpy.Attitude" title="vnpy.Attitude"><code class="xref py py-class docutils literal"><span class="pre">Attitude</span></code></a> object from the provided yaw, pitch, roll representation in radians.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="vnpy.Attitude.from_dcm">
+<em class="property">classmethod </em><code class="descclassname">Attitude.</code><code class="descname">from_dcm</code><span class="sig-paren">(</span><em>dcm</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.Attitude.from_dcm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an <a class="reference internal" href="#vnpy.Attitude" title="vnpy.Attitude"><code class="xref py py-class docutils literal"><span class="pre">Attitude</span></code></a> object from the provided direction cosine matrix representation.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="position-objects">
+<h2><a class="reference internal" href="#vnpy.Position" title="vnpy.Position"><code class="xref py py-class docutils literal"><span class="pre">Position</span></code></a> Objects<a class="headerlink" href="#position-objects" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.Position">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">Position</code><a class="headerlink" href="#vnpy.Position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents the position/location of an object regardless of the underlying data type. Allows easy conversion between
+these types.</p>
+</dd></dl>
+
+<p>Class methods are:</p>
+<dl class="classmethod">
+<dt id="vnpy.Attitude.from_lla">
+<em class="property">classmethod </em><code class="descclassname">Attitude.</code><code class="descname">from_lla</code><span class="sig-paren">(</span><em>lla</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.Attitude.from_lla" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a <a class="reference internal" href="#vnpy.Position" title="vnpy.Position"><code class="xref py py-class docutils literal"><span class="pre">Position</span></code></a> object from the given latitude, longitude, altitude (LLA) values.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="vnpy.Attitude.from_ecef">
+<em class="property">classmethod </em><code class="descclassname">Attitude.</code><code class="descname">from_ecef</code><span class="sig-paren">(</span><em>ecef</em><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.Attitude.from_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a <a class="reference internal" href="#vnpy.Position" title="vnpy.Position"><code class="xref py py-class docutils literal"><span class="pre">Position</span></code></a> object from the given earth-centered, earth-fixed (ECEF) values.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="vec3f-objects">
+<h2><a class="reference internal" href="#vnpy.vec3f" title="vnpy.vec3f"><code class="xref py py-class docutils literal"><span class="pre">vec3f</span></code></a> Objects<a class="headerlink" href="#vec3f-objects" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.vec3f">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">vec3f</code><a class="headerlink" href="#vnpy.vec3f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a 3-component vector based on single-precision floats.</p>
+</dd></dl>
+
+<p>Class attributes are:</p>
+<dl class="attribute">
+<dt id="vnpy.vec3f.x">
+<code class="descclassname">vec3f.</code><code class="descname">x</code><a class="headerlink" href="#vnpy.vec3f.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>The X (0-component).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.vec3f.y">
+<code class="descclassname">vec3f.</code><code class="descname">y</code><a class="headerlink" href="#vnpy.vec3f.y" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Y (1-component).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.vec3f.z">
+<code class="descclassname">vec3f.</code><code class="descname">z</code><a class="headerlink" href="#vnpy.vec3f.z" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Z (2-component).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="vec4f-objects">
+<h2><a class="reference internal" href="#vnpy.vec4f" title="vnpy.vec4f"><code class="xref py py-class docutils literal"><span class="pre">vec4f</span></code></a> Objects<a class="headerlink" href="#vec4f-objects" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.vec4f">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">vec4f</code><a class="headerlink" href="#vnpy.vec4f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a 4-component vector based on single-precision floats.</p>
+</dd></dl>
+
+<p>Class attributes are:</p>
+<dl class="attribute">
+<dt id="vnpy.vec4f.x">
+<code class="descclassname">vec4f.</code><code class="descname">x</code><a class="headerlink" href="#vnpy.vec4f.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>The X (0-component).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.vec4f.y">
+<code class="descclassname">vec4f.</code><code class="descname">y</code><a class="headerlink" href="#vnpy.vec4f.y" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Y (1-component).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.vec4f.z">
+<code class="descclassname">vec4f.</code><code class="descname">z</code><a class="headerlink" href="#vnpy.vec4f.z" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Z (2-component).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.vec4f.w">
+<code class="descclassname">vec4f.</code><code class="descname">w</code><a class="headerlink" href="#vnpy.vec4f.w" title="Permalink to this definition">¶</a></dt>
+<dd><p>The W (3-component).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="mat3f-objects">
+<h2><a class="reference internal" href="#vnpy.mat3f" title="vnpy.mat3f"><code class="xref py py-class docutils literal"><span class="pre">mat3f</span></code></a> Objects<a class="headerlink" href="#mat3f-objects" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.mat3f">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">mat3f</code><a class="headerlink" href="#vnpy.mat3f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a 3x3 matrix based on single-precision floats.</p>
+</dd></dl>
+
+<p>Class attributes are:</p>
+<dl class="attribute">
+<dt id="vnpy.mat3f.e00">
+<code class="descclassname">mat3f.</code><code class="descname">e00</code><a class="headerlink" href="#vnpy.mat3f.e00" title="Permalink to this definition">¶</a></dt>
+<dd><p>The element at row 0, column 0.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.mat3f.e01">
+<code class="descclassname">mat3f.</code><code class="descname">e01</code><a class="headerlink" href="#vnpy.mat3f.e01" title="Permalink to this definition">¶</a></dt>
+<dd><p>The element at row 0, column 1.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.mat3f.e02">
+<code class="descclassname">mat3f.</code><code class="descname">e02</code><a class="headerlink" href="#vnpy.mat3f.e02" title="Permalink to this definition">¶</a></dt>
+<dd><p>The element at row 0, column 2.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.mat3f.e10">
+<code class="descclassname">mat3f.</code><code class="descname">e10</code><a class="headerlink" href="#vnpy.mat3f.e10" title="Permalink to this definition">¶</a></dt>
+<dd><p>The element at row 1, column 0.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.mat3f.e11">
+<code class="descclassname">mat3f.</code><code class="descname">e11</code><a class="headerlink" href="#vnpy.mat3f.e11" title="Permalink to this definition">¶</a></dt>
+<dd><p>The element at row 1, column 1.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.mat3f.e12">
+<code class="descclassname">mat3f.</code><code class="descname">e12</code><a class="headerlink" href="#vnpy.mat3f.e12" title="Permalink to this definition">¶</a></dt>
+<dd><p>The element at row 1, column 2.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.mat3f.e20">
+<code class="descclassname">mat3f.</code><code class="descname">e20</code><a class="headerlink" href="#vnpy.mat3f.e20" title="Permalink to this definition">¶</a></dt>
+<dd><p>The element at row 2, column 0.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.mat3f.e21">
+<code class="descclassname">mat3f.</code><code class="descname">e21</code><a class="headerlink" href="#vnpy.mat3f.e21" title="Permalink to this definition">¶</a></dt>
+<dd><p>The element at row 2, column 1.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.mat3f.e22">
+<code class="descclassname">mat3f.</code><code class="descname">e22</code><a class="headerlink" href="#vnpy.mat3f.e22" title="Permalink to this definition">¶</a></dt>
+<dd><p>The element at row 2, column 2.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="packet-objects">
+<h2><a class="reference internal" href="#vnpy.Packet" title="vnpy.Packet"><code class="xref py py-class docutils literal"><span class="pre">Packet</span></code></a> Objects<a class="headerlink" href="#packet-objects" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vnpy.Packet">
+<em class="property">class </em><code class="descclassname">vnpy.</code><code class="descname">Packet</code><a class="headerlink" href="#vnpy.Packet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps a VectorNav UART packet with associated tools for parsing.</p>
+</dd></dl>
+
+<p>Class attributes are:</p>
+<dl class="attribute">
+<dt id="vnpy.Packet.is_valid">
+<code class="descclassname">Packet.</code><code class="descname">is_valid</code><a class="headerlink" href="#vnpy.Packet.is_valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs data integrity check on the data packet. This will be either 8-bit XOR checksum, CRC16-CCITT CRC, or no
+check depending on the provided data integrity type in the packet.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.Packet.type">
+<code class="descclassname">Packet.</code><code class="descname">type</code><a class="headerlink" href="#vnpy.Packet.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type of packet.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.Packet.datastr">
+<code class="descclassname">Packet.</code><code class="descname">datastr</code><a class="headerlink" href="#vnpy.Packet.datastr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the encapsulated data as a string.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.Packet.is_error">
+<code class="descclassname">Packet.</code><code class="descname">is_error</code><a class="headerlink" href="#vnpy.Packet.is_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if the packet is an ASCII error message.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.Packet.is_response">
+<code class="descclassname">Packet.</code><code class="descname">is_response</code><a class="headerlink" href="#vnpy.Packet.is_response" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if the packet is a response to a message sent to the sensor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="vnpy.Packet.is_ascii_response">
+<code class="descclassname">Packet.</code><code class="descname">is_ascii_response</code><a class="headerlink" href="#vnpy.Packet.is_ascii_response" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates if the packet is an ASCII asynchronous message.</p>
+</dd></dl>
+
+<p>Class methods are:</p>
+<dl class="method">
+<dt id="vnpy.Packet.determine_ascii_async_type">
+<code class="descclassname">Packet.</code><code class="descname">determine_ascii_async_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.Packet.determine_ascii_async_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the type of ASCII asynchronous message this packet is.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vnpy.Packet.parse_error">
+<code class="descclassname">Packet.</code><code class="descname">parse_error</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vnpy.Packet.parse_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses an error packet to get the error type.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Library API Documentation</a><ul>
+<li><a class="reference internal" href="#available-types">Available Types</a></li>
+<li><a class="reference internal" href="#compositedata-objects"><code class="docutils literal"><span class="pre">CompositeData</span></code> Objects</a></li>
+<li><a class="reference internal" href="#ezasyncdata-objects"><code class="docutils literal"><span class="pre">EzAsyncData</span></code> Objects</a></li>
+<li><a class="reference internal" href="#vnsensor-objects"><code class="docutils literal"><span class="pre">VnSensor</span></code> Objects</a></li>
+<li><a class="reference internal" href="#attitude-objects"><code class="docutils literal"><span class="pre">Attitude</span></code> Objects</a></li>
+<li><a class="reference internal" href="#position-objects"><code class="docutils literal"><span class="pre">Position</span></code> Objects</a></li>
+<li><a class="reference internal" href="#vec3f-objects"><code class="docutils literal"><span class="pre">vec3f</span></code> Objects</a></li>
+<li><a class="reference internal" href="#vec4f-objects"><code class="docutils literal"><span class="pre">vec4f</span></code> Objects</a></li>
+<li><a class="reference internal" href="#mat3f-objects"><code class="docutils literal"><span class="pre">mat3f</span></code> Objects</a></li>
+<li><a class="reference internal" href="#packet-objects"><code class="docutils literal"><span class="pre">Packet</span></code> Objects</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples.html"
+                        title="previous chapter">&lt;no title&gt;</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="getting_started.html"
+                        title="next chapter">Getting Started</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/vnpyapi.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="getting_started.html" title="Getting Started"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="&lt;no title&gt;"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">VectorNav Python Library 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016 (c) VectorNav Technologies, LLC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
+    </div>
+  </body>
+</html>
