@@ -320,7 +320,7 @@ void binaryMessageReceived(void * user_data, Packet & p, size_t index)
                     ROS_ERROR_STREAM("sync_in skipped by " << count_diff - 1);
                 }
                 double syncInTime = (ins_binary_data.gps_time - ins_binary_data.sync_in_time) * 1e-9;
-                ROS_INFO_STREAM("Received strobe count:" << ins_binary_data.sync_in_count << " at GPS time "
+                ROS_DEBUG_STREAM("Received strobe count:" << ins_binary_data.sync_in_count << " at GPS time "
                         << std::fixed << std::setw(12) << syncInTime);
                 last_sync_in_count = ins_binary_data.sync_in_count;
                 publish_sync_in();
