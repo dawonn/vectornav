@@ -79,23 +79,15 @@ struct ins_binary_data_struct
 {
     uint64_t gps_time;
     uint64_t sync_in_time;
-    float yaw;
-    float pitch;
-    float roll;
-    double latitude;
-    double longitude;
-    double altitude;
-    float vel_north;
-    float vel_east;
-    float vel_down;
+    vn::math::vec3f ypr;
+    vn::math::vec3d lla;
+    vn::math::vec3f vel_ned;
     uint16_t ins_status;
     uint32_t sync_in_count;
-    float yaw_sigma;
-    float pitch_sigma;
-    float roll_sigma;
+    vn::math::vec3f ypru;
     float pos_sigma;
     float vel_sigma;
-} __attribute__((packed));
+};
 
 ins_binary_data_struct ins_binary_data;
 
@@ -108,7 +100,7 @@ struct utc_time_struct
     uint8_t minute;
     uint8_t second;
     uint16_t millisecond;
-} __attribute__((packed));
+};
 
 struct gps_binary_data_struct
 {
@@ -117,31 +109,21 @@ struct gps_binary_data_struct
     uint16_t week;
     uint8_t  num_sats;
     uint8_t  fix;
-    double latitude;
-    double longitude;
-    double altitude;
-    float vel_north;
-    float vel_east;
-    float vel_down;
-    float north_sigma;
-    float east_sigma;
-    float down_sigma;
+    vn::math::vec3d lla;
+    vn::math::vec3f vel_ned;
+    vn::math::vec3f posu;
     float vel_sigma;
     float time_sigma;
-} __attribute__((packed));
+};
 
 struct gps_binary_data_struct gps_binary_data;
 
 struct imu_binary_data_struct
 {
     uint64_t gps_time;
-    float accel_x;
-    float accel_y;
-    float accel_z;
-    float rotr_x;
-    float rotr_y;
-    float rotr_z;
-} __attribute__((packed));
+    vn::math::vec3f accel;
+    vn::math::vec3f angular_rate;
+};
 
 struct imu_binary_data_struct imu_binary_data;
 
@@ -184,17 +166,17 @@ void publish_gps_data()
         msg_gps.GpsFix  = gps_binary_data.fix;
         msg_gps.NumSats = gps_binary_data.num_sats;
 
-        msg_gps.LLA.x = gps_binary_data.latitude;
-        msg_gps.LLA.y = gps_binary_data.longitude;
-        msg_gps.LLA.z = gps_binary_data.altitude;
+        msg_gps.LLA.x = gps_binary_data.lla[0];
+        msg_gps.LLA.y = gps_binary_data.lla[1];
+        msg_gps.LLA.z = gps_binary_data.lla[2];
 
-        msg_gps.NedVel.x = gps_binary_data.vel_north;
-        msg_gps.NedVel.y = gps_binary_data.vel_east;
-        msg_gps.NedVel.z = gps_binary_data.vel_down;
+        msg_gps.NedVel.x = gps_binary_data.vel_ned[0];
+        msg_gps.NedVel.y = gps_binary_data.vel_ned[1];
+        msg_gps.NedVel.z = gps_binary_data.vel_ned[2];
 
-        msg_gps.NedAcc.x = gps_binary_data.north_sigma;
-        msg_gps.NedAcc.y = gps_binary_data.east_sigma;
-        msg_gps.NedAcc.z = gps_binary_data.down_sigma;
+        msg_gps.NedAcc.x = gps_binary_data.posu[0];
+        msg_gps.NedAcc.y = gps_binary_data.posu[1];
+        msg_gps.NedAcc.z = gps_binary_data.posu[2];
 
         msg_gps.SpeedAcc = gps_binary_data.vel_sigma;
         msg_gps.TimeAcc  = gps_binary_data.time_sigma;
@@ -219,21 +201,22 @@ void publish_ins_data()
         msg_ins.Week    = gps_binary_data.week;
         msg_ins.Status  = ins_binary_data.ins_status;
 
-        msg_ins.RPY.x = ins_binary_data.roll; // Intentional re-ordering
-        msg_ins.RPY.y = ins_binary_data.pitch;
-        msg_ins.RPY.z = ins_binary_data.yaw;
+        msg_ins.RPY.x = ins_binary_data.ypr[2]; // Intentional re-ordering
+        msg_ins.RPY.y = ins_binary_data.ypr[1];
+        msg_ins.RPY.z = ins_binary_data.ypr[0];
 
-        msg_ins.LLA.x = ins_binary_data.latitude;
-        msg_ins.LLA.y = ins_binary_data.longitude;
-        msg_ins.LLA.z = ins_binary_data.altitude;
+        msg_ins.LLA.x = ins_binary_data.lla[0];
+        msg_ins.LLA.y = ins_binary_data.lla[1];
+        msg_ins.LLA.z = ins_binary_data.lla[2];
 
-        msg_ins.NedVel.x = ins_binary_data.vel_north;
-        msg_ins.NedVel.y = ins_binary_data.vel_east;
-        msg_ins.NedVel.z = ins_binary_data.vel_down;
+        msg_ins.NedVel.x = ins_binary_data.vel_ned[0];
+        msg_ins.NedVel.y = ins_binary_data.vel_ned[1];
+        msg_ins.NedVel.z = ins_binary_data.vel_ned[2];
 
-        msg_ins.RollUncertainty = ins_binary_data.roll_sigma;
-        msg_ins.PitchUncertainty = ins_binary_data.pitch_sigma;
-        msg_ins.YawUncertainty = ins_binary_data.yaw_sigma;
+        msg_ins.RollUncertainty = ins_binary_data.ypru[2];
+        msg_ins.PitchUncertainty = ins_binary_data.ypru[1];
+        msg_ins.YawUncertainty = ins_binary_data.ypru[0];
+
         msg_ins.PosUncertainty  = ins_binary_data.pos_sigma;
         msg_ins.VelUncertainty  = ins_binary_data.vel_sigma;
 
@@ -255,13 +238,13 @@ void publish_imu_data()
         msg_sensors.header.stamp    = timestamp;
         msg_sensors.header.frame_id = "imu";
         msg_sensors.gps_time 	    = (double)imu_binary_data.gps_time*1E-9;
-        msg_sensors.Accel.x = imu_binary_data.accel_x;
-        msg_sensors.Accel.y = imu_binary_data.accel_y;
-        msg_sensors.Accel.z = imu_binary_data.accel_z;
+        msg_sensors.Accel.x = imu_binary_data.accel[0];
+        msg_sensors.Accel.y = imu_binary_data.accel[1];
+        msg_sensors.Accel.z = imu_binary_data.accel[2];
 
-        msg_sensors.Gyro.x = imu_binary_data.rotr_x;
-        msg_sensors.Gyro.y = imu_binary_data.rotr_y;
-        msg_sensors.Gyro.z = imu_binary_data.rotr_z;
+        msg_sensors.Gyro.x = imu_binary_data.angular_rate[0];
+        msg_sensors.Gyro.y = imu_binary_data.angular_rate[1];
+        msg_sensors.Gyro.z = imu_binary_data.angular_rate[2];
 
         pub_sensors.publish(msg_sensors);
     }
@@ -291,8 +274,23 @@ void binaryMessageReceived(void * user_data, Packet & p, size_t index)
         switch (p.groups()) {
         case gps_group_signature:
             ++gps_msg_count;
-            raw_data = p.datastr();
-            memcpy(&gps_binary_data, raw_data.c_str(), raw_data.size());
+            gps_binary_data.utc_time.year =        p.extractUint8();
+            gps_binary_data.utc_time.month =       p.extractUint8();
+            gps_binary_data.utc_time.day =         p.extractUint8();
+            gps_binary_data.utc_time.hour =        p.extractUint8();
+            gps_binary_data.utc_time.minute =      p.extractUint8();
+            gps_binary_data.utc_time.second =      p.extractUint8();
+            gps_binary_data.utc_time.millisecond = p.extractUint16();
+
+            gps_binary_data.tow =        p.extractUint64();
+            gps_binary_data.week =       p.extractUint16();
+            gps_binary_data.num_sats =   p.extractUint8();
+            gps_binary_data.fix =        p.extractUint8();
+            gps_binary_data.lla =        p.extractVec3d();
+            gps_binary_data.vel_ned =    p.extractVec3f();
+            gps_binary_data.posu =       p.extractVec3f();
+            gps_binary_data.vel_sigma =  p.extractFloat();
+            gps_binary_data.time_sigma = p.extractFloat();
 
             publish_gps_data();
             if (remainder(gps_msg_count, 16) == 0) {
@@ -302,39 +300,61 @@ void binaryMessageReceived(void * user_data, Packet & p, size_t index)
             break;
         case ins_group_signature:
             ++ins_msg_count;
-            raw_data = p.datastr();
-            memcpy(&ins_binary_data, raw_data.c_str(), raw_data.size());
+            ins_binary_data.gps_time =      p.extractUint64();
+            ins_binary_data.sync_in_time =  p.extractUint64();
+            ins_binary_data.ypr =           p.extractVec3f();
+            ins_binary_data.lla =           p.extractVec3d();
+            ins_binary_data.vel_ned =       p.extractVec3f();
+            ins_binary_data.ins_status =    p.extractUint16();
+            ins_binary_data.sync_in_count = p.extractUint32();
+            ins_binary_data.ypru =          p.extractVec3f();
+            ins_binary_data.pos_sigma =     p.extractFloat();
+            ins_binary_data.vel_sigma =     p.extractFloat();
+
             publish_ins_data();
 
-            if (last_sync_in_count != ins_binary_data.sync_in_count) {
+            if (ins_binary_data.sync_in_count > last_sync_in_count) {
+                const int count_diff =
+                  ins_binary_data.sync_in_count - last_sync_in_count;
+                if (count_diff > 1 && last_sync_in_count != 0) {
+                    ROS_ERROR_STREAM("sync_in skipped by " << count_diff - 1);
+                }
                 double syncInTime = (ins_binary_data.gps_time - ins_binary_data.sync_in_time) * 1e-9;
-                ROS_DEBUG_STREAM("Received strobe count:" << ins_binary_data.sync_in_count << " at GPS time "
+                ROS_INFO_STREAM("Received strobe count:" << ins_binary_data.sync_in_count << " at GPS time "
                         << std::fixed << std::setw(12) << syncInTime);
                 last_sync_in_count = ins_binary_data.sync_in_count;
                 publish_sync_in();
+            } else if (ins_binary_data.sync_in_count < last_sync_in_count) {
+                ROS_FATAL("sync in count moved in reverse. Check hardware.");
+                exit(EXIT_FAILURE);
+            } else {
+                // This is potentially fine if the pulse rate is slower than
+                // ins rate.
             }
 
             if (remainder(ins_msg_count, 100) == 0) {
                 ins_msg_count = 0;
                 ROS_INFO_STREAM("INS_Time: " << ins_binary_data.gps_time*1E-9 << " Yaw: " <<
-                        ins_binary_data.yaw << " Pitch: " << ins_binary_data.pitch <<
-                        " Roll: " << ins_binary_data.roll << " INS_Status: " <<
-                        ins_binary_data.ins_status << " latitude: " << ins_binary_data.latitude <<
-                        " longitude: " << ins_binary_data.longitude << " altitude: " << ins_binary_data.altitude);
+                        ins_binary_data.ypr[0] << " Pitch: " << ins_binary_data.ypr[1] <<
+                        " Roll: " << ins_binary_data.ypr[2] << " INS_Status: " <<
+                        ins_binary_data.ins_status << " latitude: " << ins_binary_data.lla[0] <<
+                        " longitude: " << ins_binary_data.lla[1] << " altitude: " << ins_binary_data.lla[2]);
             }
             break;
         case imu_group_signature:
             ++imu_msg_count;
-            raw_data = p.datastr();
-            memcpy(&imu_binary_data, raw_data.c_str(), raw_data.size());
+            imu_binary_data.gps_time =     p.extractUint64();
+            imu_binary_data.accel =        p.extractVec3f();
+            imu_binary_data.angular_rate = p.extractVec3f();
+
             publish_imu_data();
             if (remainder(imu_msg_count, 500) == 0) {
                 imu_msg_count = 0;
                 ROS_INFO_STREAM("IMU_Time: " << imu_binary_data.gps_time*1E-9 << " rotr_x: " <<
-                        imu_binary_data.rotr_x << " rotr_y: " << imu_binary_data.rotr_y <<
-                        " rotr_z: " << imu_binary_data.rotr_z << " accel_x: " <<
-                        imu_binary_data.accel_x << " accel_y: " << imu_binary_data.accel_y <<
-                        " accel_z: " << imu_binary_data.accel_z);
+                        imu_binary_data.angular_rate[0] << " rotr_y: " << imu_binary_data.angular_rate[1] <<
+                        " rotr_z: " << imu_binary_data.angular_rate[2] << " accel_x: " <<
+                        imu_binary_data.accel[0] << " accel_y: " << imu_binary_data.accel[1] <<
+                        " accel_z: " << imu_binary_data.accel[2]);
             }
             break;
         default:
@@ -362,10 +382,10 @@ void shutdownCallback(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result)
 {
     int num_params = 0;
 
-    if (params.getType() == XmlRpc::XmlRpcValue::TypeArray)
-    num_params = params.size();
-    if (num_params > 1)
-    {
+    if (params.getType() == XmlRpc::XmlRpcValue::TypeArray) {
+        num_params = params.size();
+    }
+    if (num_params > 1) {
         std::string reason = params[1];
         ROS_WARN("Shutdown request received. Reason: [%s]", reason.c_str());
         g_request_shutdown = 1; // Set flag
@@ -375,7 +395,7 @@ void shutdownCallback(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result)
 }
 
 /////////////////////////////////////////////////
-int main( int argc, char* argv[] )
+int main(int argc, char* argv[])
 {
     // Initialize ROS;
     ros::init(argc, argv, "vectornav", ros::init_options::NoSigintHandler);
@@ -472,7 +492,7 @@ int main( int argc, char* argv[] )
 
     GpsGroup gps_gps_group = GPSGROUP_UTC | GPSGROUP_TOW | GPSGROUP_WEEK
         | GPSGROUP_NUMSATS | GPSGROUP_FIX | GPSGROUP_POSLLA | GPSGROUP_VELNED
-        | GPSGROUP_VELU | GPSGROUP_TIMEU;
+        | GPSGROUP_POSU | GPSGROUP_VELU | GPSGROUP_TIMEU;
 
     BinaryOutputRegister gps_log_reg(
         binary_data_output_mode,
