@@ -34,6 +34,7 @@
 #include <ros/ros.h>
 #include <tf/tf.h>
 #include <signal.h>
+#include <time.h>
 // Message Types
 #include <vectornav/utc_time.h>
 #include <vectornav/gps.h>
@@ -75,22 +76,6 @@ int last_group_number = 0;
 std::string port;
 char vn_error_msg[100];
 
-struct ins_binary_data_struct 
-{
-    uint64_t gps_time;
-    uint64_t sync_in_time;
-    vn::math::vec3f ypr;
-    vn::math::vec3d lla;
-    vn::math::vec3f vel_ned;
-    uint16_t ins_status;
-    uint32_t sync_in_count;
-    vn::math::vec3f ypru;
-    float pos_sigma;
-    float vel_sigma;
-};
-
-ins_binary_data_struct ins_binary_data;
-
 struct utc_time_struct
 {
     uint8_t year;
@@ -101,6 +86,23 @@ struct utc_time_struct
     uint8_t second;
     uint16_t millisecond;
 };
+
+struct ins_binary_data_struct 
+{
+    uint64_t gps_time;
+    uint64_t sync_in_time;
+    vn::math::vec3f ypr;
+    vn::math::vec3d lla;
+    vn::math::vec3f vel_ned;
+    uint16_t ins_status;
+    uint32_t sync_in_count;
+    utc_time_struct utc_time;
+    vn::math::vec3f ypru;
+    float pos_sigma;
+    float vel_sigma;
+};
+
+ins_binary_data_struct ins_binary_data;
 
 struct gps_binary_data_struct
 {
@@ -137,9 +139,8 @@ const unsigned raw_imu_max_rate = 800;
 
 const unsigned gps_group_signature = BINARYGROUP_GPS;
 const unsigned ins_group_signature = BINARYGROUP_COMMON | BINARYGROUP_ATTITUDE
-                                     | BINARYGROUP_INS;
+                                     | BINARYGROUP_TIME | BINARYGROUP_INS;
 const unsigned imu_group_signature = BINARYGROUP_COMMON;
-
 
 void publish_gps_data()
 {
@@ -260,7 +261,28 @@ void publish_sync_in()
         msg_sync_in.header.seq      = sync_in_seq;
         msg_sync_in.header.stamp    = timestamp;
         msg_sync_in.header.frame_id = "sync_in";
-        msg_sync_in.gps_time 	    = (double)(ins_binary_data.gps_time-ins_binary_data.sync_in_time)*1E-9;
+
+        std::tm utc_formatted_time;
+        // vectornav decided to start from 2000, whereas struct tm measures
+        // from 1900.
+        utc_formatted_time.tm_year  = ins_binary_data.utc_time.year + 100;
+
+        // vectornav encodes months counting from 1, whereas struct tm
+        // counts from 0.
+        utc_formatted_time.tm_mon   = ins_binary_data.utc_time.month - 1;
+        utc_formatted_time.tm_mday  = ins_binary_data.utc_time.day;
+        utc_formatted_time.tm_hour  = ins_binary_data.utc_time.hour;
+        utc_formatted_time.tm_min   = ins_binary_data.utc_time.minute;
+        utc_formatted_time.tm_sec   = ins_binary_data.utc_time.second;
+        utc_formatted_time.tm_wday  = 0; // Ignored by mktime.
+        utc_formatted_time.tm_yday  = 0; // Ignored by mktime.
+        utc_formatted_time.tm_isdst = 0; // UTC never sets daylight savings.
+
+        std::time_t epoch_time = timegm(&utc_formatted_time);
+        double epoch_time_s = static_cast<double>(epoch_time) +
+          static_cast<double>(ins_binary_data.utc_time.millisecond)*1e-3;
+        double sync_in_delta = static_cast<double>(ins_binary_data.sync_in_time)*1e-9;
+        msg_sync_in.utc_time 	    = epoch_time_s - sync_in_delta;
         msg_sync_in.sync_in_count   = ins_binary_data.sync_in_count;
 
         pub_sync_in.publish(msg_sync_in);
@@ -307,6 +329,15 @@ void binaryMessageReceived(void * user_data, Packet & p, size_t index)
             ins_binary_data.vel_ned =       p.extractVec3f();
             ins_binary_data.ins_status =    p.extractUint16();
             ins_binary_data.sync_in_count = p.extractUint32();
+
+            ins_binary_data.utc_time.year =        p.extractUint8();
+            ins_binary_data.utc_time.month =       p.extractUint8();
+            ins_binary_data.utc_time.day =         p.extractUint8();
+            ins_binary_data.utc_time.hour =        p.extractUint8();
+            ins_binary_data.utc_time.minute =      p.extractUint8();
+            ins_binary_data.utc_time.second =      p.extractUint8();
+            ins_binary_data.utc_time.millisecond = p.extractUint16();
+
             ins_binary_data.ypru =          p.extractVec3f();
             ins_binary_data.pos_sigma =     p.extractFloat();
             ins_binary_data.vel_sigma =     p.extractFloat();
@@ -509,6 +540,8 @@ int main(int argc, char* argv[])
         | COMMONGROUP_YAWPITCHROLL | COMMONGROUP_POSITION
         | COMMONGROUP_VELOCITY | COMMONGROUP_INSSTATUS | COMMONGROUP_SYNCINCNT;
 
+    TimeGroup ins_time_group = TIMEGROUP_TIMEUTC;
+
     AttitudeGroup ins_attitude_group = ATTITUDEGROUP_YPRU;
 
     InsGroup ins_ins_group = INSGROUP_POSU | INSGROUP_VELU;
@@ -517,7 +550,7 @@ int main(int argc, char* argv[])
         binary_data_output_mode,
         raw_imu_max_rate / binary_ins_data_rate,
         ins_common_group,
-        TIMEGROUP_NONE,
+        ins_time_group,
         IMUGROUP_NONE,
         GPSGROUP_NONE,
         ins_attitude_group,
