@@ -41,7 +41,6 @@
 #include <vectornav/ins.h>
 #include <vectornav/sensors.h>
 
-#include <vectornav/sync_in.h>
 #include <ros/xmlrpc_manager.h>
 
 #include <iostream>
@@ -68,7 +67,6 @@ vn::sensors::VnSensor vn200;
 int ins_seq           = 0;
 int imu_seq           = 0;
 int gps_seq           = 0;
-int sync_in_seq       = 0;
 int msg_cnt           = 0;
 int last_group_number = 0;
 
@@ -132,8 +130,6 @@ struct imu_binary_data_struct imu_binary_data;
 int ins_msg_count = 0;
 int gps_msg_count = 0;
 int imu_msg_count = 0;
-
-unsigned last_sync_in_count = 0;
 
 const unsigned raw_imu_max_rate = 800;
 
@@ -221,8 +217,28 @@ void publish_ins_data()
         msg_ins.PosUncertainty  = ins_binary_data.pos_sigma;
         msg_ins.VelUncertainty  = ins_binary_data.vel_sigma;
 
-        msg_ins.SyncInTime = (double)(ins_binary_data.gps_time-ins_binary_data.sync_in_time)*1E-9;
-        msg_ins.SyncInCount = ins_binary_data.sync_in_count; 
+        std::tm utc_formatted_time;
+        // vectornav decided to start from 2000, whereas struct tm measures
+        // from 1900.
+        utc_formatted_time.tm_year  = ins_binary_data.utc_time.year + 100;
+
+        // vectornav encodes months counting from 1, whereas struct tm
+        // counts from 0.
+        utc_formatted_time.tm_mon   = ins_binary_data.utc_time.month - 1;
+        utc_formatted_time.tm_mday  = ins_binary_data.utc_time.day;
+        utc_formatted_time.tm_hour  = ins_binary_data.utc_time.hour;
+        utc_formatted_time.tm_min   = ins_binary_data.utc_time.minute;
+        utc_formatted_time.tm_sec   = ins_binary_data.utc_time.second;
+        utc_formatted_time.tm_wday  = 0; // Ignored by mktime.
+        utc_formatted_time.tm_yday  = 0; // Ignored by mktime.
+        utc_formatted_time.tm_isdst = 0; // UTC never sets daylight savings.
+
+        std::time_t epoch_time = timegm(&utc_formatted_time);
+        double epoch_time_s = static_cast<double>(epoch_time) +
+          static_cast<double>(ins_binary_data.utc_time.millisecond)*1e-3;
+        double sync_in_delta = static_cast<double>(ins_binary_data.sync_in_time)*1e-9;
+        msg_ins.SyncInTime 	    = epoch_time_s - sync_in_delta;
+        msg_ins.SyncInCount     = ins_binary_data.sync_in_count;
 
         pub_ins.publish(msg_ins);
     } 
@@ -248,44 +264,6 @@ void publish_imu_data()
         msg_sensors.Gyro.z = imu_binary_data.angular_rate[2];
 
         pub_sensors.publish(msg_sensors);
-    }
-}
-
-void publish_sync_in()
-{
-    ++sync_in_seq;
-    ros::Time timestamp =  ros::Time::now(); 
-    // sync_in from camera strobe
-    if (pub_sync_in.getNumSubscribers() > 0) {
-        vectornav::sync_in msg_sync_in;
-        msg_sync_in.header.seq      = sync_in_seq;
-        msg_sync_in.header.stamp    = timestamp;
-        msg_sync_in.header.frame_id = "sync_in";
-
-        std::tm utc_formatted_time;
-        // vectornav decided to start from 2000, whereas struct tm measures
-        // from 1900.
-        utc_formatted_time.tm_year  = ins_binary_data.utc_time.year + 100;
-
-        // vectornav encodes months counting from 1, whereas struct tm
-        // counts from 0.
-        utc_formatted_time.tm_mon   = ins_binary_data.utc_time.month - 1;
-        utc_formatted_time.tm_mday  = ins_binary_data.utc_time.day;
-        utc_formatted_time.tm_hour  = ins_binary_data.utc_time.hour;
-        utc_formatted_time.tm_min   = ins_binary_data.utc_time.minute;
-        utc_formatted_time.tm_sec   = ins_binary_data.utc_time.second;
-        utc_formatted_time.tm_wday  = 0; // Ignored by mktime.
-        utc_formatted_time.tm_yday  = 0; // Ignored by mktime.
-        utc_formatted_time.tm_isdst = 0; // UTC never sets daylight savings.
-
-        std::time_t epoch_time = timegm(&utc_formatted_time);
-        double epoch_time_s = static_cast<double>(epoch_time) +
-          static_cast<double>(ins_binary_data.utc_time.millisecond)*1e-3;
-        double sync_in_delta = static_cast<double>(ins_binary_data.sync_in_time)*1e-9;
-        msg_sync_in.utc_time 	    = epoch_time_s - sync_in_delta;
-        msg_sync_in.sync_in_count   = ins_binary_data.sync_in_count;
-
-        pub_sync_in.publish(msg_sync_in);
     }
 }
 
@@ -343,25 +321,6 @@ void binaryMessageReceived(void * user_data, Packet & p, size_t index)
             ins_binary_data.vel_sigma =     p.extractFloat();
 
             publish_ins_data();
-
-            if (ins_binary_data.sync_in_count > last_sync_in_count) {
-                const int count_diff =
-                  ins_binary_data.sync_in_count - last_sync_in_count;
-                if (count_diff > 1 && last_sync_in_count != 0) {
-                    ROS_ERROR_STREAM("sync_in skipped by " << count_diff - 1);
-                }
-                double syncInTime = (ins_binary_data.gps_time - ins_binary_data.sync_in_time) * 1e-9;
-                ROS_DEBUG_STREAM("Received strobe count:" << ins_binary_data.sync_in_count << " at GPS time "
-                        << std::fixed << std::setw(12) << syncInTime);
-                last_sync_in_count = ins_binary_data.sync_in_count;
-                publish_sync_in();
-            } else if (ins_binary_data.sync_in_count < last_sync_in_count) {
-                ROS_FATAL("sync in count moved in reverse. Check hardware.");
-                exit(EXIT_FAILURE);
-            } else {
-                // This is potentially fine if the pulse rate is slower than
-                // ins rate.
-            }
 
             if (remainder(ins_msg_count, 100) == 0) {
                 ins_msg_count = 0;
@@ -504,8 +463,6 @@ int main(int argc, char* argv[])
     pub_ins     = n_.advertise<vectornav::ins>    ("ins", 1000);
     pub_gps     = n_.advertise<vectornav::gps>    ("gps", 1000);
     pub_sensors = n_.advertise<vectornav::sensors>("imu", 1000);
-    pub_sync_in = n_.advertise<vectornav::sync_in>("sync_in", 1000);
-
 
     // Initialize VectorNav
     //VN_ERROR_CODE vn_retval;
