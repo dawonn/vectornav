@@ -67,16 +67,12 @@ add_subdirectory(vnproglib-1.1/cpp)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories( vnproglib-1.1/cpp/include )
-link_directories( vnproglib-1.1/cpp/build/bin )
+include_directories(vnproglib-1.1/cpp/include)
+link_directories(vnproglib-1.1/cpp/build/bin)
 
 ## Declare a cpp library
 ## Declare a cpp executable
 add_executable(vn200_node src/vn200_node.cpp)
-
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-# add_dependencies(vectornav_node vectornav_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(vn200_node
