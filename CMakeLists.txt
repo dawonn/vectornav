@@ -67,7 +67,7 @@ add_subdirectory(vnproglib-1.1/cpp)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(vnproglib-1.1/cpp/include)
+include_directories(vnproglib-1.1/cpp/include ${catkin_INCLUDE_DIRS})
 link_directories(vnproglib-1.1/cpp/build/bin)
 
 ## Declare a cpp library
