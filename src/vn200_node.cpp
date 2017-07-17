@@ -270,7 +270,7 @@ void publish_imu_data()
 void binaryMessageReceived(void * user_data, Packet & p, size_t index)
 {
     std::string raw_data;
-    if (p.type() == Packet::TYPE_BINARY && p.isValid()) {
+    if (p.type() == Packet::TYPE_BINARY) {
         switch (p.groups()) {
         case gps_group_signature:
             ++gps_msg_count;
@@ -350,9 +350,11 @@ void binaryMessageReceived(void * user_data, Packet & p, size_t index)
         default:
             ROS_WARN("Received unknown group signature from vectornav");
         }
-    } else {
-        ROS_WARN("Received invalid packet from vectornav.");
+    } else if (p.type() == Packet::TYPE_ASCII) {
+        ROS_WARN("Received ASCII packet from vectornav.");
         // Ignore non-binary packets for now.
+    } else {
+        ROS_WARN("Received UNKNOWN packet from vectornav.");
     }
 }
 
