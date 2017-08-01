@@ -63,6 +63,7 @@ ros::Publisher pub_sync_in;
 
 // Device
 vn::sensors::VnSensor vn200;
+vn::sensors::VnSensor vn200_2;
 
 int ins_seq           = 0;
 int imu_seq           = 0;
@@ -471,10 +472,17 @@ int main(int argc, char* argv[])
     try {
         vn200.connect(port, baud);
     } catch (...) {
-        ROS_FATAL("Could not conenct to vn200 on port:%s @ Baud:%d;"
+        ROS_FATAL("Could not connect to vn200 on port:%s @ Baud:%d;"
                 "Did you add your user to the 'dialout' group in /etc/group?", 
                 port.c_str(), 
                 baud); 
+        exit(EXIT_FAILURE);
+    }
+
+    try {
+        vn200_2.connect("/dev/ttyTHS1", 115200);
+    } catch (...) {
+        ROS_FATAL("Couldn't connect second serial port");
         exit(EXIT_FAILURE);
     }
 
