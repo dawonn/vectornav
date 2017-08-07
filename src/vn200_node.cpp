@@ -543,6 +543,7 @@ int main(int argc, char* argv[])
     vn200.writeBinaryOutput2(ins_log_reg);
     vn200.writeBinaryOutput3(imu_log_reg);
 
+    vn200_2.writeAsyncDataOutputType(VNGPS);
 
     ROS_INFO("About to set SynchronizationControl");
 
