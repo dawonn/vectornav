@@ -467,6 +467,7 @@ int main(int argc, char* argv[])
     pub_gps     = n_.advertise<vectornav::gps>    ("gps", 1000);
     pub_sensors = n_.advertise<vectornav::sensors>("imu", 1000);
 
+
     // Initialize VectorNav
     //VN_ERROR_CODE vn_retval;
     ROS_INFO("Initializing vn200. Port:%s Baud:%d\n", port.c_str(), baud);
@@ -481,12 +482,17 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
+    ROS_INFO("Initializing vn200_2. Port:%s Baud:%d\n", "/dev/ttyTHS1", baud);
+
     try {
-        vn200_2.connect("/dev/ttyTHS1", 115200);
+        vn200_2.connect("/dev/ttyTHS1", baud);
     } catch (...) {
         ROS_FATAL("Couldn't connect second serial port");
         exit(EXIT_FAILURE);
     }
+
+    vn200_2.writeAsyncDataOutputType(VNGPS);
+    vn200_2.disconnect();
 
     GpsGroup gps_gps_group = GPSGROUP_UTC | GPSGROUP_TOW | GPSGROUP_WEEK
         | GPSGROUP_NUMSATS | GPSGROUP_FIX | GPSGROUP_POSLLA | GPSGROUP_VELNED
@@ -542,8 +548,6 @@ int main(int argc, char* argv[])
     vn200.writeBinaryOutput1(gps_log_reg);
     vn200.writeBinaryOutput2(ins_log_reg);
     vn200.writeBinaryOutput3(imu_log_reg);
-
-    vn200_2.writeAsyncDataOutputType(VNGPS);
 
     ROS_INFO("About to set SynchronizationControl");
 
