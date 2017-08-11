@@ -63,7 +63,6 @@ ros::Publisher pub_sync_in;
 
 // Device
 vn::sensors::VnSensor vn200;
-vn::sensors::VnSensor vn200_2;
 
 int ins_seq           = 0;
 int imu_seq           = 0;
@@ -271,7 +270,7 @@ void publish_imu_data()
 void binaryMessageReceived(void * user_data, Packet & p, size_t index)
 {
     std::string raw_data;
-    if (p.type() == Packet::TYPE_BINARY) {
+    if (p.type() == Packet::TYPE_BINARY && p.isValid()) {
         switch (p.groups()) {
         case gps_group_signature:
             ++gps_msg_count;
@@ -351,11 +350,9 @@ void binaryMessageReceived(void * user_data, Packet & p, size_t index)
         default:
             ROS_WARN("Received unknown group signature from vectornav");
         }
-    } else if (p.type() == Packet::TYPE_ASCII) {
-        ROS_WARN("Received ASCII packet from vectornav.");
-        // Ignore non-binary packets for now.
     } else {
-        ROS_WARN("Received UNKNOWN packet from vectornav.");
+        ROS_WARN("Received invalid packet from vectornav.");
+        // Ignore non-binary packets for now.
     }
 }
 
@@ -467,7 +464,6 @@ int main(int argc, char* argv[])
     pub_gps     = n_.advertise<vectornav::gps>    ("gps", 1000);
     pub_sensors = n_.advertise<vectornav::sensors>("imu", 1000);
 
-
     // Initialize VectorNav
     //VN_ERROR_CODE vn_retval;
     ROS_INFO("Initializing vn200. Port:%s Baud:%d\n", port.c_str(), baud);
@@ -475,24 +471,12 @@ int main(int argc, char* argv[])
     try {
         vn200.connect(port, baud);
     } catch (...) {
-        ROS_FATAL("Could not connect to vn200 on port:%s @ Baud:%d;"
+        ROS_FATAL("Could not conenct to vn200 on port:%s @ Baud:%d;"
                 "Did you add your user to the 'dialout' group in /etc/group?", 
                 port.c_str(), 
                 baud); 
         exit(EXIT_FAILURE);
     }
-
-    ROS_INFO("Initializing vn200_2. Port:%s Baud:%d\n", "/dev/ttyTHS1", baud);
-
-    try {
-        vn200_2.connect("/dev/ttyTHS1", baud);
-    } catch (...) {
-        ROS_FATAL("Couldn't connect second serial port");
-        exit(EXIT_FAILURE);
-    }
-
-    vn200_2.writeAsyncDataOutputType(VNGPS);
-    vn200_2.disconnect();
 
     GpsGroup gps_gps_group = GPSGROUP_UTC | GPSGROUP_TOW | GPSGROUP_WEEK
         | GPSGROUP_NUMSATS | GPSGROUP_FIX | GPSGROUP_POSLLA | GPSGROUP_VELNED
@@ -542,8 +526,6 @@ int main(int argc, char* argv[])
         GPSGROUP_NONE,
         ATTITUDEGROUP_NONE,
         INSGROUP_NONE);
-
-    vn200.writeAsyncDataOutputType(VNOFF);
 
     vn200.writeBinaryOutput1(gps_log_reg);
     vn200.writeBinaryOutput2(ins_log_reg);
