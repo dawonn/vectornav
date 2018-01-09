@@ -113,7 +113,7 @@ def sub_insCB(msg_in):
   msg_gps.longitude       = msg_in.LLA.y
   msg_gps.altitude        = msg_in.LLA.z
   msg_gps.position_covariance_type  = NavSatFix.COVARIANCE_TYPE_APPROXIMATED
-  msg_gps.position_covariance[0]    = msg_in.PosUncerainty
+  msg_gps.position_covariance[0]    = msg_in.PosUncertainty
   pub_gps.publish(msg_gps)
   
   
