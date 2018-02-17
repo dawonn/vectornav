@@ -4,7 +4,7 @@ project(vectornav)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED tf)
+find_package(catkin REQUIRED roscpp)
 
 ## System dependencies are found with CMake's conventions
 #find_package(Boost REQUIRED COMPONENTS system)
@@ -20,13 +20,13 @@ find_package(catkin REQUIRED tf)
 #######################################
 
 # Generate messages in the 'msg' folder
- add_message_files(
-   FILES
-   ins.msg
-   gps.msg
-   sensors.msg
-   utc_time.msg
- )
+# add_message_files(
+#   FILES
+#   ins.msg
+#   gps.msg
+#   sensors.msg
+#   utc_time.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -36,11 +36,11 @@ find_package(catkin REQUIRED tf)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs 
-  geometry_msgs
-)
+#generate_messages(
+#  DEPENDENCIES
+#  std_msgs 
+#  geometry_msgs
+#)
 
 ###################################
 ## catkin specific configuration ##
@@ -54,7 +54,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES vectornav
-   CATKIN_DEPENDS roscpp sensor_msgs geometry_msgs tf
+   CATKIN_DEPENDS roscpp sensor_msgs
 #  DEPENDS system_lib
 )
 
@@ -72,10 +72,10 @@ link_directories(vnproglib-1.1/cpp/build/bin)
 
 ## Declare a cpp library
 ## Declare a cpp executable
-add_executable(vn200_node src/vn200_node.cpp)
+add_executable(vnpub src/main.cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(vn200_node
+target_link_libraries(vnpub
   vncxx
   ${catkin_LIBRARIES}
 )
@@ -89,13 +89,13 @@ target_link_libraries(vn200_node
 
 # Mark executable scripts (Python etc.) for installation
 
-install(PROGRAMS
-  scripts/gpsFix.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+#install(PROGRAMS
+#  scripts/gpsFix.py
+#  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#)
 
 ## Mark executables and/or libraries for installation
-install(TARGETS vn200_node
+install(TARGETS vnpub
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
