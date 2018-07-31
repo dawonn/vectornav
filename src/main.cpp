@@ -56,20 +56,21 @@ int main(int argc, char *argv[])
   // ROS node init
   ros::init(argc, argv, "vectornav");
   ros::NodeHandle n;
+  ros::NodeHandle pn("~");
   pubIMU = n.advertise<sensor_msgs::Imu>("vectornav/IMU", 1000);
   pubMag = n.advertise<sensor_msgs::MagneticField>("vectornav/Mag", 1000);
   pubGPS = n.advertise<sensor_msgs::NavSatFix>("vectornav/GPS", 1000);
   pubTemp = n.advertise<sensor_msgs::Temperature>("vectornav/Temp", 1000);
   pubPres = n.advertise<sensor_msgs::FluidPressure>("vectornav/Pres", 1000);
 
-  n.param<std::string>("frame_id", frame_id, "vectornav");
+  pn.param<std::string>("frame_id", frame_id, "vectornav");
 
   // Serial Port Settings
 	string SensorPort;	
 	int SensorBaudrate;
 	
-	n.param<std::string>("serial_port", SensorPort, "/dev/ttyUSB0");
-	n.param<int>("serial_baud", SensorBaudrate, 115200);
+	pn.param<std::string>("serial_port", SensorPort, "/dev/ttyUSB0");
+	pn.param<int>("serial_baud", SensorBaudrate, 115200);
 	
   ROS_INFO("Connecting to : %s @ %d Baud", SensorPort.c_str(), SensorBaudrate);
 
@@ -83,7 +84,7 @@ int main(int argc, char *argv[])
 
 	// Set Data output Freq [Hz]
 	int async_output_rate;
-	n.param<int>("async_output_rate", async_output_rate, 40);
+	pn.param<int>("async_output_rate", async_output_rate, 40);
 	vs.writeAsyncDataOutputFrequency(async_output_rate);
   
   
