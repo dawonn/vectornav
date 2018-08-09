@@ -1,0 +1,53 @@
+serial_port: /dev/ttyUSB0
+serial_baud: 115200
+async_output_rate: 40
+frame_id: imu_link
+
+
+
+
+
+
+
+# Orientation settings
+tf_ned_to_enu: true
+publish_rpy: false
+publish_mag: false
+
+# Complementary filter settings
+publish_cf: false
+cf_rate: 100
+
+# EKF settings
+auto_init: true
+imu_frame_id: imu_link
+ekf_rate: 100
+
+# Dynamics mode 1 = Portable, 2 = Automotive, 3 = Airborne
+dynamics_mode: 1
+
+# Declination source
+# Declination source 1=None, 2=magnetic, 3=manual
+declination_source: 2
+
+# Declination value, set to your magnetic declination
+declination: -0.072139694
+
+# Make sure all covariances below are of type xx.xx , i.e. double so that the rpc is parsed correctly
+
+# Linear Acceleration Covariances not produced by the sensor
+linear_accel_covariance: [0.01,  0.0,    0.0,
+                          0.0,   0.01,   0.0,
+                          0.0,   0.0,    0.01]
+
+# Angular Velocity Covariances not produced by the sensor
+angular_vel_covariance: [0.01,  0.0,   0.0,
+                         0.0,   0.01,  0.0,
+                         0.0,   0.0,   0.01]
+
+# Complementary filter orientation covariance, actual covariances output from
+# sensor EKF when set to publish in that mode
+cf_orientation_covariance: [0.01,  0.0,   0.0,
+                            0.0,   0.01,  0.0,
+                            0.0,   0.0,   0.01]
+
