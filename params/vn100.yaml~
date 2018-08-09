@@ -47,10 +47,7 @@ angular_vel_covariance: [0.01,  0.0,   0.0,
 
 # Complementary filter orientation covariance, actual covariances output from
 # sensor EKF when set to publish in that mode
-orientation_covariance: [0.01,  0.0,   0.0,
+cf_orientation_covariance: [0.01,  0.0,   0.0,
                             0.0,   0.01,  0.0,
                             0.0,   0.0,   0.01]
-
-
-
 

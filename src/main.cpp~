@@ -212,12 +212,10 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         msgIMU.angular_velocity.x = ar[0];
         msgIMU.angular_velocity.y = ar[1];
         msgIMU.angular_velocity.z = ar[2];
-        msgIMU.angular_velocity_covariance = angular_vel_covariance;
 		
         msgIMU.linear_acceleration.x = al[0];
         msgIMU.linear_acceleration.y = al[1];
         msgIMU.linear_acceleration.z = al[2];
-        msgIMU.linear_acceleration_covariance = linear_accel_covariance;
 		
         pubIMU.publish(msgIMU);
 
