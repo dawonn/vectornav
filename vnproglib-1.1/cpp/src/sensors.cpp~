@@ -462,7 +462,7 @@ struct VnSensor::Impl
 			groups |= 0x0008;
 		if (fields.attitudeField){
 			groups |= 0x0010;
-			printf("There is an Attitude Field\n");
+			printf("HELLO THERE\n");
 		}
 		if (fields.insField)
 			groups |= 0x0020;

@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 		TIMEGROUP_NONE,
 		IMUGROUP_NONE,
 		GPSGROUP_NONE,
-		ATTITUDEGROUP_NONE,
+		ATTITUDEGROUP_YPRU,
 		INSGROUP_NONE);
 
     vs.writeBinaryOutput1(bor);
@@ -178,7 +178,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             TIMEGROUP_NONE,
             IMUGROUP_NONE,
             GPSGROUP_NONE,
-            ATTITUDEGROUP_NONE,
+            ATTITUDEGROUP_YPRU,
             INSGROUP_NONE))
             // Not the type of binary packet we are expecting.
             return;
@@ -193,6 +193,9 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         vec3f mag = p.extractVec3f();
         float temp = p.extractFloat();
         float pres = p.extractFloat();
+		
+		//TEST
+		vec3f or_cov = p.extractVec3f();
 
 		
         // Publish ROS Message
@@ -207,7 +210,9 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         msgIMU.orientation.y = q[1];
         msgIMU.orientation.z = q[2];
         msgIMU.orientation.w = q[3];
-        msgIMU.orientation_covariance = orientation_covariance;
+        msgIMU.orientation_covariance[0] = or_cov[0];
+        msgIMU.orientation_covariance[4] = or_cov[1];
+        msgIMU.orientation_covariance[8] = or_cov[2];
 		
         msgIMU.angular_velocity.x = ar[0];
         msgIMU.angular_velocity.y = ar[1];
