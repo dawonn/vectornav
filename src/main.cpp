@@ -196,7 +196,6 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
 		
 		//TEST
 		vec3f or_cov = p.extractVec3f();
-
 		
         // Publish ROS Message
 		
