@@ -24,6 +24,7 @@
  */
 
 #include <iostream>
+#define PI 3.14159265358979323846  /* pi */
 
 // ROS Libraries
 #include "ros/ros.h"
@@ -138,7 +139,7 @@ int main(int argc, char *argv[])
 		TIMEGROUP_NONE,
 		IMUGROUP_NONE,
 		GPSGROUP_NONE,
-		ATTITUDEGROUP_YPRU,
+		ATTITUDEGROUP_YPRU, //<-- returning yaw pitch roll uncertainties
 		INSGROUP_NONE);
 
     vs.writeBinaryOutput1(bor);
@@ -178,7 +179,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             TIMEGROUP_NONE,
             IMUGROUP_NONE,
             GPSGROUP_NONE,
-            ATTITUDEGROUP_YPRU,
+            ATTITUDEGROUP_YPRU, //<-- returning yaw pitch roll uncertainties
             INSGROUP_NONE))
             // Not the type of binary packet we are expecting.
             return;
@@ -195,7 +196,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         float pres = p.extractFloat();
 		
 		//TEST
-		vec3f or_cov = p.extractVec3f();
+		vec3f orientationStdDev = p.extractVec3f();
 		
         // Publish ROS Message
 		
@@ -209,9 +210,9 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         msgIMU.orientation.y = q[1];
         msgIMU.orientation.z = q[2];
         msgIMU.orientation.w = q[3];
-        msgIMU.orientation_covariance[0] = or_cov[0];
-        msgIMU.orientation_covariance[4] = or_cov[1];
-        msgIMU.orientation_covariance[8] = or_cov[2];
+        msgIMU.orientation_covariance[0] = orientationStdDev[0]*orientationStdDev[0]*PI/180;//Convert to radians Roll
+        msgIMU.orientation_covariance[4] = orientationStdDev[1]*orientationStdDev[1]*PI/180;//Convert to radians Pitch
+        msgIMU.orientation_covariance[8] = orientationStdDev[2]*orientationStdDev[2]*PI/180;//Convert to radians Yaw
 		
         msgIMU.angular_velocity.x = ar[0];
         msgIMU.angular_velocity.y = ar[1];
