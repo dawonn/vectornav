@@ -1,5 +1,5 @@
-# Defined in our udev rules, change according to your system. Typically /dev/ttyUSB0
-serial_port: /dev/vectornav
+# Typically /dev/ttyUSB0
+serial_port: /dev/ttyUSB0
 
 # Acceptable baud rates : 9600, 19200, 38400, 57600, 115200, 128000, 230400, 460800, 921600
 serial_baud: 115200
