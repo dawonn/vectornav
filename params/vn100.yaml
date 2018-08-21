@@ -1,0 +1,33 @@
+# Typically /dev/ttyUSB0
+serial_port: /dev/ttyUSB0
+
+# Acceptable baud rates : 9600, 19200, 38400, 57600, 115200, 128000, 230400, 460800, 921600
+serial_baud: 115200
+
+# Acceptable data rates in Hz: 1, 2, 4, 5, 10, 20, 25, 40, 50, 100, 200
+# Baud rate must be able to handle the data rate
+async_output_rate: 40
+
+# Frame id to publish data in
+frame_id: imu2
+
+# Make sure all covariances below are of type xx.xx , i.e. double so that the rpc is parsed correctly
+
+# Linear Acceleration Covariances not produced by the sensor
+linear_accel_covariance: [0.01,  0.0,    0.0,
+                          0.0,   0.01,   0.0,
+                          0.0,   0.0,    0.01]
+
+# Angular Velocity Covariances not produced by the sensor
+angular_vel_covariance: [0.01,  0.0,   0.0,
+                         0.0,   0.01,  0.0,
+                         0.0,   0.0,   0.01]
+
+# Orientation covariance overwritten in driver, this is included just as an extra
+orientation_covariance: [0.01,  0.0,   0.0,
+                            0.0,   0.01,  0.0,
+                            0.0,   0.0,   0.01]
+
+
+
+
