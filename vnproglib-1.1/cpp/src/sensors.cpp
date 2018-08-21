@@ -460,10 +460,8 @@ struct VnSensor::Impl
 			groups |= 0x0004;
 		if (fields.gpsField)
 			groups |= 0x0008;
-		if (fields.attitudeField){
+		if (fields.attitudeField)
 			groups |= 0x0010;
-			printf("There is an Attitude Field\n");
-		}
 		if (fields.insField)
 			groups |= 0x0020;
 
