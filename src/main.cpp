@@ -86,8 +86,17 @@ int main(int argc, char *argv[])
     pubTemp = n.advertise<sensor_msgs::Temperature>("vectornav/Temp", 1000);
     pubPres = n.advertise<sensor_msgs::FluidPressure>("vectornav/Pres", 1000);
 
+    // Serial Port Settings
+    string SensorPort;
+    int SensorBaudrate;
+    int async_output_rate;
+
+    // Load all params
     pn.param<std::string>("frame_id", frame_id, "vectornav");
     pn.param<bool>("tf_ned_to_enu", tf_ned_to_enu, false);
+    pn.param<int>("async_output_rate", async_output_rate, 40);
+	pn.param<std::string>("serial_port", SensorPort, "/dev/ttyUSB0");
+	pn.param<int>("serial_baud", SensorBaudrate, 115200);
 
 	//Call to set covariances
 	if(pn.getParam("linear_accel_covariance",rpc_temp))
@@ -103,30 +112,77 @@ int main(int argc, char *argv[])
         orientation_covariance = setCov(rpc_temp);
     }
 
-
-
-
-
-    // Serial Port Settings
-    string SensorPort;	
-    int SensorBaudrate;
-	
-	pn.param<std::string>("serial_port", SensorPort, "/dev/ttyUSB0");
-	pn.param<int>("serial_baud", SensorBaudrate, 115200);
-	
+		
     ROS_INFO("Connecting to : %s @ %d Baud", SensorPort.c_str(), SensorBaudrate);
 
     // Create a VnSensor object and connect to sensor
     VnSensor vs;
-    vs.connect(SensorPort, SensorBaudrate);
+    
+    // Default baudrate variable
+    int defaultBaudrate;
+
+    // Run through all of the acceptable baud rates until we are connected 
+    // Looping in case someone has changed the default
+    bool baudSet = false;
+    while(!baudSet){
+        // Make this variable only accessible in the while loop
+        static int i = 0;
+        defaultBaudrate = vs.supportedBaudrates()[i];
+        ROS_INFO("Connecting with default at %d", defaultBaudrate);
+
+        // Acceptable baud rates 9600, 19200, 38400, 57600, 128000, 115200, 230400, 460800, 921600
+        // Data sheet says 128000 is a valid baud rate. It doesn't work with the VN100 so it is excluded. 
+        // All other values seem to work fine.
+        try{
+            // Connect to sensor at it's default rate
+            try{
+                // Connect to the port
+                vs.connect(SensorPort, defaultBaudrate);
+            }catch(...){throw 1;}
+
+	        // Issues a change baudrate to the VectorNav sensor and then
+	        // reconnects the attached serial port at the new baudrate.
+            vs.changeBaudRate(SensorBaudrate);
+
+            // Only makes it here once we have the default correct 
+            ROS_INFO("Connected baud rate is %d",vs.baudrate());
+            baudSet = true;
+        }
+        // Catch all oddities  
+        catch(...){
+            // Disconnect if we had the wrong default and we were connected
+            try{
+                vs.disconnect();
+            }
+            catch(...){}// If not connected do nothing
+        }
+        
+        // Increment the default iterator
+        i++;
+        // There are only 9 available data rates, if no connection
+        // made yet possibly a hardware malfunction?
+        if(i > 8)
+        {
+            ROS_INFO("Please input a valid baud rate. Valid are:");
+            ROS_INFO("9600, 19200, 38400, 57600, 115200, 128000, 230400, 460800, 921600");
+            ROS_WARN("With the test IMU 128000 did not work, all others worked fine.");
+            break;
+        }
+    }
+    
+    // Now we verify connection (Should be good if we made it this far)
+    if(vs.verifySensorConnectivity())
+    {
+        ROS_INFO("Device connection established");
+    }else{
+        ROS_ERROR("No device communication");
+    }
 
     // Query the sensor's model number.
     string mn = vs.readModelNumber();	
     ROS_INFO("Model Number: %s", mn.c_str());
 
     // Set Data output Freq [Hz]
-    int async_output_rate;
-    pn.param<int>("async_output_rate", async_output_rate, 40);
     vs.writeAsyncDataOutputFrequency(async_output_rate);
   
 	// Configure binary output message

@@ -1,18 +1,19 @@
 # Defined in udev rules, change according to your system. Typically /dev/ttyUSB0
 serial_port: /dev/ttyUSB0
 
-# Acceptable baud rates : 9600, 19200, 38400, 57600, 115200, 128000, 230400, 460800, 921600
+# Acceptable baud rates : 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600
+# Datasheet says 128000 works but after trial it appears to not work.
 serial_baud: 115200
 
 # Acceptable data rates in Hz: 1, 2, 4, 5, 10, 20, 25, 40, 50, 100, 200
 # Baud rate must be able to handle the data rate
-async_output_rate: 50
+async_output_rate: 40
 
 # Frame id to publish data in
 frame_id: imu_link
 
 # Data publication form, true for East North Up or false for North East Down <- false is default setting
-tf_ned_to_enu: false
+tf_ned_to_enu: true
 
 # Make sure all covariances below are of type xx.xx , i.e. double so that the rpc is parsed correctly
 
