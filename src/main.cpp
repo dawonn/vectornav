@@ -55,6 +55,8 @@ using namespace vn::xplat;
 void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index);
 
 std::string frame_id;
+//boolean to use ned or enu frame. Defaults to enu which is data format from sensor.
+bool tf_ned_to_enu;
 
 //Basic loop so we can initilize our covariance parameters above
 boost::array<double, 9ul> setCov(XmlRpc::XmlRpcValue rpc){
@@ -85,8 +87,9 @@ int main(int argc, char *argv[])
     pubPres = n.advertise<sensor_msgs::FluidPressure>("vectornav/Pres", 1000);
 
     pn.param<std::string>("frame_id", frame_id, "vectornav");
+    pn.param<bool>("tf_ned_to_enu", tf_ned_to_enu, false);
 
-	//Call Set Cov
+	//Call to set covariances
 	if(pn.getParam("linear_accel_covariance",rpc_temp))
     {
         linear_accel_covariance = setCov(rpc_temp);
@@ -206,22 +209,49 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         msgIMU.header.stamp = ros::Time::now();
         msgIMU.header.frame_id = frame_id;
 		
-        msgIMU.orientation.x = q[0];
-        msgIMU.orientation.y = q[1];
-        msgIMU.orientation.z = q[2];
-        msgIMU.orientation.w = q[3];
-        msgIMU.orientation_covariance[0] = orientationStdDev[0]*orientationStdDev[0]*PI/180;//Convert to radians Roll
-        msgIMU.orientation_covariance[4] = orientationStdDev[1]*orientationStdDev[1]*PI/180;//Convert to radians Pitch
-        msgIMU.orientation_covariance[8] = orientationStdDev[2]*orientationStdDev[2]*PI/180;//Convert to radians Yaw
+        //Quaternion message comes in as a Yaw (z) Pitch (y) Roll (x) format
+        if (tf_ned_to_enu)
+        {
+            // Flip x and y then invert z
+            msgIMU.orientation.x = q[1];
+            msgIMU.orientation.y = q[0];
+            msgIMU.orientation.z = -q[2];
+            msgIMU.orientation.w = q[3];
+            msgIMU.orientation_covariance[0] = orientationStdDev[1]*orientationStdDev[1]*PI/180;//Convert to radians Pitch
+            msgIMU.orientation_covariance[4] = orientationStdDev[0]*orientationStdDev[0]*PI/180;//Convert to radians Roll
+            msgIMU.orientation_covariance[8] = orientationStdDev[2]*orientationStdDev[2]*PI/180;//Convert to radians Yaw
+
+            // Flip x and y then invert z
+            msgIMU.angular_velocity.x = ar[1];
+            msgIMU.angular_velocity.y = ar[0];
+            msgIMU.angular_velocity.z = -ar[2];
+
+            // Flip x and y then invert z
+            msgIMU.linear_acceleration.x = al[1];
+            msgIMU.linear_acceleration.y = al[0];
+            msgIMU.linear_acceleration.z = -al[2];
+        }
+        else
+        {
+            msgIMU.orientation.x = q[0];
+            msgIMU.orientation.y = q[1];
+            msgIMU.orientation.z = q[2];
+            msgIMU.orientation.w = q[3];
+            msgIMU.orientation_covariance[0] = orientationStdDev[2]*orientationStdDev[2]*PI/180;//Convert to radians Roll
+            msgIMU.orientation_covariance[4] = orientationStdDev[1]*orientationStdDev[1]*PI/180;//Convert to radians Pitch
+            msgIMU.orientation_covariance[8] = orientationStdDev[0]*orientationStdDev[0]*PI/180;//Convert to radians Yaw
+
+            msgIMU.angular_velocity.x = ar[0];
+            msgIMU.angular_velocity.y = ar[1];
+            msgIMU.angular_velocity.z = ar[2];
+
+            msgIMU.linear_acceleration.x = al[0];
+            msgIMU.linear_acceleration.y = al[1];
+            msgIMU.linear_acceleration.z = al[2];
+        }
 		
-        msgIMU.angular_velocity.x = ar[0];
-        msgIMU.angular_velocity.y = ar[1];
-        msgIMU.angular_velocity.z = ar[2];
-        msgIMU.angular_velocity_covariance = angular_vel_covariance;
-		
-        msgIMU.linear_acceleration.x = al[0];
-        msgIMU.linear_acceleration.y = al[1];
-        msgIMU.linear_acceleration.z = al[2];
+        // Covariances pulled from parameters
+        msgIMU.angular_velocity_covariance = angular_vel_covariance;		
         msgIMU.linear_acceleration_covariance = linear_accel_covariance;
 		
         pubIMU.publish(msgIMU);
