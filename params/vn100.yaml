@@ -13,7 +13,7 @@ async_output_rate: 40
 frame_id: imu_link
 
 # Data publication form, true for East North Up or false for North East Down <- false is default setting
-tf_ned_to_enu: true
+tf_ned_to_enu: false
 
 # Make sure all covariances below are of type xx.xx , i.e. double so that the rpc is parsed correctly
 
