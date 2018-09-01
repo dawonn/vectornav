@@ -156,6 +156,7 @@ int main(int argc, char *argv[])
         catch(...){
             // Disconnect if we had the wrong default and we were connected
             vs.disconnect();
+            ros::Duration(0.2).sleep();
         }
         
         // Increment the default iterator
@@ -217,7 +218,9 @@ int main(int argc, char *argv[])
 
     // Node has been terminated
     vs.unregisterAsyncPacketReceivedHandler();
+    ros::Duration(0.5).sleep();
     vs.disconnect();
+    ros::Duration(0.5).sleep();
 	return 0;
 }
 
