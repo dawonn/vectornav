@@ -155,10 +155,7 @@ int main(int argc, char *argv[])
         // Catch all oddities  
         catch(...){
             // Disconnect if we had the wrong default and we were connected
-            if(vs.verifySensorConnectivity())
-            { 
-                vs.disconnect();
-            }
+            vs.disconnect();
         }
         
         // Increment the default iterator
@@ -212,7 +209,10 @@ int main(int argc, char *argv[])
     // You spin me right round, baby
     // Right round like a record, baby
     // Right round round round
-    ros::spin();
+    while (ros::ok())
+    {
+        ros::spin(); // Need to make sure we disconnect properly. Check if all ok.
+    }
 
 
     // Node has been terminated
