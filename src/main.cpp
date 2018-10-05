@@ -35,8 +35,10 @@
 #include "nav_msgs/Odometry.h"
 #include "sensor_msgs/Temperature.h"
 #include "sensor_msgs/FluidPressure.h"
+#include "std_srvs/Empty.h"
 
 ros::Publisher pubIMU, pubMag, pubGPS, pubOdom, pubTemp, pubPres;
+ros::ServiceServer resetOdomSrv;
 
 //Unused covariances initilized to zero's
 boost::array<double, 9ul> linear_accel_covariance = { };
@@ -47,6 +49,7 @@ XmlRpc::XmlRpcValue rpc_temp;
 // Include this header file to get access to VectorNav sensors.
 #include "vn/sensors.h"
 #include "vn/compositedata.h"
+#include "vn/util.h"
 
 using namespace std;
 using namespace vn::math;
@@ -58,17 +61,18 @@ using namespace vn::xplat;
 void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index);
 
 std::string frame_id;
-//boolean to use ned or enu frame. Defaults to enu which is data format from sensor.
+// Boolean to use ned or enu frame. Defaults to enu which is data format from sensor.
 bool tf_ned_to_enu;
+// Initial position after getting a GPS fix.
 vec3d initial_position;
 bool initial_position_set = false;
 
-//Basic loop so we can initilize our covariance parameters above
+// Basic loop so we can initilize our covariance parameters above
 boost::array<double, 9ul> setCov(XmlRpc::XmlRpcValue rpc){
-    //Output covariance vector
+    // Output covariance vector
     boost::array<double, 9ul> output = { 0.0 };
 
-    //Convert the RPC message to array
+    // Convert the RPC message to array
     ROS_ASSERT(rpc.getType() == XmlRpc::XmlRpcValue::TypeArray);
 
     for(int i = 0; i < 9; i++){
@@ -78,6 +82,13 @@ boost::array<double, 9ul> setCov(XmlRpc::XmlRpcValue rpc){
     return output;
 }
 
+// Reset initial position to current position
+bool resetOdom(std_srvs::Empty::Request &req, std_srvs::Empty::Response &resp)
+{
+    initial_position_set = false;
+    return true;
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -85,12 +96,15 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "vectornav");
     ros::NodeHandle n;
     ros::NodeHandle pn("~");
+
     pubIMU = n.advertise<sensor_msgs::Imu>("vectornav/IMU", 1000);
     pubMag = n.advertise<sensor_msgs::MagneticField>("vectornav/Mag", 1000);
     pubGPS = n.advertise<sensor_msgs::NavSatFix>("vectornav/GPS", 1000);
     pubOdom = n.advertise<nav_msgs::Odometry>("vectornav/Odom", 1000);
     pubTemp = n.advertise<sensor_msgs::Temperature>("vectornav/Temp", 1000);
     pubPres = n.advertise<sensor_msgs::FluidPressure>("vectornav/Pres", 1000);
+
+    resetOdomSrv = n.advertiseService("reset_odom", resetOdom);
 
     // Serial Port Settings
     string SensorPort;
@@ -259,9 +273,9 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             if (cd.hasAttitudeUncertainty())
             {
                 vec3f orientationStdDev = cd.attitudeUncertainty();
-                msgIMU.orientation_covariance[0] = orientationStdDev[1]*orientationStdDev[1]*PI/180;//Convert to radians Pitch
-                msgIMU.orientation_covariance[4] = orientationStdDev[0]*orientationStdDev[0]*PI/180;//Convert to radians Roll
-                msgIMU.orientation_covariance[8] = orientationStdDev[2]*orientationStdDev[2]*PI/180;//Convert to radians Yaw
+                msgIMU.orientation_covariance[0] = orientationStdDev[1]*orientationStdDev[1]*PI/180; // Convert to radians Pitch
+                msgIMU.orientation_covariance[4] = orientationStdDev[0]*orientationStdDev[0]*PI/180; // Convert to radians Roll
+                msgIMU.orientation_covariance[8] = orientationStdDev[2]*orientationStdDev[2]*PI/180; // Convert to radians Yaw
             }
             // Flip x and y then invert z
             msgIMU.angular_velocity.x = ar[1];
@@ -282,9 +296,9 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             if (cd.hasAttitudeUncertainty())
             {
                 vec3f orientationStdDev = cd.attitudeUncertainty();
-                msgIMU.orientation_covariance[0] = orientationStdDev[2]*orientationStdDev[2]*PI/180;//Convert to radians Roll
-                msgIMU.orientation_covariance[4] = orientationStdDev[1]*orientationStdDev[1]*PI/180;//Convert to radians Pitch
-                msgIMU.orientation_covariance[8] = orientationStdDev[0]*orientationStdDev[0]*PI/180;//Convert to radians Yaw
+                msgIMU.orientation_covariance[0] = orientationStdDev[2]*orientationStdDev[2]*PI/180; // Convert to radians Roll
+                msgIMU.orientation_covariance[4] = orientationStdDev[1]*orientationStdDev[1]*PI/180; // Convert to radians Pitch
+                msgIMU.orientation_covariance[8] = orientationStdDev[0]*orientationStdDev[0]*PI/180; // Convert to radians Yaw
             }
             msgIMU.angular_velocity.x = ar[0];
             msgIMU.angular_velocity.y = ar[1];
@@ -313,7 +327,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // GPS
-    if (cd.hasInsStatus())
+    if (cd.insStatus() == INSSTATUS_GPS_FIX)
     {
         vec3d lla = cd.positionEstimatedLla();
 
@@ -326,49 +340,52 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         pubGPS.publish(msgGPS);
 
         // Odometry
-        nav_msgs::Odometry msgOdom;
-        msgOdom.header.stamp = msgIMU.header.stamp;
-        msgOdom.header.frame_id = msgIMU.header.frame_id;
-        vec3d pos = cd.positionEstimatedEcef();
-
-        if (!initial_position_set)
+        if (pubOdom.getNumSubscribers() > 0)
         {
-            initial_position_set = true;
-            initial_position.x = pos[0];
-            initial_position.y = pos[1];
-            initial_position.z = pos[2];
+            nav_msgs::Odometry msgOdom;
+            msgOdom.header.stamp = msgIMU.header.stamp;
+            msgOdom.header.frame_id = msgIMU.header.frame_id;
+            vec3d pos = cd.positionEstimatedEcef();
+
+            if (!initial_position_set)
+            {
+                initial_position_set = true;
+                initial_position.x = pos[0];
+                initial_position.y = pos[1];
+                initial_position.z = pos[2];
+            }
+
+            msgOdom.pose.pose.position.x = pos[0] - initial_position[0];
+            msgOdom.pose.pose.position.y = pos[1] - initial_position[1];
+            msgOdom.pose.pose.position.z = pos[2] - initial_position[2];
+
+            if (cd.hasQuaternion())
+            {
+                vec4f q = cd.quaternion();
+
+                msgOdom.pose.pose.orientation.x = q[0];
+                msgOdom.pose.pose.orientation.y = q[1];
+                msgOdom.pose.pose.orientation.z = q[2];
+                msgOdom.pose.pose.orientation.w = q[2];
+            }
+            if (cd.hasVelocityEstimatedBody())
+            {
+                vec3f vel = cd.velocityEstimatedBody();
+
+                msgOdom.twist.twist.linear.x = vel[0];
+                msgOdom.twist.twist.linear.y = vel[1];
+                msgOdom.twist.twist.linear.z = vel[2];
+            }
+            if (cd.hasAngularRate())
+            {
+                vec3f ar = cd.angularRate();
+
+                msgOdom.twist.twist.angular.x = ar[0];
+                msgOdom.twist.twist.angular.y = ar[1];
+                msgOdom.twist.twist.angular.z = ar[2];
+            }
+            pubOdom.publish(msgOdom);
         }
-
-        msgOdom.pose.pose.position.x = pos[0] - initial_position[0];
-        msgOdom.pose.pose.position.y = pos[1] - initial_position[1];
-        msgOdom.pose.pose.position.z = pos[2] - initial_position[2];
-
-        if (cd.hasQuaternion())
-        {
-            vec4f q = cd.quaternion();
-
-            msgOdom.pose.pose.orientation.x = q[0];
-            msgOdom.pose.pose.orientation.y = q[1];
-            msgOdom.pose.pose.orientation.z = q[2];
-            msgOdom.pose.pose.orientation.w = q[2];
-        }
-        if (cd.hasVelocityEstimatedBody())
-        {
-            vec3f vel = cd.velocityEstimatedBody();
-
-            msgOdom.twist.twist.linear.x = vel[0];
-            msgOdom.twist.twist.linear.y = vel[1];
-            msgOdom.twist.twist.linear.z = vel[2];
-        }
-        if (cd.hasAngularRate())
-        {
-            vec3f ar = cd.angularRate();
-
-            msgOdom.twist.twist.angular.x = ar[0];
-            msgOdom.twist.twist.angular.y = ar[1];
-            msgOdom.twist.twist.angular.z = ar[2];
-        }
-        pubOdom.publish(msgOdom);
     }
 
     // Temperature
