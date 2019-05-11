@@ -327,8 +327,8 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // GPS
-    if (cd.insStatus() == INSSTATUS_GPS_FIX)
-    {
+    //if (cd.insStatus() == INSSTATUS_GPS_FIX)
+    //{
         vec3d lla = cd.positionEstimatedLla();
 
         sensor_msgs::NavSatFix msgGPS;
@@ -340,8 +340,8 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         pubGPS.publish(msgGPS);
 
         // Odometry
-        if (pubOdom.getNumSubscribers() > 0)
-        {
+        //if (pubOdom.getNumSubscribers() > 0)
+        //{
             nav_msgs::Odometry msgOdom;
             msgOdom.header.stamp = msgIMU.header.stamp;
             msgOdom.header.frame_id = msgIMU.header.frame_id;
@@ -385,8 +385,8 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 msgOdom.twist.twist.angular.z = ar[2];
             }
             pubOdom.publish(msgOdom);
-        }
-    }
+        //}
+    //}
 
     // Temperature
     if (cd.hasTemperature())
@@ -412,3 +412,4 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         pubPres.publish(msgPres);
     }
 }
+
