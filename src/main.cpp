@@ -340,8 +340,8 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         pubGPS.publish(msgGPS);
 
         // Odometry
-        //if (pubOdom.getNumSubscribers() > 0)
-        //{
+        if (pubOdom.getNumSubscribers() > 0)
+        {
             nav_msgs::Odometry msgOdom;
             msgOdom.header.stamp = msgIMU.header.stamp;
             msgOdom.header.frame_id = msgIMU.header.frame_id;
@@ -385,7 +385,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 msgOdom.twist.twist.angular.z = ar[2];
             }
             pubOdom.publish(msgOdom);
-        //}
+        }
     //}
 
     // Temperature
