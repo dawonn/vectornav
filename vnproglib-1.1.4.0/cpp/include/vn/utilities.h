@@ -12,7 +12,7 @@
 /// \brief Defines for the specific version of the VectorNav library.
 #define VNAPI_MAJOR		1
 #define VNAPI_MINOR		1
-#define VNAPI_PATCH		0
+#define VNAPI_PATCH		2
 #define VNAPI_REVISION	126
 
 namespace vn {

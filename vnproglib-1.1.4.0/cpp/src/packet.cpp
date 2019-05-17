@@ -46,9 +46,9 @@ char* vnstrtok(char* str, size_t& startIndex);
 
 const unsigned char Packet::BinaryGroupLengths[sizeof(uint8_t)*8][sizeof(uint16_t)*8] = {
 	{ 8, 8,	 8,  12, 16, 12, 24, 12, 12, 24, 20, 28, 2,  4, 8, 0 },		// Group 1
-	{ 8, 8,  8,  2,  8,  8,  8,  4,  0,  0,  0,  0,  0,  0, 0, 0 },		// Group 2
+	{ 8, 8,  8,  2,  8,  8,  8,  4,  4,  1,  0,  0,  0,  0, 0, 0 },		// Group 2
 	{ 2, 12, 12, 12, 4,  4,  16, 12, 12, 12, 12, 2,  40, 0, 0, 0 },		// Group 3
-	{ 8, 8,  2,  1,  1,  24, 24, 12, 12, 12, 4,  4,  32, 0, 0, 0 },		// Group 4
+	{ 8, 8,  2,  1,  1,  24, 24, 12, 12, 12, 4,  4,  2, 28, 0, 0 },		// Group 4
 	{ 2, 12, 16, 36, 12, 12, 12, 12, 12, 12, 28, 24, 0,  0, 0, 0 },		// Group 5
 	{ 2, 24, 24, 12, 12, 12, 12, 12, 12, 4,  4,  68, 64, 0, 0, 0 },		// Group 6
 	{ 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0, 0 },		// Invalid group
@@ -144,7 +144,7 @@ Packet::Type Packet::type()
 
 bool Packet::isValid()
 {
-	if (_length == 0)
+	if (_length < 7)  // minumum binary packet is 7 bytes, minimum ASCII is 8 bytes
 		return false;
 
 	if (type() == TYPE_ASCII)
