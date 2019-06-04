@@ -491,6 +491,24 @@ public:
 	/// \exception invalid_operation Thrown if there is not any valid data.
 	uint32_t syncInCnt();
 
+  /// \brief Indicates if <c>syncOutCnt</c> has valid data.
+  /// \return <c>true</c> if <c>syncOutCnt</c> has valid data; otherwise <c>false</c>.
+  bool hasSyncOutCnt();
+
+  /// \brief SyncOutCnt data.
+  /// \return The SyncOutCnt data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  uint32_t syncOutCnt();
+
+  /// \brief Indicates if <c>timeStatus</c> has valid data.
+  /// \return <c>true</c> if <c>timeStatus</c> has valid data; otherwise <c>false</c>.
+  bool hasTimeStatus();
+
+  /// \brief TimeStatus data.
+  /// \return The TimeStatus data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  uint8_t timeStatus();
+
 	/// \brief Indicates if <c>timeGpsPps</c> has valid data.
 	/// \return <c>true</c> if <c>timeGpsPps</c> has valid data; otherwise <c>false</c>.
 	bool hasTimeGpsPps();
@@ -641,6 +659,25 @@ public:
 	/// \exception invalid_operation Thrown if there is no valid data.
 	float speedOverGround();
 
+  /// \brief Indicates if <c>timeInfo</c> has valid data.
+  /// \return <c>true</c> if <c>timeInfo</c> havs valid data; otherwise <c>false</c>.
+  bool hasTimeInfo();
+
+  /// \brief GPS Time Status and number of leap seconds.
+  ///
+  /// \return Current Time Info.
+  /// \exception invalid_operation Thrown if there is no valid data.
+  protocol::uart::TimeInfo timeInfo();
+
+  /// \brief Indicates if <c>dop</c> has valid data.
+  /// \return <c>true</c> if <c>dop</c> havs valid data; otherwise <c>false</c>.
+  bool hasDop();
+
+  /// \brief Dilution of precision data.
+  ///
+  /// \return Current DOP values.
+  /// \exception invalid_operation Thrown if there is no valid data.
+  protocol::uart::GnssDop dop();
 
 
 private:

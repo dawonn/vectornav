@@ -113,9 +113,10 @@ struct CompositeData::Impl
 		hasVelocityGpsNed, hasVelocityGpsEcef, hasVelocityEstimatedNed, hasVelocityEstimatedEcef, hasVelocityEstimatedBody,
 		hasDeltaTime, hasDeltaTheta, hasDeltaVelocity,
 		hasTimeStartup, hasTimeGps, hasTow, hasWeek, hasNumSats, hasTimeSyncIn, hasVpeStatus, hasInsStatus,
-		hasSyncInCnt, hasTimeGpsPps, hasGpsTow, hasTimeUtc, hasSensSat, hasFix,
+    hasSyncInCnt, hasSyncOutCnt, hasTimeStatus, hasTimeGpsPps, hasGpsTow, hasTimeUtc, hasSensSat, hasFix,
 		hasPositionUncertaintyGpsNed, hasPositionUncertaintyGpsEcef, hasPositionUncertaintyEstimated,
-		hasVelocityUncertaintyGps, hasVelocityUncertaintyEstimated, hasTimeUncertainty, hasAttitudeUncertainty;
+		hasVelocityUncertaintyGps, hasVelocityUncertaintyEstimated, hasTimeUncertainty, hasAttitudeUncertainty,
+    hasTimeInfo, hasDop;
 	vec3f yawPitchRoll,
 		magnetic, magneticUncompensated, magneticNed, magneticEcef,
 		acceleration, accelerationLinearBody, accelerationUncompensated, accelerationLinearNed, accelerationLinearEcef, accelerationNed, accelerationEcef,
@@ -130,13 +131,15 @@ struct CompositeData::Impl
 	uint64_t timeStartup, timeGps, timeSyncIn, timeGpsPps, gpsTow;
 	double tow;
 	uint16_t week;
-	uint8_t numSats;
+	uint8_t numSats, timeStatus;
 	VpeStatus vpeStatus;
 	InsStatus insStatus;
-	uint32_t syncInCnt, timeUncertainty;
+  uint32_t syncInCnt, syncOutCnt, timeUncertainty;
 	GpsFix fix;
 	TimeUtc timeUtc;
 	SensSat sensSat;
+  TimeInfo timeInfo;
+  GnssDop dop;
 
 	Impl& operator=(Impl& aImpl)
 	{
@@ -179,6 +182,7 @@ struct CompositeData::Impl
 		velocityUncertaintyEstimated = aImpl.velocityUncertaintyEstimated;
 		timeStartup = aImpl.timeStartup;
 		timeGps = aImpl.timeGps;
+		timeUtc = aImpl.timeUtc;
 		timeSyncIn = aImpl.timeSyncIn;
 		timeGpsPps = aImpl.timeGpsPps;
 		gpsTow = aImpl.gpsTow;
@@ -187,9 +191,13 @@ struct CompositeData::Impl
 		numSats = aImpl.numSats;
 		insStatus = aImpl.insStatus;
 		syncInCnt = aImpl.syncInCnt;
+    syncOutCnt = aImpl.syncOutCnt;
+    timeStatus = aImpl.timeStatus;
 		timeUncertainty = aImpl.timeUncertainty;
 		fix = aImpl.fix;
 		sensSat = aImpl.sensSat;
+    timeInfo = aImpl.timeInfo;
+    dop = aImpl.dop;
 
 		mostRecentlyUpdatedAttitudeType = aImpl.mostRecentlyUpdatedAttitudeType;
 		mostRecentlyUpdatedMagneticType = aImpl.mostRecentlyUpdatedMagneticType;
@@ -240,6 +248,8 @@ struct CompositeData::Impl
 		hasVpeStatus = aImpl.hasVpeStatus;
 		hasInsStatus = aImpl.hasInsStatus;
 		hasSyncInCnt = aImpl.hasSyncInCnt;
+    hasSyncOutCnt = aImpl.hasSyncOutCnt;
+    hasTimeStatus = aImpl.hasTimeStatus;
 		hasTimeGpsPps = aImpl.hasTimeGpsPps;
 		hasGpsTow = aImpl.hasGpsTow;
 		hasTimeUtc = aImpl.hasTimeUtc;
@@ -252,6 +262,8 @@ struct CompositeData::Impl
 		hasVelocityUncertaintyEstimated = aImpl.hasVelocityUncertaintyEstimated;
 		hasTimeUncertainty = aImpl.hasTimeUncertainty;
 		hasAttitudeUncertainty = aImpl.hasAttitudeUncertainty;
+    hasTimeInfo = aImpl.hasTimeInfo;
+    hasDop = aImpl.hasDop;
 
 		return *this;
 	}
@@ -319,7 +331,9 @@ struct CompositeData::Impl
 		hasVelocityUncertaintyEstimated = false;
 		hasTimeUncertainty = false;
 		hasAttitudeUncertainty = false;
-	}
+    hasTimeInfo = false;
+    hasDop = false;
+  }
 
 	void setYawPitchRoll(vec3f ypr)
 	{
@@ -586,6 +600,18 @@ struct CompositeData::Impl
 		syncInCnt = count;
 	}
 
+  void setSyncOutCnt(uint32_t count)
+  {
+    hasSyncOutCnt = true;
+    syncOutCnt = count;
+  }
+
+  void setTimeStatus(uint8_t status)
+  {
+    hasTimeStatus = true;
+    timeStatus = status;
+  }
+
 	void setTimeGpsPps(uint64_t pps)
 	{
 		hasTimeGpsPps = true;
@@ -645,7 +671,6 @@ struct CompositeData::Impl
 		attitudeUncertainty = u;
 	}
 
-
 	void setFix(GpsFix f)
 	{
 		hasFix = true;
@@ -663,6 +688,19 @@ struct CompositeData::Impl
 		hasSensSat = true;
 		sensSat = s;
 	}
+
+  void setGnssDop(GnssDop d)
+  {
+    hasDop = true;
+    dop = d;
+  }
+
+  void setTimeInfo(TimeInfo t)
+  {
+    hasTimeInfo = true;
+    timeInfo = t;
+  }
+
 };
 
 CompositeData::CompositeData() :
@@ -1371,6 +1409,32 @@ uint32_t CompositeData::syncInCnt()
 	return _i->syncInCnt;
 }
 
+bool CompositeData::hasSyncOutCnt()
+{
+  return _i->hasSyncOutCnt;
+}
+
+uint32_t CompositeData::syncOutCnt()
+{
+  if (!hasSyncOutCnt())
+    throw invalid_operation();
+
+  return _i->syncOutCnt;
+}
+
+bool CompositeData::hasTimeStatus()
+{
+  return _i->hasTimeStatus;
+}
+
+uint8_t CompositeData::timeStatus()
+{
+  if (!hasTimeStatus())
+    throw invalid_operation();
+
+  return _i->timeStatus;
+}
+
 bool CompositeData::hasTimeGpsPps()
 {
 	return _i->hasTimeGpsPps;
@@ -1617,6 +1681,31 @@ float CompositeData::speedOverGround()
 	}
 }
 
+bool CompositeData::hasTimeInfo()
+{
+  return _i->hasTimeInfo;
+}
+
+TimeInfo CompositeData::timeInfo()
+{
+  if (!hasTimeInfo())
+    throw invalid_operation();
+
+  return _i->timeInfo;
+}
+
+bool CompositeData::hasDop()
+{
+  return _i->hasDop;
+}
+
+GnssDop CompositeData::dop()
+{
+  if (!hasDop())
+    throw invalid_operation();
+
+  return _i->dop;
+}
 
 CompositeData CompositeData::parse(Packet& p)
 {
@@ -2097,6 +2186,7 @@ void CompositeData::parseBinaryPacketCommonGroup(Packet& p, CommonGroup gf, vect
 
 	if (gf & COMMONGROUP_TIMEGPSPPS)
 		setValues(p.extractUint64(), o, &Impl::setTimeGpsPps);
+
 }
 
 void CompositeData::parseBinaryPacketTimeGroup(Packet& p, TimeGroup gf, vector<CompositeData*>& o)
@@ -2129,13 +2219,19 @@ void CompositeData::parseBinaryPacketTimeGroup(Packet& p, TimeGroup gf, vector<C
 		t.hour = p.extractUint8();
 		t.min = p.extractUint8();
 		t.sec = p.extractUint8();
-		t.ms = p.extractUint8();
+		t.ms = p.extractUint16();
 
 		setValues(t, o, &Impl::setTimeUtc);
 	}
 
 	if (gf & TIMEGROUP_SYNCINCNT)
 		setValues(p.extractUint32(), o, &Impl::setSyncInCnt);
+
+  if (gf & TIMEGROUP_SYNCOUTCNT)
+    setValues(p.extractUint32(), o, &Impl::setSyncOutCnt);
+
+  if (gf & TIMEGROUP_TIMESTATUS)
+    setValues(p.extractUint8(), o, &Impl::setTimeStatus);
 }
 
 void CompositeData::parseBinaryPacketImuGroup(Packet& p, ImuGroup gf, vector<CompositeData*>& o)
@@ -2194,7 +2290,7 @@ void CompositeData::parseBinaryPacketGpsGroup(Packet& p, GpsGroup gf, vector<Com
 		t.hour = p.extractUint8();
 		t.min = p.extractUint8();
 		t.sec = p.extractUint8();
-		t.ms = p.extractUint8();
+		t.ms = p.extractUint16();
 
 		setValues(t, o, &Impl::setTimeUtc);
 	}
@@ -2232,6 +2328,30 @@ void CompositeData::parseBinaryPacketGpsGroup(Packet& p, GpsGroup gf, vector<Com
 	if (gf & GPSGROUP_TIMEU)
 		setValues(p.extractUint32(), o, &Impl::setTimeUncertainty);
 
+  if (gf & GPSGROUP_TIMEINFO)
+  {
+      TimeInfo t;
+
+      t.timeStatus = p.extractUint8();
+      t.leapSecs = p.extractInt8();
+
+      setValues(t, o, &Impl::setTimeInfo);
+  }
+
+  if (gf & GPSGROUP_DOP)
+  {
+    GnssDop d;
+
+    d.gDop = p.extractFloat();
+    d.pDop = p.extractFloat();
+    d.tDop = p.extractFloat();
+    d.vDop = p.extractFloat();
+    d.hDop = p.extractFloat();
+    d.nDop = p.extractFloat();
+    d.eDop = p.extractFloat();
+
+    setValues(d, o, &Impl::setGnssDop);
+  }
 }
 
 void CompositeData::parseBinaryPacketAttitudeGroup(Packet& p, AttitudeGroup gf, vector<CompositeData*>& o)

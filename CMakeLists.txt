@@ -63,12 +63,11 @@ catkin_package(
 ###########
 
 #include(vnproglib-1.1/cpp/CMakeLists.txt)
-add_subdirectory(vnproglib-1.1/cpp)
+add_subdirectory(vnproglib-1.1.4.0/cpp)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(vnproglib-1.1/cpp/include ${catkin_INCLUDE_DIRS})
-link_directories(vnproglib-1.1/cpp/build/bin)
+include_directories(vnproglib-1.1.4.0/cpp/include ${catkin_INCLUDE_DIRS})
 
 ## Declare a cpp library
 ## Declare a cpp executable
@@ -76,7 +75,7 @@ add_executable(vnpub src/main.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(vnpub
-  vncxx
+  libvncxx
   ${catkin_LIBRARIES}
 )
 

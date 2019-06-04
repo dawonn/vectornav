@@ -112,7 +112,9 @@ enum TimeGroup
 	TIMEGROUP_TIMESYNCIN			= 0x0010,	///< TimeSyncIn.
 	TIMEGROUP_TIMEGPSPPS			= 0x0020,	///< TimeGpsPps.
 	TIMEGROUP_TIMEUTC				= 0x0040,	///< TimeUTC.
-	TIMEGROUP_SYNCINCNT				= 0x0080	///< SyncInCnt.
+	TIMEGROUP_SYNCINCNT			= 0x0080,	///< SyncInCnt.
+  TIMEGROUP_SYNCOUTCNT    = 0x0100,	///< SyncOutCnt.
+  TIMEGROUP_TIMESTATUS    = 0x0200	///< TimeStatus.
 };
 
 /// \brief Flags for the binary group 3 'IMU' in the binary output registers.
@@ -148,7 +150,9 @@ enum GpsGroup
 	GPSGROUP_VELECEF				= 0x0100,	///< VelEcef.
 	GPSGROUP_POSU					= 0x0200,	///< PosU.
 	GPSGROUP_VELU					= 0x0400,	///< VelU.
-	GPSGROUP_TIMEU					= 0x0800,	///< TimeU.
+	GPSGROUP_TIMEU				= 0x0800,	///< TimeU.
+  GPSGROUP_TIMEINFO     = 0x1000,	///< TimeInfo.
+  GPSGROUP_DOP          = 0x2000,	///< Dop.
 };
 
 /// \brief Flags for the binary group 5 'Attitude' in the binary output registers.
@@ -555,10 +559,29 @@ struct TimeUtc
 	uint8_t hour;	///< \brief Hour field.
 	uint8_t min;	///< \brief Min field.
 	uint8_t sec;	///< \brief Sec field.
-	uint8_t ms;		///< \brief Ms field.
+	uint16_t ms;		///< \brief Ms field.
 
 	/// \brief Default constructor.
 	//TimeUtc() { }
+};
+
+/// \brief TimeInfo as represented by the VectorNav sensor.
+struct TimeInfo
+{
+  uint8_t timeStatus;	///< \brief Time Status field.
+  int8_t  leapSecs;	///< \brief Leap Seconds field.
+};
+
+/// \brief TimeInfo as represented by the VectorNav sensor.
+struct GnssDop
+{
+  float gDop;	///< \brief gDOP field.
+  float pDop;	///< \brief pDOP field.
+  float tDop;	///< \brief tDOP field.
+  float vDop;	///< \brief vDOP field.
+  float hDop;	///< \brief hDOP field.
+  float nDop;	///< \brief nDOP field.
+  float eDop;	///< \brief gDOP field.
 };
 
 /// \brief Allows combining flags of the CommonGroup enum.
