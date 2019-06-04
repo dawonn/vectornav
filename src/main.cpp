@@ -327,8 +327,8 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // GPS
-    if (cd.insStatus() == INSSTATUS_GPS_FIX)
-    {
+    //if (cd.insStatus() == INSSTATUS_GPS_FIX)
+    //{
         vec3d lla = cd.positionEstimatedLla();
 
         sensor_msgs::NavSatFix msgGPS;
@@ -386,7 +386,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             }
             pubOdom.publish(msgOdom);
         }
-    }
+    //}
 
     // Temperature
     if (cd.hasTemperature())
@@ -412,3 +412,4 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         pubPres.publish(msgPres);
     }
 }
+
