@@ -366,7 +366,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 msgOdom.pose.pose.orientation.x = q[0];
                 msgOdom.pose.pose.orientation.y = q[1];
                 msgOdom.pose.pose.orientation.z = q[2];
-                msgOdom.pose.pose.orientation.w = q[2];
+                msgOdom.pose.pose.orientation.w = q[3];
             }
             if (cd.hasVelocityEstimatedBody())
             {
@@ -412,4 +412,3 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         pubPres.publish(msgPres);
     }
 }
-
