@@ -111,12 +111,16 @@ int main(int argc, char *argv[])
     int SensorBaudrate;
     int async_output_rate;
 
+    // Sensor IMURATE (800Hz by default, used to configure device)
+    int SensorImuRate;
+
     // Load all params
     pn.param<std::string>("frame_id", frame_id, "vectornav");
     pn.param<bool>("tf_ned_to_enu", tf_ned_to_enu, false);
     pn.param<int>("async_output_rate", async_output_rate, 40);
     pn.param<std::string>("serial_port", SensorPort, "/dev/ttyUSB0");
     pn.param<int>("serial_baud", SensorBaudrate, 115200);
+    pn.param<int>("fixed_imu_rate", SensorImuRate, 800);
 
     //Call to set covariances
     if(pn.getParam("linear_accel_covariance",rpc_temp))
@@ -204,7 +208,7 @@ int main(int argc, char *argv[])
     // Configure binary output message
     BinaryOutputRegister bor(
             ASYNCMODE_PORT1,
-            800 / async_output_rate,  // update rate [ms]
+            SensorImuRate / async_output_rate,  // update rate [ms]
             COMMONGROUP_QUATERNION
             | COMMONGROUP_ANGULARRATE
             | COMMONGROUP_POSITION
