@@ -46,6 +46,11 @@ boost::array<double, 9ul> angular_vel_covariance = { };
 boost::array<double, 9ul> orientation_covariance = { };
 XmlRpc::XmlRpcValue rpc_temp;
 
+// Custom user data to pass to packet callback function
+struct UserData {
+    int device_family;
+};
+
 // Include this header file to get access to VectorNav sensors.
 #include "vn/sensors.h"
 #include "vn/compositedata.h"
@@ -202,6 +207,10 @@ int main(int argc, char *argv[])
     string mn = vs.readModelNumber();
     ROS_INFO("Model Number: %s", mn.c_str());
 
+    // Set the device info for passing to the packet callback function
+    UserData user_data;
+    user_data.device_family = vs.determineDeviceFamily();
+
     // Set Data output Freq [Hz]
     vs.writeAsyncDataOutputFrequency(async_output_rate);
 
@@ -228,7 +237,7 @@ int main(int argc, char *argv[])
 
     // Set Data output Freq [Hz]
     vs.writeAsyncDataOutputFrequency(async_output_rate);
-    vs.registerAsyncPacketReceivedHandler(NULL, BinaryAsyncMessageReceived);
+    vs.registerAsyncPacketReceivedHandler(&user_data, BinaryAsyncMessageReceived);
 
     // You spin me right round, baby
     // Right round like a record, baby
@@ -252,6 +261,7 @@ int main(int argc, char *argv[])
 void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
 {
     vn::sensors::CompositeData cd = vn::sensors::CompositeData::parse(p);
+    UserData user_data = *static_cast<UserData*>(userData);
 
     // IMU
     sensor_msgs::Imu msgIMU;
@@ -331,7 +341,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // GPS
-    if (cd.hasInsStatus() && (cd.insStatus() == INSSTATUS_GPS_FIX))
+    if (user_data.device_family != VnSensor::Family::VnSensor_Family_Vn100)
     {
         vec3d lla = cd.positionEstimatedLla();
 
