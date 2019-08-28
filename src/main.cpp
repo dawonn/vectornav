@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
     // Configure binary output message
     BinaryOutputRegister bor(
             ASYNCMODE_PORT1,
-            1000 / async_output_rate,  // update rate [ms]
+            800 / async_output_rate,  // update rate [ms]
             COMMONGROUP_QUATERNION
             | COMMONGROUP_ANGULARRATE
             | COMMONGROUP_POSITION
