@@ -9,6 +9,10 @@ serial_baud: 115200
 # Baud rate must be able to handle the data rate
 async_output_rate: 40
 
+# Device IMU Rate as set by the manufacturer (800Hz unless specified otherwise)
+# This value is used to set the serial data packet rate
+fixed_imu_rate: 800
+
 # Frame id to publish data in
 frame_id: imu_link
 
@@ -31,7 +35,3 @@ angular_vel_covariance: [0.01,  0.0,   0.0,
 orientation_covariance: [0.01,  0.0,   0.0,
                             0.0,   0.01,  0.0,
                             0.0,   0.0,   0.01]
-
-
-
-
