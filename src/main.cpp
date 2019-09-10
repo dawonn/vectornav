@@ -25,7 +25,8 @@
 
 #include <iostream>
 #include <cmath>
-#define PI 3.14159265358979323846  /* pi */
+// No need to define PI twice if we already have it included...
+//#define M_PI 3.14159265358979323846  /* M_PI */
 
 // ROS Libraries
 #include "ros/ros.h"
@@ -36,6 +37,8 @@
 #include "sensor_msgs/Temperature.h"
 #include "sensor_msgs/FluidPressure.h"
 #include "std_srvs/Empty.h"
+#include <tf2/LinearMath/Transform.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 ros::Publisher pubIMU, pubMag, pubGPS, pubOdom, pubTemp, pubPres;
 ros::ServiceServer resetOdomSrv;
@@ -68,6 +71,8 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index);
 std::string frame_id;
 // Boolean to use ned or enu frame. Defaults to enu which is data format from sensor.
 bool tf_ned_to_enu;
+bool frame_based_enu;
+
 // Initial position after getting a GPS fix.
 vec3d initial_position;
 bool initial_position_set = false;
@@ -122,6 +127,7 @@ int main(int argc, char *argv[])
     // Load all params
     pn.param<std::string>("frame_id", frame_id, "vectornav");
     pn.param<bool>("tf_ned_to_enu", tf_ned_to_enu, false);
+    pn.param<bool>("frame_based_enu", frame_based_enu, false);
     pn.param<int>("async_output_rate", async_output_rate, 40);
     pn.param<std::string>("serial_port", SensorPort, "/dev/ttyUSB0");
     pn.param<int>("serial_baud", SensorBaudrate, 115200);
@@ -275,30 +281,57 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         vec3f ar = cd.angularRate();
         vec3f al = cd.acceleration();
 
-        //Quaternion message comes in as a Yaw (z) Pitch (y) Roll (x) format
+        if (cd.hasAttitudeUncertainty())
+        {
+            vec3f orientationStdDev = cd.attitudeUncertainty();
+            msgIMU.orientation_covariance[0] = orientationStdDev[2]*orientationStdDev[2]*M_PI/180; // Convert to radians pitch
+            msgIMU.orientation_covariance[4] = orientationStdDev[1]*orientationStdDev[1]*M_PI/180; // Convert to radians Roll
+            msgIMU.orientation_covariance[8] = orientationStdDev[0]*orientationStdDev[0]*M_PI/180; // Convert to radians Yaw
+        }
+
+        //Quaternion message comes in as a Yaw (z) pitch (y) Roll (x) format
         if (tf_ned_to_enu)
         {
-            // Flip x and y then invert z
-            msgIMU.orientation.x = q[1];
-            msgIMU.orientation.y = q[0];
-            msgIMU.orientation.z = -q[2];
-            msgIMU.orientation.w = q[3];
+            // If we want the orientation to be based on the reference label on the imu
+            tf2::Quaternion tf2_quat(q[0],q[1],q[2],q[3]);
+            geometry_msgs::Quaternion quat_msg;
 
-            if (cd.hasAttitudeUncertainty())
+            if(frame_based_enu)
             {
-                vec3f orientationStdDev = cd.attitudeUncertainty();
-                msgIMU.orientation_covariance[0] = orientationStdDev[1]*orientationStdDev[1]*PI/180; // Convert to radians Pitch
-                msgIMU.orientation_covariance[4] = orientationStdDev[0]*orientationStdDev[0]*PI/180; // Convert to radians Roll
-                msgIMU.orientation_covariance[8] = orientationStdDev[2]*orientationStdDev[2]*PI/180; // Convert to radians Yaw
+                // Create a rotation from NED -> ENU
+                tf2::Quaternion q_rotate;
+                q_rotate.setRPY (M_PI, 0.0, M_PI/2);
+                // Apply the NED to ENU rotation such that the coordinate frame matches
+                tf2_quat = q_rotate*tf2_quat;
+                quat_msg = tf2::toMsg(tf2_quat);
             }
-            // Flip x and y then invert z
-            msgIMU.angular_velocity.x = ar[1];
-            msgIMU.angular_velocity.y = ar[0];
-            msgIMU.angular_velocity.z = -ar[2];
-            // Flip x and y then invert z
-            msgIMU.linear_acceleration.x = al[1];
-            msgIMU.linear_acceleration.y = al[0];
-            msgIMU.linear_acceleration.z = -al[2];
+            else
+            {
+                // put into ENU - swap X/Y, invert Z
+                quat_msg.x = q[1];
+                quat_msg.y = q[0];
+                quat_msg.z = -q[2];
+                quat_msg.w = q[3];
+
+                // Flip x and y then invert z
+                msgIMU.angular_velocity.x = ar[1];
+                msgIMU.angular_velocity.y = ar[0];
+                msgIMU.angular_velocity.z = -ar[2];
+                // Flip x and y then invert z
+                msgIMU.linear_acceleration.x = al[1];
+                msgIMU.linear_acceleration.y = al[0];
+                msgIMU.linear_acceleration.z = -al[2];
+
+                if (cd.hasAttitudeUncertainty())
+                {
+                    vec3f orientationStdDev = cd.attitudeUncertainty();
+                    msgIMU.orientation_covariance[0] = orientationStdDev[1]*orientationStdDev[1]*M_PI/180; // Convert to radians pitch
+                    msgIMU.orientation_covariance[4] = orientationStdDev[0]*orientationStdDev[0]*M_PI/180; // Convert to radians Roll
+                    msgIMU.orientation_covariance[8] = orientationStdDev[2]*orientationStdDev[2]*M_PI/180; // Convert to radians Yaw
+                }
+            }
+
+          msgIMU.orientation = quat_msg;
         }
         else
         {
@@ -307,13 +340,6 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             msgIMU.orientation.z = q[2];
             msgIMU.orientation.w = q[3];
 
-            if (cd.hasAttitudeUncertainty())
-            {
-                vec3f orientationStdDev = cd.attitudeUncertainty();
-                msgIMU.orientation_covariance[0] = orientationStdDev[2]*orientationStdDev[2]*PI/180; // Convert to radians Roll
-                msgIMU.orientation_covariance[4] = orientationStdDev[1]*orientationStdDev[1]*PI/180; // Convert to radians Pitch
-                msgIMU.orientation_covariance[8] = orientationStdDev[0]*orientationStdDev[0]*PI/180; // Convert to radians Yaw
-            }
             msgIMU.angular_velocity.x = ar[0];
             msgIMU.angular_velocity.y = ar[1];
             msgIMU.angular_velocity.z = ar[2];

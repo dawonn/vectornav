@@ -19,6 +19,12 @@ frame_id: imu_link
 # Data publication form, true for East North Up or false for North East Down <- false is default setting
 tf_ned_to_enu: false
 
+# If publishing ENU, do we want to publish in the frame labeled on the device? Default is false.
+# If tf_ned_to_enu = true and frame_based_enu = false orientation is reported by: x->y y->x z->-z to rotate the quaternion
+# Proper method is to rotate the quaternion by multiplication
+# If tf_ned_to_enu = true and frame_based_enu = true we rotate the quaternion to the frame matched label by multiplication
+frame_based_enu: false
+
 # Make sure all covariances below are of type xx.xx , i.e. double so that the rpc is parsed correctly
 
 # Linear Acceleration Covariances not produced by the sensor
