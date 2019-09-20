@@ -304,6 +304,15 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 // Apply the NED to ENU rotation such that the coordinate frame matches
                 tf2_quat = q_rotate*tf2_quat;
                 quat_msg = tf2::toMsg(tf2_quat);
+
+                // Since everything is in the normal frame, no flipping required
+                msgIMU.angular_velocity.x = ar[0];
+                msgIMU.angular_velocity.y = ar[1];
+                msgIMU.angular_velocity.z = ar[2];
+
+                msgIMU.linear_acceleration.x = al[0];
+                msgIMU.linear_acceleration.y = al[1];
+                msgIMU.linear_acceleration.z = al[2];
             }
             else
             {
