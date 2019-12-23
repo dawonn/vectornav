@@ -18,11 +18,13 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>nav_msgs</build_depend>
   <build_depend>tf2</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>nav_msgs</run_depend>
   <build_depend>tf2</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
 
 
   <!-- Maintainer Note:
