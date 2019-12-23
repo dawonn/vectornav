@@ -13,19 +13,21 @@
   <author email="dereck@gmail.com">Dereck Wonnacott</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-  
-  <build_depend>roscpp</build_depend>  
+
+  <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>nav_msgs</build_depend>
+  <build_depend>tf2</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>nav_msgs</run_depend>
+  <build_depend>tf2</build_depend>
 
 
   <!-- Maintainer Note:
       The vnccpplib directory is from http://www.vectornav.com/support/downloads
-      I removed the version string from the directory name, sanitized file 
+      I removed the version string from the directory name, sanitized file
       permissions, and removed all but the src and include directories.
    -->
 </package>
