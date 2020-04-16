@@ -64,7 +64,7 @@ Overview
 #### vnpub node
 
 This node provides a ROS interface for a vectornav device. It can be configured
-via ROS parameters and pubishes sensor data via ROS topics.
+via ROS parameters and publishes sensor data via ROS topics.
 
 
 #### vectornav.launch
