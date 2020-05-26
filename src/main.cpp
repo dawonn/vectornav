@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     pn.param<std::string>("frame_id", frame_id, "vectornav");
     pn.param<bool>("tf_ned_to_enu", tf_ned_to_enu, false);
     pn.param<bool>("frame_based_enu", frame_based_enu, false);
-    pn.param<int>("async_output_rate", async_output_rate, 40);
+    pn.param<int>("async_output_rate", async_output_rate, 800);
     pn.param<std::string>("serial_port", SensorPort, "/dev/ttyUSB0");
     pn.param<int>("serial_baud", SensorBaudrate, 115200);
     pn.param<int>("fixed_imu_rate", SensorImuRate, 800);
@@ -224,15 +224,18 @@ int main(int argc, char *argv[])
     BinaryOutputRegister bor(
             ASYNCMODE_PORT1,
             SensorImuRate / async_output_rate,  // update rate [ms]
-            COMMONGROUP_QUATERNION
-            | COMMONGROUP_ANGULARRATE
+            //COMMONGROUP_QUATERNION
+            COMMONGROUP_ANGULARRATE
             | COMMONGROUP_POSITION
             | COMMONGROUP_ACCEL
             | COMMONGROUP_MAGPRES,
             TIMEGROUP_NONE,
             IMUGROUP_NONE,
             GPSGROUP_NONE,
-            ATTITUDEGROUP_YPRU, //<-- returning yaw pitch roll uncertainties
+            ATTITUDEGROUP_YPRU
+            | ATTITUDEGROUP_LINEARACCELBODY
+            | ATTITUDEGROUP_YAWPITCHROLL
+            | ATTITUDEGROUP_QUATERNION, //<-- returning yaw pitch roll uncertainties
             INSGROUP_INSSTATUS
             | INSGROUP_POSLLA
             | INSGROUP_POSECEF
@@ -274,12 +277,16 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     msgIMU.header.stamp = ros::Time::now();
     msgIMU.header.frame_id = frame_id;
 
-    if (cd.hasQuaternion() && cd.hasAngularRate() && cd.hasAcceleration())
+    if (cd.hasQuaternion() && cd.hasYawPitchRoll() && cd.hasAccelerationLinearBody())
     {
 
-        vec4f q = cd.quaternion();
+        /* vec4f q = cd.quaternion();
         vec3f ar = cd.angularRate();
-        vec3f al = cd.acceleration();
+        vec3f al = cd.acceleration();*/
+        vec4f q = cd.quaternion();
+        vec3f ar = cd.yawPitchRoll();
+        vec3f al = cd.accelerationLinearBody();
+        
 
         if (cd.hasAttitudeUncertainty())
         {
