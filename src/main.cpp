@@ -281,13 +281,10 @@ void BinaryAsyncMessageReceived(void *userData, Packet &p, size_t index)
     msgIMU.header.stamp = ros::Time::now();
     msgIMU.header.frame_id = frame_id;
 
-    if (cd.hasQuaternion() && cd.hasYawPitchRoll() && cd.hasAccelerationLinearBody())
+    /*if (cd.hasQuaternion() && cd.hasYawPitchRoll() && cd.hasAccelerationLinearBody())
     {
-        ROS_INFO("Sensor data is available");
 
-        /* vec4f q = cd.quaternion();
-        vec3f ar = cd.angularRate();
-        vec3f al = cd.acceleration();*/
+
         vec4f q = cd.quaternion();
         vec3f ar = cd.yawPitchRoll();
         vec3f al = cd.accelerationLinearBody();
@@ -318,5 +315,48 @@ void BinaryAsyncMessageReceived(void *userData, Packet &p, size_t index)
         msgIMU.angular_velocity_covariance = angular_vel_covariance;
         msgIMU.linear_acceleration_covariance = linear_accel_covariance;
         pubIMU.publish(msgIMU);
+    }*/
+
+    if (cd.hasQuaternion())
+    {
+
+        vec4f q = cd.quaternion();
+
+        msgIMU.orientation.x = q[0];
+        msgIMU.orientation.y = q[1];
+        msgIMU.orientation.z = q[2];
+        msgIMU.orientation.w = q[3];
     }
+    else
+    {
+        ROS_INFO("quaternion not available");
+    }
+
+    if (cd.hasYawPitchRoll())
+    {
+        vec3f ar = cd.yawPitchRoll();
+        msgIMU.angular_velocity.x = ar[0];
+        msgIMU.angular_velocity.y = ar[1];
+        msgIMU.angular_velocity.z = ar[2];
+    }
+    else
+    {
+
+        ROS_INFO("angular velocity not available");
+    }
+
+    if (cd.hasAccelerationLinearBody())
+    {
+        vec3f al = cd.accelerationLinearBody();
+        msgIMU.linear_acceleration.x = al[0];
+        msgIMU.linear_acceleration.y = al[1];
+        msgIMU.linear_acceleration.z = al[2];
+    }
+    else
+    {
+
+        ROS_INFO("linear accelartion not available");
+    }
+
+    pubIMU.publish(msgIMU);
 }
