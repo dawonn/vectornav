@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
     user_data.device_family = vs.determineDeviceFamily();
 
     // Set Data output Freq [Hz]
-    // vs.writeAsyncDataOutputFrequency(async_output_rate);
+    vs.writeAsyncDataOutputFrequency(async_output_rate);
 
     // Configure binary output message
     /*BinaryOutputRegister bor(
@@ -249,6 +249,8 @@ int main(int argc, char *argv[])
     // Set Data output Freq [Hz]
     // vs.writeAsyncDataOutputFrequency(async_output_rate);
     vs.registerAsyncPacketReceivedHandler(&user_data, BinaryAsyncMessageReceived);
+
+    ROS_INFO("Sensor correctly initialized");
 
     // You spin me right round, baby
     // Right round like a record, baby
@@ -281,6 +283,7 @@ void BinaryAsyncMessageReceived(void *userData, Packet &p, size_t index)
 
     if (cd.hasQuaternion() && cd.hasYawPitchRoll() && cd.hasAccelerationLinearBody())
     {
+        ROS_INFO("Sensor data is available");
 
         /* vec4f q = cd.quaternion();
         vec3f ar = cd.angularRate();
