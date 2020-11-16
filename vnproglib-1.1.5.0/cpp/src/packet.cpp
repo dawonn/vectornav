@@ -44,15 +44,15 @@ namespace uart {
 
 char* vnstrtok(char* str, size_t& startIndex);
 
-const unsigned char Packet::BinaryGroupLengths[sizeof(uint8_t)*8][sizeof(uint16_t)*8] = {
-	{ 8, 8,	 8,  12, 16, 12, 24, 12, 12, 24, 20, 28, 2,  4, 8, 0 },		// Group 1
-	{ 8, 8,  8,  2,  8,  8,  8,  4,  4,  1,  0,  0,  0,  0, 0, 0 },		// Group 2
-	{ 2, 12, 12, 12, 4,  4,  16, 12, 12, 12, 12, 2,  40, 0, 0, 0 },		// Group 3
-	{ 8, 8,  2,  1,  1,  24, 24, 12, 12, 12, 4,  4,  2, 28, 0, 0 },		// Group 4
-	{ 2, 12, 16, 36, 12, 12, 12, 12, 12, 12, 28, 24, 0,  0, 0, 0 },		// Group 5
-	{ 2, 24, 24, 12, 12, 12, 12, 12, 12, 4,  4,  68, 64, 0, 0, 0 },		// Group 6
-	{ 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0, 0 },		// Invalid group
-	{ 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0, 0 }		// Invalid group
+const unsigned char Packet::BinaryGroupLengths[sizeof(uint8_t)*8][sizeof(uint16_t)*15] = {
+	{ 8,  8,  8, 12, 16, 12, 24, 12, 12, 24, 20, 28,  2,  4,  8},		// Group 1
+	{ 8,  8,  8,  2,  8,  8,  8,  4,  4,  1,  0,  0,  0,  0,  0},		// Group 2
+	{ 2, 12, 12, 12,  4,  4, 16, 12, 12, 12, 12,  2, 40,  0,  0},		// Group 3
+	{ 8,  8,  2,  1,  1, 24, 24, 12, 12, 12,  4,  4,  2, 28,  0},		// Group 4
+	{ 2, 12, 16, 36, 12, 12, 12, 12, 12, 12, 28, 24,  0,  0,  0},		// Group 5
+	{ 2, 24, 24, 12, 12, 12, 12, 12, 12,  4,  4, 68, 64,  0,  0},		// Group 6
+	{ 8,  8,  2,  1,  1, 24, 24, 12, 12, 12,  4,  4,  2, 28,  0},		// Group 7
+	{ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}		// Invalid group
 };
 
 Packet::Packet() :
@@ -290,7 +290,11 @@ bool Packet::isAsciiAsync()
 		return true;
 	if (strncmp(pAT, "DTV", 3) == 0)
 		return true;
-	#ifdef INTERNAL
+  if(strncmp(pAT, "G2S", 3) == 0)
+    return true;
+  if(strncmp(pAT, "G2E", 3) == 0)
+    return true;
+#ifdef INTERNAL
 	if (strncmp(pAT, "RAW", 3) == 0)
 		return true;
 	if (strncmp(pAT, "CMV", 3) == 0)
@@ -369,7 +373,11 @@ AsciiAsync Packet::determineAsciiAsyncType()
 		return VNISE;
 	if (strncmp(pAT, "DTV", 3) == 0)
 		return VNDTV;
-	#ifdef INTERNAL
+  if(strncmp(pAT, "G2S", 3) == 0)
+    return VNG2S;
+  if(strncmp(pAT, "G2E", 3) == 0)
+    return VNG2E;
+#ifdef INTERNAL
 	if (strncmp(pAT, "RAW", 3) == 0)
 		return VNRAW;
 	if (strncmp(pAT, "CMV", 3) == 0)
@@ -383,7 +391,7 @@ AsciiAsync Packet::determineAsciiAsyncType()
 		throw unknown_error();
 }
 
-bool Packet::isCompatible(CommonGroup commonGroup, TimeGroup timeGroup, ImuGroup imuGroup, GpsGroup gpsGroup, AttitudeGroup attitudeGroup, InsGroup insGroup)
+bool Packet::isCompatible(CommonGroup commonGroup, TimeGroup timeGroup, ImuGroup imuGroup, GpsGroup gpsGroup, AttitudeGroup attitudeGroup, InsGroup insGroup, GpsGroup gps2Group)
 {
 	// First make sure the appropriate groups are specified.
 	uint8_t groups = _data[1];
@@ -391,8 +399,8 @@ bool Packet::isCompatible(CommonGroup commonGroup, TimeGroup timeGroup, ImuGroup
 
 	if (commonGroup)
 	{
-		if (*reinterpret_cast<uint16_t*>(curField) != commonGroup)
-			// Not the expected collection of field data types.
+    if(*reinterpret_cast<uint16_t*>(curField) != commonGroup)
+      // Not the expected collection of field data types.
 			return false;
 
 		curField += 2;
@@ -473,8 +481,21 @@ bool Packet::isCompatible(CommonGroup commonGroup, TimeGroup timeGroup, ImuGroup
 		return false;
 	}
 
-	// Everything checks out.
+  if(gps2Group) {
+    if(*reinterpret_cast<uint16_t*>(curField) != gps2Group)
+      // Not the expected collection of field data types.
+      return false;
+
+    curField += 2;
+  } else if(groups & 0x40) {
+    // There is unexpected GPS2 Group data.
+    return false;
+  }
+
+  // Everything checks out.
 	return true;
+
+
 }
 
 char* startAsciiPacketParse(char* packetStart, size_t& index)
@@ -722,7 +743,7 @@ size_t Packet::genReadBinaryOutput3(ErrorDetectionMode errorDetectionMode, char 
 }
 
 
-size_t writeBinaryOutput(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint8_t binaryOutputNumber, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField)
+size_t writeBinaryOutput(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint8_t binaryOutputNumber, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField, uint16_t gps2Field)
 {
 	// First determine which groups are present.
 	uint16_t groups = 0;
@@ -738,6 +759,8 @@ size_t writeBinaryOutput(ErrorDetectionMode errorDetectionMode, char* buffer, si
 		groups |= 0x0010;
 	if (insField)
 		groups |= 0x0020;
+  if(gps2Field)
+    groups |= 0x0040;
 
 	#if VN_HAVE_SECURE_CRT
 	int length = sprintf_s(buffer, size, "$VNWRG,%u,%u,%u,%X", 74 + binaryOutputNumber, asyncMode, rateDivisor, groups);
@@ -781,23 +804,29 @@ size_t writeBinaryOutput(ErrorDetectionMode errorDetectionMode, char* buffer, si
 		#else
 		length += sprintf(buffer + length, ",%X", insField);
 		#endif
+  if(gps2Field)
+  #if VN_HAVE_SECURE_CRT
+  length += sprintf_s(buffer + length, size - length, ",%X", gps2Field);
+  #else
+  length += sprintf(buffer + length, ",%X", gps2Field);
+  #endif
 
 	return Packet::finalizeCommand(errorDetectionMode, buffer, length);
 }
 
-size_t Packet::genWriteBinaryOutput1(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField)
+size_t Packet::genWriteBinaryOutput1(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField, uint16_t gps2Field)
 {
-	return writeBinaryOutput(errorDetectionMode, buffer, size, 1, asyncMode, rateDivisor, commonField, timeField, imuField, gpsField, attitudeField, insField);
+	return writeBinaryOutput(errorDetectionMode, buffer, size, 1, asyncMode, rateDivisor, commonField, timeField, imuField, gpsField, attitudeField, insField, gps2Field);
 }
 
-size_t Packet::genWriteBinaryOutput2(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField)
+size_t Packet::genWriteBinaryOutput2(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField, uint16_t gps2Field)
 {
-	return writeBinaryOutput(errorDetectionMode, buffer, size, 2, asyncMode, rateDivisor, commonField, timeField, imuField, gpsField, attitudeField, insField);
+	return writeBinaryOutput(errorDetectionMode, buffer, size, 2, asyncMode, rateDivisor, commonField, timeField, imuField, gpsField, attitudeField, insField, gps2Field);
 }
 
-size_t Packet::genWriteBinaryOutput3(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField)
+size_t Packet::genWriteBinaryOutput3(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField, uint16_t gps2Field)
 {
-	return writeBinaryOutput(errorDetectionMode, buffer, size, 3, asyncMode, rateDivisor, commonField, timeField, imuField, gpsField, attitudeField, insField);
+	return writeBinaryOutput(errorDetectionMode, buffer, size, 3, asyncMode, rateDivisor, commonField, timeField, imuField, gpsField, attitudeField, insField, gps2Field);
 }
 
 
@@ -2933,7 +2962,8 @@ void Packet::parseBinaryOutput(
 	uint16_t* imuField,
 	uint16_t* gpsField,
 	uint16_t* attitudeField,
-	uint16_t* insField)
+	uint16_t* insField,
+  uint16_t* gps2Field)
 {
 	size_t parseIndex;
 
@@ -2945,6 +2975,7 @@ void Packet::parseBinaryOutput(
 	*gpsField = 0;
 	*attitudeField = 0;
 	*insField = 0;
+  *gps2Field = 0;
 
 	*asyncMode = ATOU16; NEXT
 	*rateDivisor = ATOU16; NEXT
@@ -2979,6 +3010,10 @@ void Packet::parseBinaryOutput(
 		NEXT
 		*insField = ATOU16;
 	}
+  if(*outputGroup & 0x0040) {
+    NEXT
+      *gps2Field = ATOU16;
+  }
 }
 
 void Packet::parseUserTag(char* tag)

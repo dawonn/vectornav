@@ -211,7 +211,11 @@ int main(int argc, char *argv[])
     }
     // Query the sensor's model number.
     string mn = vs.readModelNumber();
-    ROS_INFO("Model Number: %s", mn.c_str());
+    string fv = vs.readFirmwareVersion();
+    uint32_t hv = vs.readHardwareRevision();
+    uint32_t sn = vs.readSerialNumber();
+    ROS_INFO("Model Number: %s, Firmware Version: %s", mn.c_str(), fv.c_str());
+    ROS_INFO("Hardware Revision : %d, Serial Number : %d", hv, sn);
 
     // Set the device info for passing to the packet callback function
     UserData user_data;
@@ -237,7 +241,8 @@ int main(int argc, char *argv[])
             | INSGROUP_POSLLA
             | INSGROUP_POSECEF
             | INSGROUP_VELBODY
-            | INSGROUP_ACCELECEF);
+            | INSGROUP_ACCELECEF,
+            GPSGROUP_NONE);
 
     vs.writeBinaryOutput1(bor);
 
@@ -256,8 +261,10 @@ int main(int argc, char *argv[])
     // Node has been terminated
     vs.unregisterAsyncPacketReceivedHandler();
     ros::Duration(0.5).sleep();
+    ROS_INFO ("Unregisted the Packet Received Handler");
     vs.disconnect();
     ros::Duration(0.5).sleep();
+    ROS_INFO ("%s is disconnected successfully", mn.c_str());
     return 0;
 }
 

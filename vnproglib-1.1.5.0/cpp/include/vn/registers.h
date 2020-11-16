@@ -31,6 +31,7 @@ struct BinaryOutputRegister
 	protocol::uart::GpsGroup gpsField;				///< Group 4 (GPS)
 	protocol::uart::AttitudeGroup attitudeField;	///< Group 5 (Attitude)
 	protocol::uart::InsGroup insField;				///< Group 6 (INS)
+  protocol::uart::GpsGroup gps2Field;				///< Group 7 (GPS2)
 
 	BinaryOutputRegister() :
 		asyncMode(protocol::uart::ASYNCMODE_NONE),
@@ -40,8 +41,9 @@ struct BinaryOutputRegister
 		imuField(protocol::uart::IMUGROUP_NONE),
 		gpsField(protocol::uart::GPSGROUP_NONE),
 		attitudeField(protocol::uart::ATTITUDEGROUP_NONE),
-		insField(protocol::uart::INSGROUP_NONE)
-	{ }
+		insField(protocol::uart::INSGROUP_NONE),
+    gps2Field(protocol::uart::GPSGROUP_NONE)
+  { }
 
 	/// \brief Creates an initializes a new BinaryOutputRegister structure.
 	///
@@ -53,6 +55,7 @@ struct BinaryOutputRegister
 	/// \param[in] gpsFieldIn Value to initialize field 4 (GPS) with.
 	/// \param[in] attitudeFieldIn Value to initialize field 5 (Attitude) with.
 	/// \param[in] insFieldIn Value to initialize field 6 (INS) with.
+  /// \param[in] gps2FieldIn Value to initialize field 7 (GPS2) with.
 	BinaryOutputRegister(
 		protocol::uart::AsyncMode asyncModeIn,
 		uint16_t rateDivisorIn,
@@ -61,7 +64,8 @@ struct BinaryOutputRegister
 		protocol::uart::ImuGroup imuFieldIn,
 		protocol::uart::GpsGroup gpsFieldIn,
 		protocol::uart::AttitudeGroup attitudeFieldIn,
-		protocol::uart::InsGroup insFieldIn) :
+		protocol::uart::InsGroup insFieldIn,
+    protocol::uart::GpsGroup gps2FieldIn) :
 		asyncMode(asyncModeIn),
 		rateDivisor(rateDivisorIn),
 		commonField(commonFieldIn),
@@ -69,7 +73,8 @@ struct BinaryOutputRegister
 		imuField(imuFieldIn),
 		gpsField(gpsFieldIn),
 		attitudeField(attitudeFieldIn),
-		insField(insFieldIn)
+		insField(insFieldIn),
+    gps2Field(gps2FieldIn)
 	{ }
 
 	BinaryOutputRegister(
@@ -80,7 +85,8 @@ struct BinaryOutputRegister
 		uint16_t imuFieldIn,
 		uint16_t gpsFieldIn,
 		uint16_t attitudeFieldIn,
-		uint16_t insFieldIn) :
+		uint16_t insFieldIn,
+    uint16_t gps2FieldIn) :
 		asyncMode(static_cast<protocol::uart::AsyncMode>(asyncModeIn)),
 		rateDivisor(rateDivisorIn),
 		commonField(static_cast<protocol::uart::CommonGroup>(commonFieldIn)),
@@ -88,7 +94,8 @@ struct BinaryOutputRegister
 		imuField(static_cast<protocol::uart::ImuGroup>(imuFieldIn)),
 		gpsField(static_cast<protocol::uart::GpsGroup>(gpsFieldIn)),
 		attitudeField(static_cast<protocol::uart::AttitudeGroup>(attitudeFieldIn)),
-		insField(static_cast<protocol::uart::InsGroup>(insFieldIn))
+		insField(static_cast<protocol::uart::InsGroup>(insFieldIn)),
+    gps2Field(static_cast<protocol::uart::GpsGroup>(gps2FieldIn))
 	{ }
 };
 

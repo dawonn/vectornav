@@ -291,25 +291,43 @@ public:
 	/// \exception invalid_operation Thrown if there is no valid data.
 	math::PositionD anyPosition();
 
-	/// \brief Indicates if <c>positionGpsLla</c> has valid data.
-	/// \return <c>true</c> if <c>positionGpsLla</c> has valid data; otherwise <c>false</c>.
-	bool hasPositionGpsLla();
+  /// \brief Indicates if <c>positionGpsLla</c> has valid data.
+  /// \return <c>true</c> if <c>positionGpsLla</c> has valid data; otherwise <c>false</c>.
+  bool hasPositionGpsLla();
 
-	/// \brief Position GPS LLA data.
-	/// \return The Position GPS LLA data.
-	/// \exception invalid_operation Thrown if there is not any valid data.
-	math::vec3d positionGpsLla();
+  /// \brief Indicates if <c>positionGps2Lla</c> has valid data.
+  /// \return <c>true</c> if <c>positionGps2Lla</c> has valid data; otherwise <c>false</c>.
+  bool hasPositionGps2Lla();
 
-	/// \brief Indicates if <c>positionGpsEcef</c> has valid data.
-	/// \return <c>true</c> if <c>positionGpsEcef</c> has valid data; otherwise <c>false</c>.
-	bool hasPositionGpsEcef();
+  /// \brief Position GPS LLA data.
+  /// \return The Position GPS LLA data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  math::vec3d positionGpsLla();
 
-	/// \brief Position GPS ECEF data.
-	/// \return The Position GPS ECEF data.
-	/// \exception invalid_operation Thrown if there is not any valid data.
-	math::vec3d positionGpsEcef();
+  /// \brief Position GPS2 LLA data.
+  /// \return The Position GPS2 LLA data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  math::vec3d positionGps2Lla();
 
-	/// \brief Indicates if <c>positionEstimatedLla</c> has valid data.
+  /// \brief Indicates if <c>positionGpsEcef</c> has valid data.
+  /// \return <c>true</c> if <c>positionGpsEcef</c> has valid data; otherwise <c>false</c>.
+  bool hasPositionGpsEcef();
+
+  /// \brief Indicates if <c>positionGps2Ecef</c> has valid data.
+  /// \return <c>true</c> if <c>positionGps2Ecef</c> has valid data; otherwise <c>false</c>.
+  bool hasPositionGps2Ecef();
+
+  /// \brief Position GPS ECEF data.
+  /// \return The Position GPS ECEF data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  math::vec3d positionGpsEcef();
+
+  /// \brief Position GPS2 ECEF data.
+  /// \return The Position GPS2 ECEF data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  math::vec3d positionGps2Ecef();
+
+  /// \brief Indicates if <c>positionEstimatedLla</c> has valid data.
 	/// \return <c>true</c> if <c>positionEstimatedLla</c> has valid data; otherwise <c>false</c>.
 	bool hasPositionEstimatedLla();
 
@@ -338,25 +356,43 @@ public:
 	/// \exception invalid_operation Thrown if there is no valid data.
 	math::vec3f anyVelocity();
 
-	/// \brief Indicates if <c>velocityGpsNed</c> has valid data.
-	/// \return <c>true</c> if <c>velocityGpsNed</c> has valid data; otherwise <c>false</c>.
-	bool hasVelocityGpsNed();
+  /// \brief Indicates if <c>velocityGpsNed</c> has valid data.
+  /// \return <c>true</c> if <c>velocityGpsNed</c> has valid data; otherwise <c>false</c>.
+  bool hasVelocityGpsNed();
 
-	/// \brief Velocity GPS NED data.
-	/// \return The velocity GPS NED data.
-	/// \exception invalid_operation Thrown if there is not any valid data.
-	math::vec3f velocityGpsNed();
+  /// \brief Indicates if <c>velocityGps2Ned</c> has valid data.
+  /// \return <c>true</c> if <c>velocityGps2Ned</c> has valid data; otherwise <c>false</c>.
+  bool hasVelocityGps2Ned();
 
-	/// \brief Indicates if <c>velocityGpsEcef</c> has valid data.
-	/// \return <c>true</c> if <c>velocityGpsEcef</c> has valid data; otherwise <c>false</c>.
-	bool hasVelocityGpsEcef();
+  /// \brief Velocity GPS NED data.
+  /// \return The velocity GPS NED data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  math::vec3f velocityGpsNed();
 
-	/// \brief Velocity GPS ECEF data.
-	/// \return The velocity GPS ECEF data.
-	/// \exception invalid_operation Thrown if there is not any valid data.
-	math::vec3f velocityGpsEcef();
+  /// \brief Velocity GPS2 NED data.
+  /// \return The velocity GPS2 NED data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  math::vec3f velocityGps2Ned();
 
-	/// \brief Indicates if <c>velocityEstimatedNed</c> has valid data.
+  /// \brief Indicates if <c>velocityGpsEcef</c> has valid data.
+  /// \return <c>true</c> if <c>velocityGpsEcef</c> has valid data; otherwise <c>false</c>.
+  bool hasVelocityGpsEcef();
+
+  /// \brief Indicates if <c>velocityGps2Ecef</c> has valid data.
+  /// \return <c>true</c> if <c>velocityGps2Ecef</c> has valid data; otherwise <c>false</c>.
+  bool hasVelocityGps2Ecef();
+
+  /// \brief Velocity GPS ECEF data.
+  /// \return The velocity GPS ECEF data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  math::vec3f velocityGpsEcef();
+
+  /// \brief Velocity GPS2 ECEF data.
+  /// \return The velocity GPS2 ECEF data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  math::vec3f velocityGps2Ecef();
+
+  /// \brief Indicates if <c>velocityEstimatedNed</c> has valid data.
 	/// \return <c>true</c> if <c>velocityEstimatedNed</c> has valid data; otherwise <c>false</c>.
 	bool hasVelocityEstimatedNed();
 
@@ -419,25 +455,34 @@ public:
 	/// \exception invalid_operation Thrown if there is not any valid data.
 	uint64_t timeStartup();
 
-	/// \brief Indicates if <c>timeGps</c> has valid data.
-	/// \return <c>true</c> if <c>timeGps</c> has valid data; otherwise <c>false</c>.
-	bool hasTimeGps();
+  /// \brief Indicates if <c>timeGps</c> has valid data.
+  /// \return <c>true</c> if <c>timeGps</c> has valid data; otherwise <c>false</c>.
+  bool hasTimeGps();
 
-	/// \brief Time GPS data.
-	/// \return The time GPS data.
-	/// \exception invalid_operation Thrown if there is not any valid data.
-	uint64_t timeGps();
+  /// \brief Indicates if <c>timeGps2</c> has valid data.
+  /// \return <c>true</c> if <c>timeGps2</c> has valid data; otherwise <c>false</c>.
+  bool hasTimeGps2();
 
-	/// \brief Indicates if <c>tow</c> has valid data.
-	/// \return <c>true</c> if <c>tow</c> has valid data; otherwise <c>false</c>.
-	bool hasTow();
+  /// \brief Time GPS data.
+  /// \return The time GPS data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  uint64_t timeGps();
 
-	/// \brief GPS time of week data.
-	/// \return The GPS time of week data.
-	/// \exception invalid_operation Thrown if there is not any valid data.
-	double tow();
+  /// \brief Time GPS2 data.
+  /// \return The time GPS2 data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  uint64_t timeGps2();
 
-	/// \brief Indicates if <c>week</c> has valid data.
+  /// \brief Indicates if <c>tow</c> has valid data.
+  /// \return <c>true</c> if <c>tow</c> has valid data; otherwise <c>false</c>.
+  bool hasTow();
+
+  /// \brief GPS time of week data.
+  /// \return The GPS time of week data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  double tow();
+
+  /// \brief Indicates if <c>week</c> has valid data.
 	/// \return <c>true</c> if <c>week</c> has valid data; otherwise <c>false</c>.
 	bool hasWeek();
 
@@ -509,25 +554,43 @@ public:
   /// \exception invalid_operation Thrown if there is not any valid data.
   uint8_t timeStatus();
 
-	/// \brief Indicates if <c>timeGpsPps</c> has valid data.
-	/// \return <c>true</c> if <c>timeGpsPps</c> has valid data; otherwise <c>false</c>.
-	bool hasTimeGpsPps();
+  /// \brief Indicates if <c>timeGpsPps</c> has valid data.
+  /// \return <c>true</c> if <c>timeGpsPps</c> has valid data; otherwise <c>false</c>.
+  bool hasTimeGpsPps();
 
-	/// \brief TimeGpsPps data.
-	/// \return The TimeGpsPps data.
-	/// \exception invalid_operation Thrown if there is not any valid data.
-	uint64_t timeGpsPps();
+  /// \brief Indicates if <c>timeGps2Pps</c> has valid data.
+  /// \return <c>true</c> if <c>timeGps2Pps</c> has valid data; otherwise <c>false</c>.
+  bool hasTimeGps2Pps();
 
-	/// \brief Indicates if <c>gpsTow</c> has valid data.
-	/// \return <c>true</c> if <c>gpsTow</c> has valid data; otherwise <c>false</c>.
-	bool hasGpsTow();
+  /// \brief TimeGpsPps data.
+  /// \return The TimeGpsPps data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  uint64_t timeGpsPps();
 
-	/// \brief GpsTow data.
-	/// \return The GpsTow data.
-	/// \exception invalid_operation Thrown if there is not any valid data.
-	uint64_t gpsTow();
+  /// \brief TimeGps2Pps data.
+  /// \return The TimeGps2Pps data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  uint64_t timeGps2Pps();
 
-	/// \brief Indicates if <c>timeUtc</c> has valid data.
+  /// \brief Indicates if <c>gpsTow</c> has valid data.
+  /// \return <c>true</c> if <c>gpsTow</c> has valid data; otherwise <c>false</c>.
+  bool hasGpsTow();
+
+  /// \brief Indicates if <c>gps2Tow</c> has valid data.
+  /// \return <c>true</c> if <c>gps2Tow</c> has valid data; otherwise <c>false</c>.
+  bool hasGps2Tow();
+
+  /// \brief GpsTow data.
+  /// \return The GpsTow data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  uint64_t gpsTow();
+
+  /// \brief Gps2Tow data.
+  /// \return The Gps2Tow data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  uint64_t gps2Tow();
+
+  /// \brief Indicates if <c>timeUtc</c> has valid data.
 	/// \return <c>true</c> if <c>timeUtc</c> has valid data; otherwise <c>false</c>.
 	bool hasTimeUtc();
 
@@ -545,16 +608,25 @@ public:
 	/// \exception invalid_operation Thrown if there is not any valid data.
 	protocol::uart::SensSat sensSat();
 
-	/// \brief Indicates if <c>fix</c> has valid data.
-	/// \return <c>true</c> if <c>fix</c> has valid data; otherwise <c>false</c>.
-	bool hasFix();
+  /// \brief Indicates if <c>fix</c> has valid data.
+  /// \return <c>true</c> if <c>fix</c> has valid data; otherwise <c>false</c>.
+  bool hasFix();
 
-	/// \brief GPS fix data.
-	/// \return The GPS fix data.
-	/// \exception invalid_operation Thrown if there is not any valid data.
-	protocol::uart::GpsFix fix();
+  /// \brief Indicates if <c>fix2</c> has valid data.
+  /// \return <c>true</c> if <c>fix2</c> has valid data; otherwise <c>false</c>.
+  bool hasFix2();
 
-	/// \brief Indicates if <c>anyPositionUncertainty</c> has valid data.
+  /// \brief GPS fix data.
+  /// \return The GPS fix data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  protocol::uart::GpsFix fix();
+
+  /// \brief GPS2 fix data.
+  /// \return The GPS2 fix data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  protocol::uart::GpsFix fix2();
+
+  /// \brief Indicates if <c>anyPositionUncertainty</c> has valid data.
 	/// \return <c>true</c> if <c>anyPositionUncertainty</c> has valid data; otherwise <c>false</c>.
 	bool hasAnyPositionUncertainty();
 
@@ -565,25 +637,43 @@ public:
 	/// \exception invalid_operation Thrown if there is no valid data.
 	math::vec3f anyPositionUncertainty();
 
-	/// \brief Indicates if <c>positionUncertaintyGpsNed</c> has valid data.
-	/// \return <c>true</c> if <c>positionUncertaintyGpsNed</c> has valid data; otherwise <c>false</c>.
-	bool hasPositionUncertaintyGpsNed();
+  /// \brief Indicates if <c>positionUncertaintyGpsNed</c> has valid data.
+  /// \return <c>true</c> if <c>positionUncertaintyGpsNed</c> has valid data; otherwise <c>false</c>.
+  bool hasPositionUncertaintyGpsNed();
 
-	/// \brief GPS position uncertainty NED data.
+  /// \brief Indicates if <c>positionUncertaintyGps2Ned</c> has valid data.
+  /// \return <c>true</c> if <c>positionUncertaintyGps2Ned</c> has valid data; otherwise <c>false</c>.
+  bool hasPositionUncertaintyGps2Ned();
+
+  /// \brief GPS position uncertainty NED data.
 	/// \return The GPS position uncertainty NED data.
 	/// \exception invalid_operation Thrown if there is not any valid data.
 	math::vec3f positionUncertaintyGpsNed();
 
-	/// \brief Indicates if <c>positionUncertaintyGpsEcef</c> has valid data.
-	/// \return <c>true</c> if <c>positionUncertaintyGpsEcef</c> has valid data; otherwise <c>false</c>.
-	bool hasPositionUncertaintyGpsEcef();
+  /// \brief GPS2 position uncertainty NED data.
+  /// \return The GPS2 position uncertainty NED data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  math::vec3f positionUncertaintyGps2Ned();
 
-	/// \brief GPS position uncertainty ECEF data.
+  /// \brief Indicates if <c>positionUncertaintyGpsEcef</c> has valid data.
+  /// \return <c>true</c> if <c>positionUncertaintyGpsEcef</c> has valid data; otherwise <c>false</c>.
+  bool hasPositionUncertaintyGpsEcef();
+
+  /// \brief Indicates if <c>positionUncertaintyGps2Ecef</c> has valid data.
+  /// \return <c>true</c> if <c>positionUncertaintyGps2Ecef</c> has valid data; otherwise <c>false</c>.
+  bool hasPositionUncertaintyGps2Ecef();
+
+  /// \brief GPS position uncertainty ECEF data.
 	/// \return The GPS position uncertainty ECEF data.
 	/// \exception invalid_operation Thrown if there is not any valid data.
 	math::vec3f positionUncertaintyGpsEcef();
 
-	/// \brief Indicates if <c>positionUncertaintyEstimated</c> has valid data.
+  /// \brief GPS2 position uncertainty ECEF data.
+  /// \return The GPS2 position uncertainty ECEF data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  math::vec3f positionUncertaintyGps2Ecef();
+
+  /// \brief Indicates if <c>positionUncertaintyEstimated</c> has valid data.
 	/// \return <c>true</c> if <c>positionUncertaintyEstimated</c> has valid data; otherwise <c>false</c>.
 	bool hasPositionUncertaintyEstimated();
 
@@ -603,16 +693,25 @@ public:
 	/// \exception invalid_operation Thrown if there is no valid data.
 	float anyVelocityUncertainty();
 
-	/// \brief Indicates if <c>velocityUncertaintyGps</c> has valid data.
-	/// \return <c>true</c> if <c>velocityUncertaintyGps</c> has valid data; otherwise <c>false</c>.
-	bool hasVelocityUncertaintyGps();
+  /// \brief Indicates if <c>velocityUncertaintyGps</c> has valid data.
+  /// \return <c>true</c> if <c>velocityUncertaintyGps</c> has valid data; otherwise <c>false</c>.
+  bool hasVelocityUncertaintyGps();
 
-	/// \brief GPS velocity uncertainty data.
-	/// \return The GPS velocity uncertainty data.
-	/// \exception invalid_operation Thrown if there is not any valid data.
-	float velocityUncertaintyGps();
+  /// \brief Indicates if <c>velocityUncertaintyGps2</c> has valid data.
+  /// \return <c>true</c> if <c>velocityUncertaintyGps2</c> has valid data; otherwise <c>false</c>.
+  bool hasVelocityUncertaintyGps2();
 
-	/// \brief Indicates if <c>velocityUncertaintyEstimated</c> has valid data.
+  /// \brief GPS velocity uncertainty data.
+  /// \return The GPS velocity uncertainty data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  float velocityUncertaintyGps();
+
+  /// \brief GPS2 velocity uncertainty data.
+  /// \return The GPS2 velocity uncertainty data.
+  /// \exception invalid_operation Thrown if there is not any valid data.
+  float velocityUncertaintyGps2();
+
+  /// \brief Indicates if <c>velocityUncertaintyEstimated</c> has valid data.
 	/// \return <c>true</c> if <c>velocityUncertaintyEstimated</c> has valid data; otherwise <c>false</c>.
 	bool hasVelocityUncertaintyEstimated();
 
@@ -669,6 +768,12 @@ public:
   /// \exception invalid_operation Thrown if there is no valid data.
   protocol::uart::TimeInfo timeInfo();
 
+  /// \brief GPS2 Time Status and number of leap seconds.
+  ///
+  /// \return Current Time Info.
+  /// \exception invalid_operation Thrown if there is no valid data.
+  protocol::uart::TimeInfo timeInfo2();
+
   /// \brief Indicates if <c>dop</c> has valid data.
   /// \return <c>true</c> if <c>dop</c> havs valid data; otherwise <c>false</c>.
   bool hasDop();
@@ -689,6 +794,7 @@ private:
 	static void parseBinaryPacketGpsGroup(protocol::uart::Packet& p, protocol::uart::GpsGroup gf, std::vector<CompositeData*>& o);
 	static void parseBinaryPacketAttitudeGroup(protocol::uart::Packet& p, protocol::uart::AttitudeGroup gf, std::vector<CompositeData*>& o);
 	static void parseBinaryPacketInsGroup(protocol::uart::Packet& p, protocol::uart::InsGroup gf, std::vector<CompositeData*>& o);
+	static void parseBinaryPacketGps2Group(protocol::uart::Packet& p, protocol::uart::GpsGroup gf, std::vector<CompositeData*>& o);
 
 private:
 	struct Impl;

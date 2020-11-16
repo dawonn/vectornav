@@ -413,7 +413,7 @@ struct VnSensor::Impl
 	{
 		char toSend[17];
 		Packet response;
-		uint16_t asyncMode, rateDivisor, outputGroup, commonField, timeField, imuField, gpsField, attitudeField, insField;
+		uint16_t asyncMode, rateDivisor, outputGroup, commonField, timeField, imuField, gpsField, attitudeField, insField, gps2Field;
 
 		#if VN_HAVE_SECURE_CRT
 		int length = sprintf_s(toSend, sizeof(toSend), "$VNRRG,%u*", 74 + binaryOutputNumber);
@@ -432,7 +432,8 @@ struct VnSensor::Impl
 			&imuField,
 			&gpsField,
 			&attitudeField,
-			&insField);
+			&insField,
+      &gps2Field);
 
 		return BinaryOutputRegister(
 			static_cast<AsyncMode>(asyncMode),
@@ -442,7 +443,8 @@ struct VnSensor::Impl
 			static_cast<ImuGroup>(imuField),
 			static_cast<GpsGroup>(gpsField),
 			static_cast<AttitudeGroup>(attitudeField),
-			static_cast<InsGroup>(insField));
+			static_cast<InsGroup>(insField),
+      static_cast<GpsGroup>(gps2Field));
 	}
 
 	void writeBinaryOutput(uint8_t binaryOutputNumber, BinaryOutputRegister &fields, bool waitForReply)
@@ -464,6 +466,8 @@ struct VnSensor::Impl
 			groups |= 0x0010;
 		if (fields.insField)
 			groups |= 0x0020;
+    if(fields.gps2Field)
+      groups |= 0x0040;
 
 		#if VN_HAVE_SECURE_CRT
 		int length = sprintf_s(toSend, sizeof(toSend), "$VNWRG,%u,%u,%u,%X", 74 + binaryOutputNumber, fields.asyncMode, fields.rateDivisor, groups);
@@ -507,6 +511,12 @@ struct VnSensor::Impl
 			#else
 			length += sprintf(toSend + length, ",%X", fields.insField);
 			#endif
+    if(fields.gps2Field)
+      #if VN_HAVE_SECURE_CRT
+      length += sprintf_s(toSend + length, sizeof(toSend) - length, ",%X", fields.gps2Field);
+      #else
+      length += sprintf(toSend + length, ",%X", fields.gps2Field);
+      #endif
 
 		#if VN_HAVE_SECURE_CRT
 		length += sprintf_s(toSend + length, sizeof(toSend) - length, "*");
