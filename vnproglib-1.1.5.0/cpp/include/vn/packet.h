@@ -16,7 +16,7 @@ namespace uart {
 struct vn_proglib_DLLEXPORT Packet
 {
 	/// \brief Array containing sizes for the binary group fields.
-	static const unsigned char BinaryGroupLengths[sizeof(uint8_t)*8][sizeof(uint16_t)*8];
+	static const unsigned char BinaryGroupLengths[sizeof(uint8_t)*8][sizeof(uint16_t)*15];
 
 	/// \brief The different types of UART packets.
 	enum Type
@@ -105,7 +105,7 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \param[in] insGroup The INS Group configuration.
 	/// \return <c>true</c> if the packet matches the expected group
 	///     configuration; otherwise <c>false</c>.
-	bool isCompatible(CommonGroup commonGroup, TimeGroup timeGroup, ImuGroup imuGroup, GpsGroup gpsGroup, AttitudeGroup attitudeGroup, InsGroup insGroup);
+	bool isCompatible(CommonGroup commonGroup, TimeGroup timeGroup, ImuGroup imuGroup, GpsGroup gpsGroup, AttitudeGroup attitudeGroup, InsGroup insGroup, GpsGroup gps2Group);
 
 	/// \brief Computes the expected number of bytes for a possible binary
 	/// packet.
@@ -268,8 +268,9 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \param[in] gpsField The register's Group 4 (GPS) field.
 	/// \param[in] attitudeField The register's Group 5 (Attitude) field.
 	/// \param[in] insField The register's Group 6 (INS) field.
-	/// \return The total number bytes in the generated command.
-	static size_t genWriteBinaryOutput1(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField);
+  /// \param[in] gps2Field The register's Group 7 (GPS2) field.
+/// \return The total number bytes in the generated command.
+	static size_t genWriteBinaryOutput1(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField, uint16_t gps2Field);
 
 	/// \brief Generates a command to write to the Binary Output 2 register on a VectorNav sensor.
 	///
@@ -288,8 +289,9 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \param[in] gpsField The register's Group 4 (GPS) field.
 	/// \param[in] attitudeField The register's Group 5 (Attitude) field.
 	/// \param[in] insField The register's Group 6 (INS) field.
-	/// \return The total number bytes in the generated command.
-	static size_t genWriteBinaryOutput2(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField);
+  /// \param[in] gps2Field The register's Group 7 (GPS2) field.
+  /// \return The total number bytes in the generated command.
+	static size_t genWriteBinaryOutput2(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField, uint16_t gps2Field);
 
 	/// \brief Generates a command to write to the Binary Output 3 register on a VectorNav sensor.
 	///
@@ -308,8 +310,9 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \param[in] gpsField The register's Group 4 (GPS) field.
 	/// \param[in] attitudeField The register's Group 5 (Attitude) field.
 	/// \param[in] insField The register's Group 6 (INS) field.
-	/// \return The total number bytes in the generated command.
-	static size_t genWriteBinaryOutput3(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField);
+  /// \param[in] gps2Field The register's Group 7 (GPS2) field.
+  /// \return The total number bytes in the generated command.
+	static size_t genWriteBinaryOutput3(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint16_t asyncMode, uint16_t rateDivisor, uint16_t commonField, uint16_t timeField, uint16_t imuField, uint16_t gpsField, uint16_t attitudeField, uint16_t insField, uint16_t gps2Field);
 
 
 	/// \brief Generates a command to write sensor settings to non-volatile memory.
@@ -1612,8 +1615,9 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \param[out] imuField The set fields of Output Group 3 (IMU) if present.
 	/// \param[out] gpsField The set fields of Output Group 4 (GPS) if present.
 	/// \param[out] attitudeField The set fields of Output Group 5 (Attitude) if present.
-	/// \param[out] insField The set fields of Output Group 6 (INS) if present.
-	void parseBinaryOutput(
+  /// \param[out] insField The set fields of Output Group 6 (INS) if present.
+  /// \param[out] gps2Field The set fields of Output Group 7 (GPS2) if present.
+  void parseBinaryOutput(
 		uint16_t* asyncMode,
 		uint16_t* rateDivisor,
 		uint16_t* outputGroup,
@@ -1622,7 +1626,8 @@ struct vn_proglib_DLLEXPORT Packet
 		uint16_t* imuField,
 		uint16_t* gpsField,
 		uint16_t* attitudeField,
-		uint16_t* insField);
+		uint16_t* insField,
+    uint16_t* gps2Field);
 
 	/// \brief Parses a response from reading the User Tag register.
 	///

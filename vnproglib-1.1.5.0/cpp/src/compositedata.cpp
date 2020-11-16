@@ -63,18 +63,22 @@ struct CompositeData::Impl
 	enum PositionType
 	{
 		CDPOS_None,
-		CDPOS_GpsLla,
-		CDPOS_GpsEcef,
-		CDPOS_EstimatedLla,
+    CDPOS_GpsLla,
+    CDPOS_Gps2Lla,
+    CDPOS_GpsEcef,
+    CDPOS_Gps2Ecef,
+    CDPOS_EstimatedLla,
 		CDPOS_EstimatedEcef
 	};
 
 	enum VelocityType
 	{
 		CDVEL_None,
-		CDVEL_GpsNed,
-		CDVEL_GpsEcef,
-		CDVEL_EstimatedNed,
+    CDVEL_GpsNed,
+    CDVEL_Gps2Ned,
+    CDVEL_GpsEcef,
+    CDVEL_Gps2Ecef,
+    CDVEL_EstimatedNed,
 		CDVEL_EstimatedEcef,
 		CDVEL_EstimatedBody
 	};
@@ -82,16 +86,19 @@ struct CompositeData::Impl
 	enum PositionUncertaintyType
 	{
 		CDPOU_None,
-		CDPOU_GpsNed,
-		CDPOU_GpsEcef,
-		CDPOU_Estimated
+    CDPOU_GpsNed,
+    CDPOU_Gps2Ned,
+    CDPOU_GpsEcef,
+    CDPOU_Gps2Ecef,
+    CDPOU_Estimated
 	};
 
 	enum VelocityUncertaintyType
 	{
 		CDVEU_None,
-		CDVEU_Gps,
-		CDVEU_Estimated
+    CDVEU_Gps,
+    CDVEU_Gps2,
+    CDVEU_Estimated
 	};
 
 	AttitudeType mostRecentlyUpdatedAttitudeType;
@@ -109,37 +116,41 @@ struct CompositeData::Impl
 		hasAcceleration, hasAccelerationLinearBody, hasAccelerationUncompensated, hasAccelerationLinearNed, hasAccelerationLinearEcef, hasAccelerationNed, hasAccelerationEcef,
 		hasAngularRate, hasAngularRateUncompensated,
 		hasTemperature, hasPressure,
-		hasPositionGpsLla, hasPositionGpsEcef, hasPositionEstimatedLla, hasPositionEstimatedEcef,
-		hasVelocityGpsNed, hasVelocityGpsEcef, hasVelocityEstimatedNed, hasVelocityEstimatedEcef, hasVelocityEstimatedBody,
+    hasPositionGpsLla, hasPositionGps2Lla, hasPositionGpsEcef, hasPositionGps2Ecef, hasPositionEstimatedLla, hasPositionEstimatedEcef,
+    hasVelocityGpsNed, hasVelocityGps2Ned, hasVelocityGpsEcef, hasVelocityGps2Ecef, hasVelocityEstimatedNed, hasVelocityEstimatedEcef, hasVelocityEstimatedBody,
 		hasDeltaTime, hasDeltaTheta, hasDeltaVelocity,
-		hasTimeStartup, hasTimeGps, hasTow, hasWeek, hasNumSats, hasTimeSyncIn, hasVpeStatus, hasInsStatus,
-    hasSyncInCnt, hasSyncOutCnt, hasTimeStatus, hasTimeGpsPps, hasGpsTow, hasTimeUtc, hasSensSat, hasFix,
-		hasPositionUncertaintyGpsNed, hasPositionUncertaintyGpsEcef, hasPositionUncertaintyEstimated,
-		hasVelocityUncertaintyGps, hasVelocityUncertaintyEstimated, hasTimeUncertainty, hasAttitudeUncertainty,
-    hasTimeInfo, hasDop;
+		hasTimeStartup, hasTimeGps, hasTimeGps2, hasTow, hasWeek, hasGpsWeek, hasGps2Week, hasNumSats, hasNumSats2, hasTimeSyncIn, hasVpeStatus, hasInsStatus,
+    hasSyncInCnt, hasSyncOutCnt, hasTimeStatus, hasTimeGpsPps, hasTimeGps2Pps, hasGpsTow, hasGps2Tow, hasTimeUtc, hasTimeUtc2, hasSensSat, hasFix, hasFix2,
+    hasPositionUncertaintyGpsNed, hasPositionUncertaintyGps2Ned, hasPositionUncertaintyGpsEcef, hasPositionUncertaintyGps2Ecef, hasPositionUncertaintyEstimated,
+    hasVelocityUncertaintyGps, hasVelocityUncertaintyGps2, hasVelocityUncertaintyEstimated, hasTimeUncertainty, hasTimeUncertainty2, hasAttitudeUncertainty,
+    hasTimeInfo, hasTimeInfo2, hasDop, hasDop2;
 	vec3f yawPitchRoll,
 		magnetic, magneticUncompensated, magneticNed, magneticEcef,
 		acceleration, accelerationLinearBody, accelerationUncompensated, accelerationLinearNed, accelerationLinearEcef, accelerationNed, accelerationEcef,
 		angularRate, angularRateUncompensated,
-		velocityGpsNed, velocityGpsEcef, velocityEstimatedNed, velocityEstimatedEcef, velocityEstimatedBody,
-		deltaTheta, deltaVelocity, positionUncertaintyGpsNed, positionUncertaintyGpsEcef, attitudeUncertainty;
-	vec3d positionGpsLla, positionGpsEcef, positionEstimatedLla, positionEstimatedEcef;
+    velocityGpsNed, velocityGps2Ned, velocityGpsEcef, velocityGps2Ecef, velocityEstimatedNed, velocityEstimatedEcef, velocityEstimatedBody,
+		deltaTheta, deltaVelocity, positionUncertaintyGpsNed, positionUncertaintyGps2Ned, positionUncertaintyGpsEcef, positionUncertaintyGps2Ecef, attitudeUncertainty;
+	vec3d positionGpsLla, positionGps2Lla, positionGpsEcef, positionGps2Ecef, positionEstimatedLla, positionEstimatedEcef;
 	vec4f quaternion;
 	mat3f directionConsineMatrix;
 	float temperature, pressure, deltaTime, positionUncertaintyEstimated,
-		velocityUncertaintyGps, velocityUncertaintyEstimated;
-	uint64_t timeStartup, timeGps, timeSyncIn, timeGpsPps, gpsTow;
+    velocityUncertaintyGps, velocityUncertaintyGps2, velocityUncertaintyEstimated;
+	uint64_t timeStartup, timeGps, timeGps2, timeSyncIn, timeGpsPps, timeGps2Pps, gpsTow, gps2Tow;
 	double tow;
-	uint16_t week;
-	uint8_t numSats, timeStatus;
+	uint16_t week, gpsWeek, gps2Week;
+	uint8_t numSats, numSats2, timeStatus;
 	VpeStatus vpeStatus;
 	InsStatus insStatus;
-  uint32_t syncInCnt, syncOutCnt, timeUncertainty;
-	GpsFix fix;
-	TimeUtc timeUtc;
-	SensSat sensSat;
+  uint32_t syncInCnt, syncOutCnt, timeUncertainty, timeUncertainty2;
+  GpsFix fix;
+  GpsFix fix2;
+  TimeUtc timeUtc;
+  TimeUtc timeUtc2;
+  SensSat sensSat;
   TimeInfo timeInfo;
+  TimeInfo timeInfo2;
   GnssDop dop;
+  GnssDop dop2;
 
 	Impl& operator=(Impl& aImpl)
 	{
@@ -157,19 +168,25 @@ struct CompositeData::Impl
 		accelerationEcef = aImpl.accelerationEcef;
 		angularRate = aImpl.angularRate;
 		angularRateUncompensated = aImpl.angularRateUncompensated;
-		velocityGpsNed = aImpl.velocityGpsNed;
-		velocityGpsEcef = aImpl.velocityGpsEcef;
-		velocityEstimatedNed = aImpl.velocityEstimatedNed;
+    velocityGpsNed = aImpl.velocityGpsNed;
+    velocityGps2Ned = aImpl.velocityGps2Ned;
+    velocityGpsEcef = aImpl.velocityGpsEcef;
+    velocityGps2Ecef = aImpl.velocityGps2Ecef;
+    velocityEstimatedNed = aImpl.velocityEstimatedNed;
 		velocityEstimatedEcef = aImpl.velocityEstimatedEcef;
 		velocityEstimatedBody = aImpl.velocityEstimatedBody;
 		deltaTheta = aImpl.deltaTheta;
 		deltaVelocity = aImpl.deltaVelocity;
-		positionUncertaintyGpsNed = aImpl.positionUncertaintyGpsNed;
-		positionUncertaintyGpsEcef = aImpl.positionUncertaintyGpsEcef;
-		attitudeUncertainty = aImpl.attitudeUncertainty;
-		positionGpsLla = aImpl.positionGpsLla;
-		positionGpsEcef = aImpl.positionGpsEcef;
-		positionEstimatedLla = aImpl.positionEstimatedLla;
+    positionUncertaintyGpsNed = aImpl.positionUncertaintyGpsNed;
+    positionUncertaintyGps2Ned = aImpl.positionUncertaintyGps2Ned;
+    positionUncertaintyGpsEcef = aImpl.positionUncertaintyGpsEcef;
+    positionUncertaintyGps2Ecef = aImpl.positionUncertaintyGps2Ecef;
+    attitudeUncertainty = aImpl.attitudeUncertainty;
+    positionGpsLla = aImpl.positionGpsLla;
+    positionGps2Lla = aImpl.positionGps2Lla;
+    positionGpsEcef = aImpl.positionGpsEcef;
+    positionGps2Ecef = aImpl.positionGps2Ecef;
+    positionEstimatedLla = aImpl.positionEstimatedLla;
 		positionEstimatedEcef = aImpl.positionEstimatedEcef;
 		quaternion = aImpl.quaternion;
 		directionConsineMatrix = aImpl.directionConsineMatrix;
@@ -178,26 +195,36 @@ struct CompositeData::Impl
 		pressure = aImpl.pressure;
 		deltaTime = aImpl.deltaTime;
 		positionUncertaintyEstimated = aImpl.positionUncertaintyEstimated;
-		velocityUncertaintyGps = aImpl.velocityUncertaintyGps;
-		velocityUncertaintyEstimated = aImpl.velocityUncertaintyEstimated;
+    velocityUncertaintyGps = aImpl.velocityUncertaintyGps;
+    velocityUncertaintyGps2 = aImpl.velocityUncertaintyGps2;
+    velocityUncertaintyEstimated = aImpl.velocityUncertaintyEstimated;
 		timeStartup = aImpl.timeStartup;
-		timeGps = aImpl.timeGps;
-		timeUtc = aImpl.timeUtc;
-		timeSyncIn = aImpl.timeSyncIn;
-		timeGpsPps = aImpl.timeGpsPps;
-		gpsTow = aImpl.gpsTow;
-		tow = aImpl.tow;
-		week = aImpl.week;
-		numSats = aImpl.numSats;
-		insStatus = aImpl.insStatus;
+    timeGps = aImpl.timeGps;
+    timeGps2 = aImpl.timeGps2;
+    timeUtc = aImpl.timeUtc;
+    timeUtc2 = aImpl.timeUtc2;
+    timeSyncIn = aImpl.timeSyncIn;
+    timeGpsPps = aImpl.timeGpsPps;
+    timeGps2Pps = aImpl.timeGps2Pps;
+    gpsTow = aImpl.gpsTow;
+    gps2Tow = aImpl.gps2Tow;
+    tow = aImpl.tow;
+    week = aImpl.week;
+    gpsWeek = aImpl.gpsWeek;
+    gps2Week = aImpl.gps2Week;
+    numSats = aImpl.numSats;
+    numSats2 = aImpl.numSats2;
+    insStatus = aImpl.insStatus;
 		syncInCnt = aImpl.syncInCnt;
     syncOutCnt = aImpl.syncOutCnt;
     timeStatus = aImpl.timeStatus;
-		timeUncertainty = aImpl.timeUncertainty;
-		fix = aImpl.fix;
+    timeUncertainty = aImpl.timeUncertainty;
+    timeUncertainty2 = aImpl.timeUncertainty2;
+    fix = aImpl.fix;
 		sensSat = aImpl.sensSat;
     timeInfo = aImpl.timeInfo;
     dop = aImpl.dop;
+    dop2 = aImpl.dop2;
 
 		mostRecentlyUpdatedAttitudeType = aImpl.mostRecentlyUpdatedAttitudeType;
 		mostRecentlyUpdatedMagneticType = aImpl.mostRecentlyUpdatedMagneticType;
@@ -227,43 +254,60 @@ struct CompositeData::Impl
 		hasAngularRateUncompensated = aImpl.hasAngularRateUncompensated;
 		hasTemperature = aImpl.hasTemperature;
 		hasPressure = aImpl.hasPressure;
-		hasPositionGpsLla = aImpl.hasPositionGpsLla;
-		hasPositionGpsEcef = aImpl.hasPositionGpsEcef;
-		hasPositionEstimatedLla = aImpl.hasPositionEstimatedLla;
+    hasPositionGpsLla = aImpl.hasPositionGpsLla;
+    hasPositionGps2Lla = aImpl.hasPositionGps2Lla;
+    hasPositionGpsEcef = aImpl.hasPositionGpsEcef;
+    hasPositionGps2Ecef = aImpl.hasPositionGps2Ecef;
+    hasPositionEstimatedLla = aImpl.hasPositionEstimatedLla;
 		hasPositionEstimatedEcef = aImpl.hasPositionEstimatedEcef;
-		hasVelocityGpsNed = aImpl.hasVelocityGpsNed;
-		hasVelocityGpsEcef = aImpl.hasVelocityGpsEcef;
-		hasVelocityEstimatedNed = aImpl.hasVelocityEstimatedNed;
+    hasVelocityGpsNed = aImpl.hasVelocityGpsNed;
+    hasVelocityGps2Ned = aImpl.hasVelocityGps2Ned;
+    hasVelocityGpsEcef = aImpl.hasVelocityGpsEcef;
+    hasVelocityGps2Ecef = aImpl.hasVelocityGps2Ecef;
+    hasVelocityEstimatedNed = aImpl.hasVelocityEstimatedNed;
 		hasVelocityEstimatedEcef = aImpl.hasVelocityEstimatedEcef;
 		hasVelocityEstimatedBody = aImpl.hasVelocityEstimatedBody;
 		hasDeltaTime = aImpl.hasDeltaTime;
 		hasDeltaTheta = aImpl.hasDeltaTheta;
 		hasDeltaVelocity = aImpl.hasDeltaVelocity;
 		hasTimeStartup = aImpl.hasTimeStartup;
-		hasTimeGps = aImpl.hasTimeGps;
-		hasTow = aImpl.hasTow;
-		hasWeek = aImpl.hasWeek;
-		hasNumSats = aImpl.hasNumSats;
-		hasTimeSyncIn = aImpl.hasTimeSyncIn;
+    hasTimeGps = aImpl.hasTimeGps;
+    hasTimeGps2 = aImpl.hasTimeGps2;
+    hasTow = aImpl.hasTow;
+    hasWeek = aImpl.hasWeek;
+    hasGpsWeek = aImpl.hasGpsWeek;
+    hasGps2Week = aImpl.hasGps2Week;
+    hasNumSats = aImpl.hasNumSats;
+    hasNumSats2 = aImpl.hasNumSats2;
+    hasTimeSyncIn = aImpl.hasTimeSyncIn;
 		hasVpeStatus = aImpl.hasVpeStatus;
 		hasInsStatus = aImpl.hasInsStatus;
 		hasSyncInCnt = aImpl.hasSyncInCnt;
     hasSyncOutCnt = aImpl.hasSyncOutCnt;
     hasTimeStatus = aImpl.hasTimeStatus;
-		hasTimeGpsPps = aImpl.hasTimeGpsPps;
-		hasGpsTow = aImpl.hasGpsTow;
-		hasTimeUtc = aImpl.hasTimeUtc;
-		hasSensSat = aImpl.hasSensSat;
+    hasTimeGpsPps = aImpl.hasTimeGpsPps;
+    hasTimeGps2Pps = aImpl.hasTimeGps2Pps;
+    hasGpsTow = aImpl.hasGpsTow;
+    hasGps2Tow = aImpl.hasGps2Tow;
+    hasTimeUtc = aImpl.hasTimeUtc;
+    hasTimeUtc2 = aImpl.hasTimeUtc2;
+    hasSensSat = aImpl.hasSensSat;
 		hasFix = aImpl.hasFix;
-		hasPositionUncertaintyGpsNed = aImpl.hasPositionUncertaintyGpsNed;
-		hasPositionUncertaintyGpsEcef = aImpl.hasPositionUncertaintyGpsEcef;
-		hasPositionUncertaintyEstimated = aImpl.hasPositionUncertaintyEstimated;
-		hasVelocityUncertaintyGps = aImpl.hasVelocityUncertaintyGps;
-		hasVelocityUncertaintyEstimated = aImpl.hasVelocityUncertaintyEstimated;
-		hasTimeUncertainty = aImpl.hasTimeUncertainty;
-		hasAttitudeUncertainty = aImpl.hasAttitudeUncertainty;
+    hasPositionUncertaintyGpsNed = aImpl.hasPositionUncertaintyGpsNed;
+    hasPositionUncertaintyGps2Ned = aImpl.hasPositionUncertaintyGps2Ned;
+    hasPositionUncertaintyGpsEcef = aImpl.hasPositionUncertaintyGpsEcef;
+    hasPositionUncertaintyGps2Ecef = aImpl.hasPositionUncertaintyGps2Ecef;
+    hasPositionUncertaintyEstimated = aImpl.hasPositionUncertaintyEstimated;
+    hasVelocityUncertaintyGps = aImpl.hasVelocityUncertaintyGps;
+    hasVelocityUncertaintyGps2 = aImpl.hasVelocityUncertaintyGps2;
+    hasVelocityUncertaintyEstimated = aImpl.hasVelocityUncertaintyEstimated;
+    hasTimeUncertainty = aImpl.hasTimeUncertainty;
+    hasTimeUncertainty2 = aImpl.hasTimeUncertainty2;
+    hasAttitudeUncertainty = aImpl.hasAttitudeUncertainty;
     hasTimeInfo = aImpl.hasTimeInfo;
+    hasTimeInfo2 = aImpl.hasTimeInfo2;
     hasDop = aImpl.hasDop;
+    hasDop2 = aImpl.hasDop2;
 
 		return *this;
 	}
@@ -298,41 +342,58 @@ struct CompositeData::Impl
 		hasAngularRateUncompensated = false;
 		hasTemperature = false;
 		hasPressure = false;
-		hasPositionGpsLla = false;
-		hasPositionGpsEcef = false;
-		hasPositionEstimatedLla = false;
+    hasPositionGpsLla = false;
+    hasPositionGps2Lla = false;
+    hasPositionGpsEcef = false;
+    hasPositionGps2Ecef = false;
+    hasPositionEstimatedLla = false;
 		hasPositionEstimatedEcef = false;
-		hasVelocityGpsNed = false;
-		hasVelocityGpsEcef = false;
-		hasVelocityEstimatedNed = false;
+    hasVelocityGpsNed = false;
+    hasVelocityGps2Ned = false;
+    hasVelocityGpsEcef = false;
+    hasVelocityGps2Ecef = false;
+    hasVelocityEstimatedNed = false;
 		hasVelocityEstimatedEcef = false;
 		hasVelocityEstimatedBody = false;
 		hasDeltaTime = false;
 		hasDeltaTheta = false;
 		hasDeltaVelocity = false;
 		hasTimeStartup = false;
-		hasTimeGps = false;
-		hasTow = false;
-		hasWeek = false;
-		hasNumSats = false;
-		hasTimeSyncIn = false;
+    hasTimeGps = false;
+    hasTimeGps2 = false;
+    hasTow = false;
+    hasWeek = false;
+    hasGpsWeek = false;
+    hasGps2Week = false;
+    hasNumSats = false;
+    hasNumSats2 = false;
+    hasTimeSyncIn = false;
 		hasVpeStatus = false;
 		hasInsStatus = false;
 		hasSyncInCnt = false;
-		hasTimeGpsPps = false;
-		hasGpsTow = false; 
-		hasTimeUtc = false;
-		hasSensSat = false;
+    hasTimeGpsPps = false;
+    hasTimeGps2Pps = false;
+    hasGpsTow = false;
+    hasGps2Tow = false;
+    hasTimeUtc = false;
+    hasTimeUtc2 = false;
+    hasSensSat = false;
 		hasFix = false;
-		hasPositionUncertaintyGpsNed = false;
-		hasPositionUncertaintyGpsEcef = false;
-		hasPositionUncertaintyEstimated = false;
-		hasVelocityUncertaintyGps = false;
-		hasVelocityUncertaintyEstimated = false;
-		hasTimeUncertainty = false;
-		hasAttitudeUncertainty = false;
+    hasPositionUncertaintyGpsNed = false;
+    hasPositionUncertaintyGps2Ned = false;
+    hasPositionUncertaintyGpsEcef = false;
+    hasPositionUncertaintyGps2Ecef = false;
+    hasPositionUncertaintyEstimated = false;
+    hasVelocityUncertaintyGps = false;
+    hasVelocityUncertaintyGps2 = false;
+    hasVelocityUncertaintyEstimated = false;
+    hasTimeUncertainty = false;
+    hasTimeUncertainty2 = false;
+    hasAttitudeUncertainty = false;
     hasTimeInfo = false;
+    hasTimeInfo2 = false;
     hasDop = false;
+    hasDop2 = false;
   }
 
 	void setYawPitchRoll(vec3f ypr)
@@ -465,21 +526,35 @@ struct CompositeData::Impl
 		pressure = pres;
 	}
 
-	void setPositionGpsLla(vec3d pos)
-	{
-		mostRecentlyUpdatedPositionType = CDPOS_GpsLla;
-		hasPositionGpsLla = true;
-		positionGpsLla = pos;
-	}
+  void setPositionGpsLla(vec3d pos)
+  {
+    mostRecentlyUpdatedPositionType = CDPOS_GpsLla;
+    hasPositionGpsLla = true;
+    positionGpsLla = pos;
+  }
 
-	void setPositionGpsEcef(vec3d pos)
-	{
-		mostRecentlyUpdatedPositionType = CDPOS_GpsEcef;
-		hasPositionGpsEcef = true;
-		positionGpsEcef = pos;
-	}
+  void setPositionGps2Lla(vec3d pos)
+  {
+    mostRecentlyUpdatedPositionType = CDPOS_Gps2Lla;
+    hasPositionGps2Lla = true;
+    positionGps2Lla = pos;
+  }
 
-	void setPositionEstimatedLla(vec3d pos)
+  void setPositionGpsEcef(vec3d pos)
+  {
+    mostRecentlyUpdatedPositionType = CDPOS_GpsEcef;
+    hasPositionGpsEcef = true;
+    positionGpsEcef = pos;
+  }
+
+  void setPositionGps2Ecef(vec3d pos)
+  {
+    mostRecentlyUpdatedPositionType = CDPOS_Gps2Ecef;
+    hasPositionGps2Ecef = true;
+    positionGps2Ecef = pos;
+  }
+
+  void setPositionEstimatedLla(vec3d pos)
 	{
 		mostRecentlyUpdatedPositionType = CDPOS_EstimatedLla;
 		hasPositionEstimatedLla = true;
@@ -493,21 +568,35 @@ struct CompositeData::Impl
 		positionEstimatedEcef = pos;
 	}
 
-	void setVelocityGpsNed(vec3f vel)
-	{
-		mostRecentlyUpdatedVelocityType = CDVEL_GpsNed;
-		hasVelocityGpsNed = true;
-		velocityGpsNed = vel;
-	}
+  void setVelocityGpsNed(vec3f vel)
+  {
+    mostRecentlyUpdatedVelocityType = CDVEL_GpsNed;
+    hasVelocityGpsNed = true;
+    velocityGpsNed = vel;
+  }
 
-	void setVelocityGpsEcef(vec3f vel)
-	{
-		mostRecentlyUpdatedVelocityType = CDVEL_GpsEcef;
-		hasVelocityGpsEcef = true;
-		velocityGpsEcef = vel;
-	}
+  void setVelocityGps2Ned(vec3f vel)
+  {
+    mostRecentlyUpdatedVelocityType = CDVEL_Gps2Ned;
+    hasVelocityGps2Ned = true;
+    velocityGps2Ned = vel;
+  }
 
-	void setVelocityEstimatedNed(vec3f vel)
+  void setVelocityGpsEcef(vec3f vel)
+  {
+    mostRecentlyUpdatedVelocityType = CDVEL_GpsEcef;
+    hasVelocityGpsEcef = true;
+    velocityGpsEcef = vel;
+  }
+
+  void setVelocityGps2Ecef(vec3f vel)
+  {
+    mostRecentlyUpdatedVelocityType = CDVEL_Gps2Ecef;
+    hasVelocityGps2Ecef = true;
+    velocityGps2Ecef = vel;
+  }
+
+  void setVelocityEstimatedNed(vec3f vel)
 	{
 		mostRecentlyUpdatedVelocityType = CDVEL_EstimatedNed;
 		hasVelocityEstimatedNed = true;
@@ -552,31 +641,55 @@ struct CompositeData::Impl
 		timeStartup = ts;
 	}
 
-	void setTimeGps(uint64_t time)
-	{
-		hasTimeGps = true;
-		timeGps = time;
-	}
+  void setTimeGps(uint64_t time)
+  {
+    hasTimeGps = true;
+    timeGps = time;
+  }
 
-	void setTow(double t)
-	{
-		hasTow = true;
-		tow = t;
-	}
+  void setTimeGps2(uint64_t time)
+  {
+    hasTimeGps2 = true;
+    timeGps2 = time;
+  }
 
-	void setWeek(uint16_t w)
-	{
-		hasWeek = true;
-		week = w;
-	}
+  void setTow(double t)
+  {
+    hasTow = true;
+    tow = t;
+  }
 
-	void setNumSats(uint8_t s)
-	{
-		hasNumSats = true;
-		numSats = s;
-	}
+  void setWeek(uint16_t w)
+  {
+    hasWeek = true;
+    week = w;
+  }
 
-	void setTimeSyncIn(uint64_t t)
+  void setGpsWeek(uint16_t w)
+  {
+    hasGpsWeek = true;
+    gpsWeek = w;
+  }
+
+  void setGps2Week(uint16_t w)
+  {
+    hasGps2Week = true;
+    gps2Week = w;
+  }
+
+  void setNumSats(uint8_t s)
+  {
+    hasNumSats = true;
+    numSats = s;
+  }
+
+  void setNumSats2(uint8_t s)
+  {
+    hasNumSats2 = true;
+    numSats2 = s;
+  }
+
+  void setTimeSyncIn(uint64_t t)
 	{
 		hasTimeSyncIn = true;
 		timeSyncIn = t;
@@ -612,78 +725,129 @@ struct CompositeData::Impl
     timeStatus = status;
   }
 
-	void setTimeGpsPps(uint64_t pps)
-	{
-		hasTimeGpsPps = true;
-		timeGpsPps = pps;
-	}
+  void setTimeGpsPps(uint64_t pps)
+  {
+    hasTimeGpsPps = true;
+    timeGpsPps = pps;
+  }
 
-	void setGpsTow(uint64_t tow)
-	{
-		hasGpsTow = true;
-		gpsTow = tow;
-	}
+  void setTimeGps2Pps(uint64_t pps)
+  {
+    hasTimeGps2Pps = true;
+    timeGps2Pps = pps;
+  }
 
-	void setPositionUncertaintyGpsNed(vec3f u)
-	{
-		mostRecentlyUpdatedPositionUncertaintyType = CDPOU_GpsNed;
-		hasPositionUncertaintyGpsNed = true;
-		positionUncertaintyGpsNed = u;
-	}
+  void setGpsTow(uint64_t tow)
+  {
+    hasGpsTow = true;
+    gpsTow = tow;
+  }
 
-	void setPositionUncertaintyGpsEcef(vec3f u)
+  void setGps2Tow(uint64_t tow)
+  {
+    hasGps2Tow = true;
+    gps2Tow = tow;
+  }
+
+  void setPositionUncertaintyGpsNed(vec3f u)
+  {
+    mostRecentlyUpdatedPositionUncertaintyType = CDPOU_GpsNed;
+    hasPositionUncertaintyGpsNed = true;
+    positionUncertaintyGpsNed = u;
+  }
+
+  void setPositionUncertaintyGps2Ned(vec3f u)
+  {
+    mostRecentlyUpdatedPositionUncertaintyType = CDPOU_Gps2Ned;
+    hasPositionUncertaintyGps2Ned = true;
+    positionUncertaintyGps2Ned = u;
+  }
+
+  void setPositionUncertaintyGpsEcef(vec3f u)
 	{
 		mostRecentlyUpdatedPositionUncertaintyType = CDPOU_GpsEcef;
 		hasPositionUncertaintyGpsEcef = true;
 		positionUncertaintyGpsEcef = u;
 	}
 
-	void setPositionUncertaintyEstimated(float u)
+  void setPositionUncertaintyGps2Ecef(vec3f u)
+  {
+    mostRecentlyUpdatedPositionUncertaintyType = CDPOU_Gps2Ecef;
+    hasPositionUncertaintyGps2Ecef = true;
+    positionUncertaintyGps2Ecef = u;
+  }
+
+  void setPositionUncertaintyEstimated(float u)
 	{
 		mostRecentlyUpdatedPositionUncertaintyType = CDPOU_Estimated;
 		hasPositionUncertaintyEstimated = true;
 		positionUncertaintyEstimated = u;
 	}
 
-	void setVelocityUncertaintyGps(float u)
-	{
-		mostRecentlyUpdatedVelocityUncertaintyType = CDVEU_Gps;
-		hasVelocityUncertaintyGps = true;
-		velocityUncertaintyGps = u;
-	}
-	
-	void setVelocityUncertaintyEstimated(float u)
+  void setVelocityUncertaintyGps(float u)
+  {
+    mostRecentlyUpdatedVelocityUncertaintyType = CDVEU_Gps;
+    hasVelocityUncertaintyGps = true;
+    velocityUncertaintyGps = u;
+  }
+
+  void setVelocityUncertaintyGps2(float u)
+  {
+    mostRecentlyUpdatedVelocityUncertaintyType = CDVEU_Gps2;
+    hasVelocityUncertaintyGps2 = true;
+    velocityUncertaintyGps2 = u;
+  }
+
+  void setVelocityUncertaintyEstimated(float u)
 	{
 		mostRecentlyUpdatedVelocityUncertaintyType = CDVEU_Estimated;
 		hasVelocityUncertaintyEstimated = true;
 		velocityUncertaintyEstimated = u;
 	}
 
-	void setTimeUncertainty(uint32_t u)
-	{
-		hasTimeUncertainty = true;
-		timeUncertainty = u;
-	}
+  void setTimeUncertainty(uint32_t u)
+  {
+    hasTimeUncertainty = true;
+    timeUncertainty = u;
+  }
 
-	void setAttitudeUncertainty(vec3f u)
+  void setTimeUncertainty2(uint32_t u)
+  {
+    hasTimeUncertainty2 = true;
+    timeUncertainty2 = u;
+  }
+
+  void setAttitudeUncertainty(vec3f u)
 	{
 		hasAttitudeUncertainty = true;
 		attitudeUncertainty = u;
 	}
 
-	void setFix(GpsFix f)
-	{
-		hasFix = true;
-		fix = f;
-	}
+  void setFix(GpsFix f)
+  {
+    hasFix = true;
+    fix = f;
+  }
 
-	void setTimeUtc(TimeUtc t)
-	{
-		hasTimeUtc = true;
-		timeUtc = t;
-	}
+  void setFix2(GpsFix f)
+  {
+    hasFix2 = true;
+    fix2 = f;
+  }
 
-	void setSensSat(SensSat s)
+  void setTimeUtc(TimeUtc t)
+  {
+    hasTimeUtc = true;
+    timeUtc = t;
+  }
+
+  void setTimeUtc2(TimeUtc t)
+  {
+    hasTimeUtc2 = true;
+    timeUtc2 = t;
+  }
+
+  void setSensSat(SensSat s)
 	{
 		hasSensSat = true;
 		sensSat = s;
@@ -695,13 +859,26 @@ struct CompositeData::Impl
     dop = d;
   }
 
+  void setGnssDop2(GnssDop d)
+  {
+    hasDop2 = true;
+    dop2 = d;
+  }
+
   void setTimeInfo(TimeInfo t)
   {
     hasTimeInfo = true;
     timeInfo = t;
   }
 
+  void setTimeInfo2(TimeInfo t)
+  {
+    hasTimeInfo2 = true;
+    timeInfo2 = t;
+  }
 };
+
+
 
 CompositeData::CompositeData() :
 _i(new Impl)
@@ -1097,11 +1274,15 @@ PositionD CompositeData::anyPosition()
 	{
 	case Impl::CDPOS_None:
 		throw invalid_operation();
-	case Impl::CDPOS_GpsLla:
-		return PositionD::fromLla(_i->positionGpsLla);
-	case Impl::CDPOS_GpsEcef:
-		return PositionD::fromEcef(_i->positionGpsEcef);
-	case Impl::CDPOS_EstimatedLla:
+  case Impl::CDPOS_GpsLla:
+    return PositionD::fromLla(_i->positionGpsLla);
+  case Impl::CDPOS_Gps2Lla:
+    return PositionD::fromLla(_i->positionGps2Lla);
+  case Impl::CDPOS_GpsEcef:
+    return PositionD::fromEcef(_i->positionGpsEcef);
+  case Impl::CDPOS_Gps2Ecef:
+    return PositionD::fromEcef(_i->positionGps2Ecef);
+  case Impl::CDPOS_EstimatedLla:
 		return PositionD::fromLla(_i->positionEstimatedLla);
 	case Impl::CDPOS_EstimatedEcef:
 		return PositionD::fromEcef(_i->positionEstimatedEcef);
@@ -1112,28 +1293,46 @@ PositionD CompositeData::anyPosition()
 
 bool CompositeData::hasPositionGpsLla()
 {
-	return _i->hasPositionGpsLla;
+  return _i->hasPositionGpsLla;
+}
+
+bool CompositeData::hasPositionGps2Lla()
+{
+  return _i->hasPositionGps2Lla;
 }
 
 vec3d CompositeData::positionGpsLla()
 {
-	if (!hasPositionGpsLla())
-		throw invalid_operation();
+  if(!hasPositionGpsLla())
+    throw invalid_operation();
 
-	return _i->positionGpsLla;
+  return _i->positionGpsLla;
+}
+
+vec3d CompositeData::positionGps2Lla()
+{
+  if(!hasPositionGps2Lla())
+    throw invalid_operation();
+
+  return _i->positionGps2Lla;
 }
 
 bool CompositeData::hasPositionGpsEcef()
 {
-	return _i->hasPositionGpsEcef;
+  return _i->hasPositionGpsEcef;
 }
 
-vec3d CompositeData::positionGpsEcef()
+bool CompositeData::hasPositionGps2Ecef()
 {
-	if (!hasPositionGpsEcef())
+  return _i->hasPositionGps2Ecef;
+}
+
+vec3d CompositeData::positionGps2Ecef()
+{
+	if (!hasPositionGps2Ecef())
 		throw invalid_operation();
 
-	return _i->positionGpsEcef;
+	return _i->positionGps2Ecef;
 }
 
 bool CompositeData::hasPositionEstimatedLla()
@@ -1173,11 +1372,15 @@ vec3f CompositeData::anyVelocity()
 	{
 	case Impl::CDVEL_None:
 		throw invalid_operation();
-	case Impl::CDVEL_GpsNed:
-		return _i->velocityGpsNed;
-	case Impl::CDVEL_GpsEcef:
-		return _i->velocityGpsEcef;
-	case Impl::CDVEL_EstimatedNed:
+  case Impl::CDVEL_GpsNed:
+    return _i->velocityGpsNed;
+  case Impl::CDVEL_Gps2Ned:
+    return _i->velocityGps2Ned;
+  case Impl::CDVEL_GpsEcef:
+    return _i->velocityGpsEcef;
+  case Impl::CDVEL_Gps2Ecef:
+    return _i->velocityGps2Ecef;
+  case Impl::CDVEL_EstimatedNed:
 		return _i->velocityEstimatedNed;
 	case Impl::CDVEL_EstimatedEcef:
 		return _i->velocityEstimatedEcef;
@@ -1190,28 +1393,54 @@ vec3f CompositeData::anyVelocity()
 
 bool CompositeData::hasVelocityGpsNed()
 {
-	return _i->hasVelocityGpsNed;
+  return _i->hasVelocityGpsNed;
+}
+
+bool CompositeData::hasVelocityGps2Ned()
+{
+  return _i->hasVelocityGps2Ned;
 }
 
 vec3f CompositeData::velocityGpsNed()
 {
-	if (!hasVelocityGpsNed())
-		throw invalid_operation();
+  if(!hasVelocityGpsNed())
+    throw invalid_operation();
 
-	return _i->velocityGpsNed;
+  return _i->velocityGpsNed;
+}
+
+vec3f CompositeData::velocityGps2Ned()
+{
+  if(!hasVelocityGps2Ned())
+    throw invalid_operation();
+
+  return _i->velocityGps2Ned;
 }
 
 bool CompositeData::hasVelocityGpsEcef()
 {
-	return _i->hasVelocityGpsEcef;
+  return _i->hasVelocityGpsEcef;
+}
+
+bool CompositeData::hasVelocityGps2Ecef()
+{
+  return _i->hasVelocityGps2Ecef;
 }
 
 vec3f CompositeData::velocityGpsEcef()
 {
-	if (!hasVelocityGpsEcef())
-		throw invalid_operation();
+  if(!hasVelocityGpsEcef())
+    throw invalid_operation();
 
-	return _i->velocityGpsEcef;
+  return _i->velocityGpsEcef;
+}
+
+vec3f CompositeData::velocityGps2Ecef()
+{
+  if(!hasVelocityGps2Ecef())
+    throw invalid_operation();
+
+  return _i->velocityGps2Ecef;
 }
 
 bool CompositeData::hasVelocityEstimatedNed()
@@ -1307,28 +1536,41 @@ uint64_t CompositeData::timeStartup()
 
 bool CompositeData::hasTimeGps()
 {
-	return _i->hasTimeGps;
+  return _i->hasTimeGps;
+}
+
+bool CompositeData::hasTimeGps2()
+{
+  return _i->hasTimeGps2;
 }
 
 uint64_t CompositeData::timeGps()
 {
-	if (!hasTimeGps())
-		throw invalid_operation();
+  if(!hasTimeGps())
+    throw invalid_operation();
 
-	return _i->timeGps;
+  return _i->timeGps;
+}
+
+uint64_t CompositeData::timeGps2()
+{
+  if(!hasTimeGps2())
+    throw invalid_operation();
+
+  return _i->timeGps2;
 }
 
 bool CompositeData::hasTow()
 {
-	return _i->hasTow;
+  return _i->hasTow;
 }
 
 double CompositeData::tow()
 {
-	if (!hasTow())
-		throw invalid_operation();
+  if(!hasTow())
+    throw invalid_operation();
 
-	return _i->tow;
+  return _i->tow;
 }
 
 bool CompositeData::hasWeek()
@@ -1437,7 +1679,12 @@ uint8_t CompositeData::timeStatus()
 
 bool CompositeData::hasTimeGpsPps()
 {
-	return _i->hasTimeGpsPps;
+  return _i->hasTimeGpsPps;
+}
+
+bool CompositeData::hasTimeGps2Pps()
+{
+  return _i->hasTimeGps2Pps;
 }
 
 uint64_t CompositeData::timeGpsPps()
@@ -1448,17 +1695,38 @@ uint64_t CompositeData::timeGpsPps()
 	return _i->timeGpsPps;
 }
 
+uint64_t CompositeData::timeGps2Pps()
+{
+  if(!hasTimeGps2Pps())
+    throw invalid_operation();
+
+  return _i->timeGps2Pps;
+}
+
 bool CompositeData::hasGpsTow()
 {
-	return _i->hasGpsTow;
+  return _i->hasGpsTow;
+}
+
+bool CompositeData::hasGps2Tow()
+{
+  return _i->hasGps2Tow;
 }
 
 uint64_t CompositeData::gpsTow()
 {
-	if (!hasGpsTow())
-		throw invalid_operation();
+  if(!hasGpsTow())
+    throw invalid_operation();
 
-	return _i->gpsTow;
+  return _i->gpsTow;
+}
+
+uint64_t CompositeData::gps2Tow()
+{
+  if(!hasGps2Tow())
+    throw invalid_operation();
+
+  return _i->gps2Tow;
 }
 
 bool CompositeData::hasTimeUtc()
@@ -1489,15 +1757,28 @@ SensSat CompositeData::sensSat()
 
 bool CompositeData::hasFix()
 {
-	return _i->hasFix;
+  return _i->hasFix;
+}
+
+bool CompositeData::hasFix2()
+{
+  return _i->hasFix2;
 }
 
 GpsFix CompositeData::fix()
 {
-	if (!hasFix())
-		throw invalid_operation();
+  if(!hasFix())
+    throw invalid_operation();
 
-	return _i->fix;
+  return _i->fix;
+}
+
+GpsFix CompositeData::fix2()
+{
+  if(!hasFix2())
+    throw invalid_operation();
+
+  return _i->fix2;
 }
 
 bool CompositeData::hasAnyPositionUncertainty()
@@ -1511,11 +1792,15 @@ vec3f CompositeData::anyPositionUncertainty()
 	{
 	case Impl::CDPOU_None:
 		throw invalid_operation();
-	case Impl::CDPOU_GpsNed:
-		return _i->positionUncertaintyGpsNed;
-	case Impl::CDPOU_GpsEcef:
-		return _i->positionUncertaintyGpsEcef;
-	case Impl::CDPOU_Estimated:
+  case Impl::CDPOU_GpsNed:
+    return _i->positionUncertaintyGpsNed;
+  case Impl::CDPOU_Gps2Ned:
+    return _i->positionUncertaintyGps2Ned;
+  case Impl::CDPOU_GpsEcef:
+    return _i->positionUncertaintyGpsEcef;
+  case Impl::CDPOU_Gps2Ecef:
+    return _i->positionUncertaintyGps2Ecef;
+  case Impl::CDPOU_Estimated:
 		return vec3f(_i->positionUncertaintyEstimated);
 	default:
 		throw not_implemented();
@@ -1524,28 +1809,54 @@ vec3f CompositeData::anyPositionUncertainty()
 
 bool CompositeData::hasPositionUncertaintyGpsNed()
 {
-	return _i->hasPositionUncertaintyGpsNed;
+  return _i->hasPositionUncertaintyGpsNed;
+}
+
+bool CompositeData::hasPositionUncertaintyGps2Ned()
+{
+  return _i->hasPositionUncertaintyGps2Ned;
 }
 
 vec3f CompositeData::positionUncertaintyGpsNed()
 {
-	if (!hasPositionUncertaintyGpsNed())
-		throw invalid_operation();
+  if(!hasPositionUncertaintyGpsNed())
+    throw invalid_operation();
 
-	return _i->positionUncertaintyGpsNed;
+  return _i->positionUncertaintyGpsNed;
+}
+
+vec3f CompositeData::positionUncertaintyGps2Ned()
+{
+  if(!hasPositionUncertaintyGps2Ned())
+    throw invalid_operation();
+
+  return _i->positionUncertaintyGps2Ned;
 }
 
 bool CompositeData::hasPositionUncertaintyGpsEcef()
 {
-	return _i->hasPositionUncertaintyGpsEcef;
+  return _i->hasPositionUncertaintyGpsEcef;
+}
+
+bool CompositeData::hasPositionUncertaintyGps2Ecef()
+{
+  return _i->hasPositionUncertaintyGps2Ecef;
 }
 
 vec3f CompositeData::positionUncertaintyGpsEcef()
 {
-	if (!hasPositionUncertaintyGpsEcef())
-		throw invalid_operation();
+  if(!hasPositionUncertaintyGpsEcef())
+    throw invalid_operation();
 
-	return _i->positionUncertaintyGpsEcef;
+  return _i->positionUncertaintyGpsEcef;
+}
+
+vec3f CompositeData::positionUncertaintyGps2Ecef()
+{
+  if(!hasPositionUncertaintyGps2Ecef())
+    throw invalid_operation();
+
+  return _i->positionUncertaintyGps2Ecef;
 }
 
 bool CompositeData::hasPositionUncertaintyEstimated()
@@ -1572,9 +1883,11 @@ float CompositeData::anyVelocityUncertainty()
 	{
 	case Impl::CDVEU_None:
 		throw invalid_operation();
-	case Impl::CDVEU_Gps:
-		return _i->velocityUncertaintyGps;
-	case Impl::CDVEU_Estimated:
+  case Impl::CDVEU_Gps:
+    return _i->velocityUncertaintyGps;
+  case Impl::CDVEU_Gps2:
+    return _i->velocityUncertaintyGps2;
+  case Impl::CDVEU_Estimated:
 		return _i->velocityUncertaintyEstimated;
 	default:
 		throw not_implemented();
@@ -1583,7 +1896,12 @@ float CompositeData::anyVelocityUncertainty()
 
 bool CompositeData::hasVelocityUncertaintyGps()
 {
-	return _i->hasVelocityUncertaintyGps;
+  return _i->hasVelocityUncertaintyGps;
+}
+
+bool CompositeData::hasVelocityUncertaintyGps2()
+{
+  return _i->hasVelocityUncertaintyGps2;
 }
 
 float CompositeData::velocityUncertaintyGps()
@@ -1592,6 +1910,14 @@ float CompositeData::velocityUncertaintyGps()
 		throw invalid_operation();
 
 	return _i->velocityUncertaintyGps;
+}
+
+float CompositeData::velocityUncertaintyGps2()
+{
+  if(!hasVelocityUncertaintyGps2())
+    throw invalid_operation();
+
+  return _i->velocityUncertaintyGps2;
 }
 
 bool CompositeData::hasVelocityUncertaintyEstimated()
@@ -1635,10 +1961,11 @@ vec3f CompositeData::attitudeUncertainty()
 
 bool CompositeData::hasCourseOverGround()
 {
-	return _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_None
-		&& _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_EstimatedBody	// TODO: Don't have conversion formula from body frame to NED frame.
-		&& _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_EstimatedEcef	// TODO: Don't have conversion formula from ECEF frame to NED frame.
-		&& _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_GpsEcef;		// TODO: Don't have conversion formula from ECEF frame to NED frame.
+  return _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_None
+    && _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_EstimatedBody	// TODO: Don't have conversion formula from body frame to NED frame.
+    && _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_EstimatedEcef	// TODO: Don't have conversion formula from ECEF frame to NED frame.
+    && _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_GpsEcef		// TODO: Don't have conversion formula from ECEF frame to NED frame.
+    && _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_Gps2Ecef;		// TODO: Don't have conversion formula from ECEF frame to NED frame.
 }
 
 float CompositeData::courseOverGround()
@@ -1648,9 +1975,11 @@ float CompositeData::courseOverGround()
 
 	switch (_i->mostRecentlyUpdatedVelocityType)
 	{
-	case Impl::CDVEL_GpsNed:
-		return course_over_ground(_i->velocityGpsNed);
-	case Impl::CDVEL_EstimatedNed:
+    case Impl::CDVEL_GpsNed:
+      return course_over_ground(_i->velocityGpsNed);
+    case Impl::CDVEL_Gps2Ned:
+      return course_over_ground(_i->velocityGps2Ned);
+    case Impl::CDVEL_EstimatedNed:
 		return course_over_ground(_i->velocityEstimatedNed);
 	default:
 		throw not_implemented();
@@ -1659,10 +1988,11 @@ float CompositeData::courseOverGround()
 
 bool CompositeData::hasSpeedOverGround()
 {
-	return _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_None
-		&& _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_EstimatedBody	// TODO: Don't have conversion formula from body frame to NED frame.
-		&& _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_EstimatedEcef	// TODO: Don't have conversion formula from ECEF frame to NED frame.
-		&& _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_GpsEcef;		// TODO: Don't have conversion formula from ECEF frame to NED frame.
+  return _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_None
+    && _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_EstimatedBody	// TODO: Don't have conversion formula from body frame to NED frame.
+    && _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_EstimatedEcef	// TODO: Don't have conversion formula from ECEF frame to NED frame.
+    && _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_GpsEcef		// TODO: Don't have conversion formula from ECEF frame to NED frame.
+    && _i->mostRecentlyUpdatedVelocityType != Impl::CDVEL_Gps2Ecef;		// TODO: Don't have conversion formula from ECEF frame to NED frame.
 }
 
 float CompositeData::speedOverGround()
@@ -1672,9 +2002,11 @@ float CompositeData::speedOverGround()
 
 	switch (_i->mostRecentlyUpdatedVelocityType)
 	{
-	case Impl::CDVEL_GpsNed:
-		return speed_over_ground(_i->velocityGpsNed);
-	case Impl::CDVEL_EstimatedNed:
+    case Impl::CDVEL_GpsNed:
+      return speed_over_ground(_i->velocityGpsNed);
+    case Impl::CDVEL_Gps2Ned:
+      return speed_over_ground(_i->velocityGps2Ned);
+    case Impl::CDVEL_EstimatedNed:
 		return speed_over_ground(_i->velocityEstimatedNed);
 	default:
 		throw not_implemented();
@@ -1932,63 +2264,115 @@ void CompositeData::parseAscii(Packet& p, vector<CompositeData*>& o)
 		break;
 	}
 
-	case VNGPS:
-	{
-		double time;
-		uint16_t week;
-		uint8_t fix, numSats;
-		vec3d lla;
-		vec3f nedVel, nedAcc;
-		float speedAcc, timeAcc;
+  case VNGPS:
+  {
+    double time;
+    uint16_t week;
+    uint8_t fix, numSats;
+    vec3d lla;
+    vec3f nedVel, nedAcc;
+    float speedAcc, timeAcc;
 
-		p.parseVNGPS(&time, &week, &fix, &numSats, &lla, &nedVel, &nedAcc, &speedAcc, &timeAcc);
+    p.parseVNGPS(&time, &week, &fix, &numSats, &lla, &nedVel, &nedAcc, &speedAcc, &timeAcc);
 
-		for (cditer i = o.begin(); i != o.end(); ++i)
-		{
-			(*i)->_i->setTow(time);
-			(*i)->_i->setWeek(week);
-			(*i)->_i->setFix(static_cast<GpsFix>(fix));
-			(*i)->_i->setNumSats(numSats);
-			(*i)->_i->setPositionGpsLla(lla);
-			(*i)->_i->setVelocityGpsNed(nedVel);
-			(*i)->_i->setPositionUncertaintyGpsNed(nedAcc);
-			(*i)->_i->setVelocityUncertaintyGps(speedAcc);
-			// Convert to uint32_t since this is the binary representation in nanoseconds.
-			(*i)->_i->setTimeUncertainty(static_cast<uint32_t>(timeAcc * 1e9));
-		}
+    for(cditer i = o.begin(); i != o.end(); ++i) {
+      (*i)->_i->setGpsTow(time);
+      (*i)->_i->setGpsWeek(week);
+      (*i)->_i->setFix(static_cast<GpsFix>(fix));
+      (*i)->_i->setNumSats(numSats);
+      (*i)->_i->setPositionGpsLla(lla);
+      (*i)->_i->setVelocityGpsNed(nedVel);
+      (*i)->_i->setPositionUncertaintyGpsNed(nedAcc);
+      (*i)->_i->setVelocityUncertaintyGps(speedAcc);
+      // Convert to uint32_t since this is the binary representation in nanoseconds.
+      (*i)->_i->setTimeUncertainty(static_cast<uint32_t>(timeAcc * 1e9));
+    }
 
-		break;
-	}
+    break;
+  }
 
-	case VNGPE:
-	{
-		double tow;
-		uint16_t week;
-		uint8_t fix, numSats;
-		vec3d position;
-		vec3f ecefVel, ecefAcc;
-		float speedAcc, timeAcc;
+  case VNG2S:
+  {
+    double time;
+    uint16_t week;
+    uint8_t fix, numSats;
+    vec3d lla;
+    vec3f nedVel, nedAcc;
+    float speedAcc, timeAcc;
 
-		p.parseVNGPE(&tow, &week, &fix, &numSats, &position, &ecefVel, &ecefAcc, &speedAcc, &timeAcc);
+    p.parseVNGPS(&time, &week, &fix, &numSats, &lla, &nedVel, &nedAcc, &speedAcc, &timeAcc);
 
-		for (cditer i = o.begin(); i != o.end(); ++i)
-		{
-			(*i)->_i->setTow(tow);
-			(*i)->_i->setWeek(week);
-			(*i)->_i->setFix(static_cast<GpsFix>(fix));
-			(*i)->_i->setNumSats(numSats);
-			(*i)->_i->setPositionGpsEcef(position);
-			(*i)->_i->setVelocityGpsEcef(ecefVel);
-			(*i)->_i->setPositionUncertaintyGpsEcef(ecefAcc);
-			(*i)->_i->setVelocityUncertaintyGps(speedAcc);
-			// Convert to uint32_t since this is the binary representation in nanoseconds.
-			(*i)->_i->setTimeUncertainty(static_cast<uint32_t>(timeAcc * 1e9));
-		}
+    for(cditer i = o.begin(); i != o.end(); ++i) {
+      (*i)->_i->setGps2Tow(time);
+      (*i)->_i->setGps2Week(week);
+      (*i)->_i->setFix2(static_cast<GpsFix>(fix));
+      (*i)->_i->setNumSats2(numSats);
+      (*i)->_i->setPositionGps2Lla(lla);
+      (*i)->_i->setVelocityGps2Ned(nedVel);
+      (*i)->_i->setPositionUncertaintyGps2Ned(nedAcc);
+      (*i)->_i->setVelocityUncertaintyGps2(speedAcc);
+      // Convert to uint32_t since this is the binary representation in nanoseconds.
+      (*i)->_i->setTimeUncertainty2(static_cast<uint32_t>(timeAcc * 1e9));
+    }
 
-		break;
-	}
+    break;
+  }
 
-	case VNINS:
+  case VNGPE:
+  {
+    double tow;
+    uint16_t week;
+    uint8_t fix, numSats;
+    vec3d position;
+    vec3f ecefVel, ecefAcc;
+    float speedAcc, timeAcc;
+
+    p.parseVNGPE(&tow, &week, &fix, &numSats, &position, &ecefVel, &ecefAcc, &speedAcc, &timeAcc);
+
+    for(cditer i = o.begin(); i != o.end(); ++i) {
+      (*i)->_i->setGpsTow(tow);
+      (*i)->_i->setGpsWeek(week);
+      (*i)->_i->setFix(static_cast<GpsFix>(fix));
+      (*i)->_i->setNumSats(numSats);
+      (*i)->_i->setPositionGpsEcef(position);
+      (*i)->_i->setVelocityGpsEcef(ecefVel);
+      (*i)->_i->setPositionUncertaintyGpsEcef(ecefAcc);
+      (*i)->_i->setVelocityUncertaintyGps(speedAcc);
+      // Convert to uint32_t since this is the binary representation in nanoseconds.
+      (*i)->_i->setTimeUncertainty(static_cast<uint32_t>(timeAcc * 1e9));
+    }
+
+    break;
+  }  
+  
+  case VNG2E:
+  {
+    double tow;
+    uint16_t week;
+    uint8_t fix, numSats;
+    vec3d position;
+    vec3f ecefVel, ecefAcc;
+    float speedAcc, timeAcc;
+
+    p.parseVNGPE(&tow, &week, &fix, &numSats, &position, &ecefVel, &ecefAcc, &speedAcc, &timeAcc);
+
+    for(cditer i = o.begin(); i != o.end(); ++i) {
+      (*i)->_i->setGps2Tow(tow);
+      (*i)->_i->setGps2Week(week);
+      (*i)->_i->setFix2(static_cast<GpsFix>(fix));
+      (*i)->_i->setNumSats2(numSats);
+      (*i)->_i->setPositionGps2Ecef(position);
+      (*i)->_i->setVelocityGps2Ecef(ecefVel);
+      (*i)->_i->setPositionUncertaintyGps2Ecef(ecefAcc);
+      (*i)->_i->setVelocityUncertaintyGps2(speedAcc);
+      // Convert to uint32_t since this is the binary representation in nanoseconds.
+      (*i)->_i->setTimeUncertainty2(static_cast<uint32_t>(timeAcc * 1e9));
+    }
+
+    break;
+  }
+
+  case VNINS:
 	{
 		double tow;
 		uint16_t week, status;
@@ -2121,6 +2505,8 @@ void CompositeData::parseBinary(Packet& p, vector<CompositeData*>& o)
 		parseBinaryPacketAttitudeGroup(p, AttitudeGroup(p.groupField(curGroupFieldIndex++)), o);
 	if (groups & BINARYGROUP_INS)
 		parseBinaryPacketInsGroup(p, InsGroup(p.groupField(curGroupFieldIndex++)), o);
+  if(groups & BINARYGROUP_GPS2)
+    parseBinaryPacketGps2Group(p, GpsGroup(p.groupField(curGroupFieldIndex++)), o);
 }
 
 void CompositeData::parseBinaryPacketCommonGroup(Packet& p, CommonGroup gf, vector<CompositeData*>& o)
@@ -2198,7 +2584,7 @@ void CompositeData::parseBinaryPacketTimeGroup(Packet& p, TimeGroup gf, vector<C
 		setValues(p.extractUint64(), o, &Impl::setTimeGps);
 
 	if (gf & TIMEGROUP_GPSTOW)
-		setValues(p.extractUint64(), o, &Impl::setGpsTow);
+		setValues(((double)p.extractUint64()/1000000000), o, &Impl::setTow);
 
 	if (gf & TIMEGROUP_GPSWEEK)
 		setValues(p.extractUint16(), o, &Impl::setWeek);
@@ -2299,7 +2685,7 @@ void CompositeData::parseBinaryPacketGpsGroup(Packet& p, GpsGroup gf, vector<Com
 		setValues(p.extractUint64(), o, &Impl::setGpsTow);
 
 	if (gf & GPSGROUP_WEEK)
-		setValues(p.extractUint16(), o, &Impl::setWeek);
+		setValues(p.extractUint16(), o, &Impl::setGpsWeek);
 
 	if (gf & GPSGROUP_NUMSATS)
 		setValues(p.extractUint8(), o, &Impl::setNumSats);
@@ -2421,6 +2807,80 @@ void CompositeData::parseBinaryPacketInsGroup(Packet& p, InsGroup gf, vector<Com
 		setValues(p.extractFloat(), o, &Impl::setVelocityUncertaintyEstimated);
 
 }
+
+void CompositeData::parseBinaryPacketGps2Group(Packet& p, GpsGroup gf, vector<CompositeData*>& o)
+{
+  if(gf & GPSGROUP_UTC) {
+    TimeUtc t;
+
+    t.year = p.extractInt8();
+    t.month = p.extractUint8();
+    t.day = p.extractUint8();
+    t.hour = p.extractUint8();
+    t.min = p.extractUint8();
+    t.sec = p.extractUint8();
+    t.ms = p.extractUint16();
+
+    setValues(t, o, &Impl::setTimeUtc2);
+  }
+
+  if(gf & GPSGROUP_TOW)
+    setValues(p.extractUint64(), o, &Impl::setGps2Tow);
+
+  if(gf & GPSGROUP_WEEK)
+    setValues(p.extractUint16(), o, &Impl::setGps2Week);
+
+  if(gf & GPSGROUP_NUMSATS)
+    setValues(p.extractUint8(), o, &Impl::setNumSats2);
+
+  if(gf & GPSGROUP_FIX)
+    setValues(GpsFix(p.extractUint8()), o, &Impl::setFix2);
+
+  if(gf & GPSGROUP_POSLLA)
+    setValues(p.extractVec3d(), o, &Impl::setPositionGps2Lla);
+
+  if(gf & GPSGROUP_POSECEF)
+    setValues(p.extractVec3d(), o, &Impl::setPositionGps2Ecef);
+
+  if(gf & GPSGROUP_VELNED)
+    setValues(p.extractVec3f(), o, &Impl::setVelocityGps2Ned);
+
+  if(gf & GPSGROUP_VELECEF)
+    setValues(p.extractVec3f(), o, &Impl::setVelocityGps2Ecef);
+
+  if(gf & GPSGROUP_POSU)
+    setValues(p.extractVec3f(), o, &Impl::setPositionUncertaintyGps2Ned);
+
+  if(gf & GPSGROUP_VELU)
+    setValues(p.extractFloat(), o, &Impl::setVelocityUncertaintyGps2);
+
+  if(gf & GPSGROUP_TIMEU)
+    setValues(p.extractUint32(), o, &Impl::setTimeUncertainty2);
+
+  if(gf & GPSGROUP_TIMEINFO) {
+    TimeInfo t;
+
+    t.timeStatus = p.extractUint8();
+    t.leapSecs = p.extractInt8();
+
+    setValues(t, o, &Impl::setTimeInfo2);
+  }
+
+  if(gf & GPSGROUP_DOP) {
+    GnssDop d;
+
+    d.gDop = p.extractFloat();
+    d.pDop = p.extractFloat();
+    d.tDop = p.extractFloat();
+    d.vDop = p.extractFloat();
+    d.hDop = p.extractFloat();
+    d.nDop = p.extractFloat();
+    d.eDop = p.extractFloat();
+
+    setValues(d, o, &Impl::setGnssDop2);
+  }
+}
+
 
 }
 }

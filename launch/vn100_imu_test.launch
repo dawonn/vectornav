@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+<launch>
+	<arg name="rvizconfig" default="$(find vectornav)/rviz/vn_100.rviz"/>
+	<arg name="target_frame" default="base_link"/>
+	<arg name="frame_id" default="imu_link"/>
+
+	<include file="$(find vectornav)/launch/vn100_imu.launch">
+		<arg name="target_frame" value="$(arg target_frame)"/>
+		<arg name="frame_id" value="$(arg frame_id)"/>
+	</include>
+
+	<node pkg="tf" type="static_transform_publisher" name="imu_broadcaster" args="1.0 1.0 1.0 0 0 0 $(arg target_frame) $(arg frame_id) 100" />
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" output="screen" />
+</launch>

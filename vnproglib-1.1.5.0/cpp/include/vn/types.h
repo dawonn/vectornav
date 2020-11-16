@@ -52,6 +52,9 @@ enum AsciiAsync
 	VNISL	= 28,		///< Asynchronous output type is INS LLA 2 solution.
 	VNISE	= 29,		///< Asynchronous output type is INS ECEF 2 solution.
 	VNDTV	= 30,		///< Asynchronous output type is Delta Theta and Delta Velocity.
+  VNG2S = 32,		///< Asynchronous output type is GPS LLA.
+  VNG2E = 33,		///< Asynchronous output type is GPS ECEF.
+
 	#ifdef INTERNAL
 	VNRAW	= 252,		///< Asynchronous output type is Raw Voltage Measurements.
 	VNCMV	= 253,		///< Asynchronous output type is Calibrated Measurements.
@@ -77,7 +80,8 @@ enum BinaryGroup
 	BINARYGROUP_IMU = 0x04,			///< IMU group.
 	BINARYGROUP_GPS = 0x08,			///< GPS group.
 	BINARYGROUP_ATTITUDE = 0x10,	///< Attitude group.
-	BINARYGROUP_INS = 0x20			///< INS group.
+	BINARYGROUP_INS = 0x20,			///< INS group.
+  BINARYGROUP_GPS2 = 0x40			///< GPS2 group.
 };
 
 /// \brief Flags for the binary group 1 'Common' in the binary output registers.
@@ -135,19 +139,19 @@ enum ImuGroup
 	IMUGROUP_SENSSAT				= 0x0800,	///< SensSat.
 };
 
-/// \brief Flags for the binary group 4 'GPS' in the binary output registers.
+/// \brief Flags for the binary group 4 'GPS' and group 7 'GPS2' in the binary output registers.
 enum GpsGroup
 {
 	GPSGROUP_NONE					= 0x0000,	///< None.
 	GPSGROUP_UTC					= 0x0001,	///< UTC.
 	GPSGROUP_TOW					= 0x0002,	///< Tow.
 	GPSGROUP_WEEK					= 0x0004,	///< Week.
-	GPSGROUP_NUMSATS				= 0x0008,	///< NumSats.
+	GPSGROUP_NUMSATS			= 0x0008,	///< NumSats.
 	GPSGROUP_FIX					= 0x0010,	///< Fix.
-	GPSGROUP_POSLLA					= 0x0020,	///< PosLla.
-	GPSGROUP_POSECEF				= 0x0040,	///< PosEcef.
-	GPSGROUP_VELNED					= 0x0080,	///< VelNed.
-	GPSGROUP_VELECEF				= 0x0100,	///< VelEcef.
+	GPSGROUP_POSLLA				= 0x0020,	///< PosLla.
+	GPSGROUP_POSECEF			= 0x0040,	///< PosEcef.
+	GPSGROUP_VELNED				= 0x0080,	///< VelNed.
+	GPSGROUP_VELECEF			= 0x0100,	///< VelEcef.
 	GPSGROUP_POSU					= 0x0200,	///< PosU.
 	GPSGROUP_VELU					= 0x0400,	///< VelU.
 	GPSGROUP_TIMEU				= 0x0800,	///< TimeU.
@@ -224,7 +228,9 @@ enum SyncInMode
 	/// \brief Start IMU sampling on trigger of SYNC_IN pin.
 	SYNCINMODE_IMU = 4,
 	/// \brief Output asynchronous message on trigger of SYNC_IN pin.
-	SYNCINMODE_ASYNC = 5
+	SYNCINMODE_ASYNC = 5,
+	/// \brief Output asynchronous 0Hz message on trigger of SYNC_IN pin.
+	SYNCINMODE_ASYNC3 = 6
 };
 
 /// \brief Different modes for the SyncInEdge field of the Synchronization Control register.

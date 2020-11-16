@@ -74,12 +74,6 @@ include_directories(
 
 add_library(libvncxx ${SOURCE})
 
-install(TARGETS libvncxx
-    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
 #add_subdirectory(examples/ez_async_data)
 #add_subdirectory(examples/getting_started)
 #add_subdirectory(examples/math)

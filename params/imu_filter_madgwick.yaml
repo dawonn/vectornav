@@ -1,0 +1,6 @@
+orientation_stddev: 0.001
+gain: 0.01
+zeta: 0.001
+publish_tf: false
+use_mag: true
+world_frame: enu

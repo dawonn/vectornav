@@ -465,10 +465,6 @@ struct SerialPort::Impl
 			{
 				_dataReceivedHandler(_dataReceivedUserData);
 			}
-			else
-			{
-				return;
-			}
 		}
 		catch (exception& e)
 		{
