@@ -1,84 +1,39 @@
-Vectornav ROS Driver
-====================
+# Vectornav ROS2 Driver
 
-A ROS node for VectorNav INS & GPS devices.
+A ROS2 node for VectorNav INS & GPS devices.
 
 This package provides a sensor_msg interface for the VN100, 200, & 300 
 devices. Simply configure your launch files to point to the serial port
-of the deice and you can use rostopic to quickly get running.   
+of the sensor and you can use ros2 topic to quickly get running. 
 
+This driver is designed to get you running quickly, but you will likely want 
+to customize main.cc to change device parameters for your application.
 
+## QuickStart Guide
 
-The MIT License (MIT)
-----------------------
+Build
 
-Copyright (c) 2018 Dereck Wonnacott <dereck@gmail.com>
+1. git clone https://github.com/dawonn/vectornav.git -b foxy
+2. cd vectornav 
+3. colcon build
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Run
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+4. (Terminal 1) roslaunch vectornav vectornav.launch
+5. (Terminal 2) rostopic echo /vectornav/IMU
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+## vectornav node
 
-
-
-QuickStart Guide
-----------------
-
-This assumes that you have a VectorNav device connected to your computer 
-via a USB cable and that you have already created a [catkin workspace][2]
-
-Build:
-
-1. cd ~/catkin_ws/src
-2. git clone https://github.com/dawonn/vectornav.git
-3. cd ..
-4. catkin_make
-
-
-Run:
-
-5. (Terminal 1) roscore
-6. (Terminal 2) roslaunch vectornav vectornav.launch
-7. (Terminal 3) rostopic list
-8. (Terminal 3) rostopic echo /vectornav/IMU
-9. (Terminal #) ctrl+c to quit
-
-
-
-Overview 
---------
-
-#### vnpub node
-
-This node provides a ROS interface for a vectornav device. It can be configured
+This node provides a ROS2 interface for a vectornav device. It can be configured
 via ROS parameters and publishes sensor data via ROS topics.
 
 
-#### vectornav.launch
+## vectronav.launch
 
 This launch file contains the default parameters for connecting a device to ROS.
-You will problaby want to copy it into your own project and modify as required. 
+You will probably want to copy it into your own project and modify as required. 
 
 
-References 
-----------
+## References 
 
-[1]: http://www.vectornav.com/ "VectorNav"
-[2]: http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment "ROS Workspace Tutorial"
-
-
-
-
+[1] http://www.vectornav.com/ "VectorNav"

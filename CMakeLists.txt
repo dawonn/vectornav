@@ -1,48 +1,41 @@
-cmake_minimum_required(VERSION 2.8.3)
-# Compile options so compiles with ROS Kinetic
-# Future releases may want to 
-add_compile_options(-std=c++11)
+cmake_minimum_required(VERSION 3.5)
 project(vectornav)
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-find_package(catkin REQUIRED roscpp)
+# Default to C99
+if(NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99)
+endif()
 
-###################################
-## catkin specific configuration ##
-###################################
-catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES vectornav
-   CATKIN_DEPENDS roscpp sensor_msgs
-#  DEPENDS system_lib
-)
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 
-###########
-## Build ##
-###########
+# TODO[DERECK] fix library warnings
+# if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+#   add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+# endif()
 
-#include(vnproglib-1.1/cpp/CMakeLists.txt)
+# find dependencies
+# TODO[DERECK] Move to auto-dep macro
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+
 add_subdirectory(vnproglib-1.1.5.0/cpp)
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(vnproglib-1.1.5.0/cpp/include ${catkin_INCLUDE_DIRS})
+add_executable(${PROJECT_NAME} src/main.cc)
+ament_target_dependencies(${PROJECT_NAME} rclcpp sensor_msgs)
+target_link_libraries(${PROJECT_NAME} vncxx )
 
-## Declare a cpp library
-## Declare a cpp executable
-add_executable(vnpub src/main.cpp)
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(vnpub
-  libvncxx
-  ${catkin_LIBRARIES}
+install(TARGETS
+  ${PROJECT_NAME}
+  DESTINATION lib/${PROJECT_NAME}
 )
 
-## Mark executables and/or libraries for installation
-install(TARGETS vnpub
-   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+ament_package()
