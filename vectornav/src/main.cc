@@ -5,6 +5,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
+#include "vectornav_msgs/msg/composite_data.hpp"
 
 // Include this header file to get access to VectorNav sensors.
 #include "vn/sensors.h"
@@ -102,6 +103,9 @@ public:
     declare_parameter<int>("BO3.insField", vn::protocol::uart::InsGroup::INSGROUP_NONE);
     declare_parameter<int>("BO3.gps2Field", vn::protocol::uart::GpsGroup::GPSGROUP_NONE);
 
+    // Composite Data Publisher
+    pub_ = this->create_publisher<vectornav_msgs::msg::CompositeData>("vectornav/composite_data", 10);
+
     // Connect to the sensor
     connect(port, baud);
 
@@ -120,7 +124,7 @@ public:
   void reconnect_timer()
   {
     // Check if the sensor is connected
-    if (vs.verifySensorConnectivity())
+    if (vs_.verifySensorConnectivity())
     {
       return;
     }
@@ -132,7 +136,7 @@ public:
       int baud = get_parameter("baud").as_int();
       if(!connect(port, baud))
       {
-        vs.disconnect();
+        vs_.disconnect();
       }
     }
     catch (...)
@@ -153,11 +157,11 @@ public:
   bool connect(const std::string port, const int baud)
   {
     // Default response was too low and retransmit time was too long by default.
-    vs.setResponseTimeoutMs(1000); // ms
-    vs.setRetransmitDelayMs(50);   // ms
+    vs_.setResponseTimeoutMs(1000); // ms
+    vs_.setRetransmitDelayMs(50);   // ms
 
     // Check if the requested baud rate is supported
-    auto baudrates = vs.supportedBaudrates();
+    auto baudrates = vs_.supportedBaudrates();
     if (baud > 0 && std::find(baudrates.begin(), baudrates.end(), baud) == baudrates.end())
     {
       RCLCPP_FATAL(get_logger(), "Baudrate Not Supported: %d", baud);
@@ -171,9 +175,9 @@ public:
     {
       try
       {
-        vs.connect(port, b);
+        vs_.connect(port, b);
 
-        if (vs.verifySensorConnectivity())
+        if (vs_.verifySensorConnectivity())
         {
           break;
         }
@@ -185,26 +189,26 @@ public:
     }
 
     // Configure the sensor to the requested baudrate
-    if (baud > 0 && baud != vs.baudrate())
+    if (baud > 0 && baud != vs_.baudrate())
     {
-      vs.changeBaudRate(baud);
+      vs_.changeBaudRate(baud);
     }
 
     // Verify connection one more time
-    if (!vs.verifySensorConnectivity())
+    if (!vs_.verifySensorConnectivity())
     {
       RCLCPP_ERROR(get_logger(), "Unable to connect via %s", port.c_str());
       return false;
     }
 
     // Query the sensor's model number.
-    std::string mn = vs.readModelNumber();
-    std::string fv = vs.readFirmwareVersion();
-    uint32_t hv = vs.readHardwareRevision();
-    uint32_t sn = vs.readSerialNumber();
-    std::string ut = vs.readUserTag();
+    std::string mn = vs_.readModelNumber();
+    std::string fv = vs_.readFirmwareVersion();
+    uint32_t hv = vs_.readHardwareRevision();
+    uint32_t sn = vs_.readSerialNumber();
+    std::string ut = vs_.readUserTag();
 
-    RCLCPP_INFO(get_logger(), "Connected to %s @ %d baud", port.c_str(), vs.baudrate());
+    RCLCPP_INFO(get_logger(), "Connected to %s @ %d baud", port.c_str(), vs_.baudrate());
     RCLCPP_INFO(get_logger(), "Model: %s", mn.c_str());
     RCLCPP_INFO(get_logger(), "Firmware Version: %s", fv.c_str());
     RCLCPP_INFO(get_logger(), "Hardware Version : %d", hv);
@@ -217,17 +221,17 @@ public:
 
     // TODO[Dereck] Move to Service Call?
     // 5.2.1
-    // vs.writeUserTag("");
+    // vs_.writeUserTag("");
 
     // Async Output Type
     // 5.2.7
     auto AsyncDataOutputType = (vn::protocol::uart::AsciiAsync)get_parameter("AsyncDataOutputType").as_int();
-    vs.writeAsyncDataOutputType(AsyncDataOutputType);
+    vs_.writeAsyncDataOutputType(AsyncDataOutputType);
 
     // Async output Frequency (Hz)
     // 5.2.8
     int AsyncDataOutputFreq = get_parameter("AsyncDataOutputFrequency").as_int();
-    vs.writeAsyncDataOutputFrequency(AsyncDataOutputFreq);
+    vs_.writeAsyncDataOutputFrequency(AsyncDataOutputFreq);
 
     // Sync control 
     // 5.2.9
@@ -239,7 +243,7 @@ public:
     configSync.syncOutPolarity = (vn::protocol::uart::SyncOutPolarity)get_parameter("syncOutPolarity").as_int();; 
     configSync.syncOutSkipFactor = get_parameter("syncOutSkipFactor").as_int();; 
     configSync.syncOutPulseWidth = get_parameter("syncOutPulseWidth_ns").as_int();; 
-    vs.writeSynchronizationControl(configSync);
+    vs_.writeSynchronizationControl(configSync);
 
     // Communication Protocol Control
     // 5.2.10
@@ -251,7 +255,7 @@ public:
     configComm.serialChecksum = (vn::protocol::uart::ChecksumMode)get_parameter("serialChecksum").as_int(); 
     configComm.spiChecksum = (vn::protocol::uart::ChecksumMode)get_parameter("spiChecksum").as_int(); 
     configComm.errorMode = (vn::protocol::uart::ErrorMode)get_parameter("errorMode").as_int(); 
-    vs.writeCommunicationProtocolControl(configComm);
+    vs_.writeCommunicationProtocolControl(configComm);
     // TODO[Dereck] Log error messages from sensor
 
     // Binary Output Register 1
@@ -266,7 +270,7 @@ public:
     configBO1.attitudeField = (vn::protocol::uart::AttitudeGroup)get_parameter("BO1.attitudeField").as_int(); 
     configBO1.insField = (vn::protocol::uart::InsGroup)get_parameter("BO1.insField").as_int(); 
     configBO1.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO1.gps2Field").as_int(); 
-    vs.writeBinaryOutput1(configBO1);
+    vs_.writeBinaryOutput1(configBO1);
 
     // Binary Output Register 2
     // 5.2.12
@@ -280,7 +284,7 @@ public:
     configBO2.attitudeField = (vn::protocol::uart::AttitudeGroup)get_parameter("BO2.attitudeField").as_int(); 
     configBO2.insField = (vn::protocol::uart::InsGroup)get_parameter("BO2.insField").as_int(); 
     configBO2.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO2.gps2Field").as_int(); 
-    vs.writeBinaryOutput1(configBO2);
+    vs_.writeBinaryOutput1(configBO2);
 
     // Binary Output Register 3
     // 5.2.13
@@ -294,21 +298,56 @@ public:
     configBO3.attitudeField = (vn::protocol::uart::AttitudeGroup)get_parameter("BO3.attitudeField").as_int(); 
     configBO3.insField = (vn::protocol::uart::InsGroup)get_parameter("BO3.insField").as_int(); 
     configBO3.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO3.gps2Field").as_int(); 
-    vs.writeBinaryOutput1(configBO3);
+    vs_.writeBinaryOutput1(configBO3);
 
-
-
+    // Register Binary Data Callback
+    vs_.registerAsyncPacketReceivedHandler(this, Vectornav::AsyncPacketReceivedHandler);
     
-
     // Connection Successful
     return true;
   }
 
-private:
-  // VectorNav Sensor Handle
-  vn::sensors::VnSensor vs;
+static void AsyncPacketReceivedHandler(void* node, vn::protocol::uart::Packet& asyncPacket, size_t packetStartRunningIndex)
+{
+  // Verify that this packet is a binary output message
+  if (asyncPacket.type() != vn::protocol::uart::Packet::TYPE_BINARY)
+  {
+    return;
+  }
 
+  // Groups
+  auto msg = vectornav_msgs::msg::CompositeData();
+  msg.groups = asyncPacket.groups();
+
+  // Fields
+  // Need to count the number of 1's in the group bitfield
+  //countSetBits(msg.groups);
+
+  // p->publish(msg);
+}
+
+private:
+
+  /// Count the number of set bits in an int
+  static void countSetBits(uint32_t n) 
+  {
+      uint32_t count = 0;
+      while (n != 0)
+      {
+          n = n & (n-1);
+          count++;
+      }
+  }
+
+  /// VectorNav Sensor Handle
+  vn::sensors::VnSensor vs_;
+
+  /// Reconnection Timer
   rclcpp::TimerBase::SharedPtr reconnect_timer_;
+
+  /// Composite Data Publisher
+  rclcpp::Publisher<vectornav_msgs::msg::CompositeData>::SharedPtr pub_;
+
 };
 
 int main(int argc, char *argv[])
