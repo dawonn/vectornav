@@ -45,7 +45,7 @@ public:
     // Async output Frequency (Hz)
     // 5.2.8
     // {1 2 4 5 10 20 25 40 50 100 200}
-    declare_parameter<int>("AsyncDataOutputFrequency", 50);
+    declare_parameter<int>("AsyncDataOutputFrequency", 20);
 
     // Sync control 
     // 5.2.9
@@ -64,14 +64,14 @@ public:
     declare_parameter<int>("spiCount", vn::protocol::uart::CountMode::COUNTMODE_NONE);
     declare_parameter<int>("spiStatus", vn::protocol::uart::StatusMode::STATUSMODE_OFF);
     declare_parameter<int>("serialChecksum", vn::protocol::uart::ChecksumMode::CHECKSUMMODE_CHECKSUM);
-    declare_parameter<int>("spiChecksum", vn::protocol::uart::ChecksumMode::CHECKSUMMODE_CHECKSUM);
+    declare_parameter<int>("spiChecksum", vn::protocol::uart::ChecksumMode::CHECKSUMMODE_OFF);
     declare_parameter<int>("errorMode", vn::protocol::uart::ErrorMode::ERRORMODE_SEND);
 
     // Binary Output Register 1
     // 5.2.11
-    declare_parameter<int>("BO1.asyncMode", vn::protocol::uart::AsyncMode::ASYNCMODE_NONE);
-    declare_parameter<int>("BO1.rateDivisor", 0);
-    declare_parameter<int>("BO1.commonField", vn::protocol::uart::CommonGroup::COMMONGROUP_NONE);
+    declare_parameter<int>("BO1.asyncMode", vn::protocol::uart::AsyncMode::ASYNCMODE_BOTH);
+    declare_parameter<int>("BO1.rateDivisor", 100);
+    declare_parameter<int>("BO1.commonField", vn::protocol::uart::CommonGroup::COMMONGROUP_TIMESTARTUP);
     declare_parameter<int>("BO1.timeField", vn::protocol::uart::TimeGroup::TIMEGROUP_NONE);
     declare_parameter<int>("BO1.imuField", vn::protocol::uart::ImuGroup::IMUGROUP_NONE);
     declare_parameter<int>("BO1.gpsField", vn::protocol::uart::GpsGroup::GPSGROUP_NONE);
@@ -188,6 +188,10 @@ public:
       }
     }
 
+    // Restore Factory Settings for consistency
+    // TODO[Dereck] Move factoryReset to Service Call?
+    // vs_.restoreFactorySettings();
+
     // Configure the sensor to the requested baudrate
     if (baud > 0 && baud != vs_.baudrate())
     {
@@ -219,7 +223,10 @@ public:
     // Sensor Configuration
     //
 
-    // TODO[Dereck] Move to Service Call?
+    // Register Error Callback
+    vs_.registerErrorPacketReceivedHandler(this, Vectornav::ErrorPacketReceivedHandler);
+
+    // TODO[Dereck] Move writeUserTag to Service Call?
     // 5.2.1
     // vs_.writeUserTag("");
 
@@ -256,7 +263,6 @@ public:
     configComm.spiChecksum = (vn::protocol::uart::ChecksumMode)get_parameter("spiChecksum").as_int(); 
     configComm.errorMode = (vn::protocol::uart::ErrorMode)get_parameter("errorMode").as_int(); 
     vs_.writeCommunicationProtocolControl(configComm);
-    // TODO[Dereck] Log error messages from sensor
 
     // Binary Output Register 1
     // 5.2.11
@@ -284,7 +290,7 @@ public:
     configBO2.attitudeField = (vn::protocol::uart::AttitudeGroup)get_parameter("BO2.attitudeField").as_int(); 
     configBO2.insField = (vn::protocol::uart::InsGroup)get_parameter("BO2.insField").as_int(); 
     configBO2.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO2.gps2Field").as_int(); 
-    vs_.writeBinaryOutput1(configBO2);
+    vs_.writeBinaryOutput2(configBO2);
 
     // Binary Output Register 3
     // 5.2.13
@@ -298,35 +304,56 @@ public:
     configBO3.attitudeField = (vn::protocol::uart::AttitudeGroup)get_parameter("BO3.attitudeField").as_int(); 
     configBO3.insField = (vn::protocol::uart::InsGroup)get_parameter("BO3.insField").as_int(); 
     configBO3.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO3.gps2Field").as_int(); 
-    vs_.writeBinaryOutput1(configBO3);
+    vs_.writeBinaryOutput3(configBO3);
 
     // Register Binary Data Callback
     vs_.registerAsyncPacketReceivedHandler(this, Vectornav::AsyncPacketReceivedHandler);
+
     
+
     // Connection Successful
     return true;
   }
 
-static void AsyncPacketReceivedHandler(void* node, vn::protocol::uart::Packet& asyncPacket, size_t packetStartRunningIndex)
-{
-  // Verify that this packet is a binary output message
-  if (asyncPacket.type() != vn::protocol::uart::Packet::TYPE_BINARY)
+private:
+
+  static void ErrorPacketReceivedHandler(void* nodeptr, vn::protocol::uart::Packet& errorPacket, size_t packetStartRunningIndex)
   {
-    return;
+    // Get handle to the vectornav class
+    auto node = reinterpret_cast<Vectornav*>(nodeptr);
+
+    auto err = errorPacket.parseError();
+
+    RCLCPP_ERROR(node->get_logger(), "SensorError: %d", (int)err);
+    // TODO[Dereck] Display error text
   }
 
-  // Groups
-  auto msg = vectornav_msgs::msg::CompositeData();
-  msg.groups = asyncPacket.groups();
+  static void AsyncPacketReceivedHandler(void* nodeptr, vn::protocol::uart::Packet& asyncPacket, size_t packetStartRunningIndex)
+  {
+    // Get handle to the vectornav class
+    auto node = reinterpret_cast<Vectornav*>(nodeptr);
+    
+    RCLCPP_INFO(node->get_logger(), "!!!!! 1");
 
-  // Fields
-  // Need to count the number of 1's in the group bitfield
-  //countSetBits(msg.groups);
+    // Verify that this packet is a binary output message 
+    if (asyncPacket.type() != vn::protocol::uart::Packet::TYPE_BINARY)
+    {
+      return;
+    }
 
-  // p->publish(msg);
-}
+    RCLCPP_INFO(node->get_logger(), "!!!!! 2");
 
-private:
+    // Groups
+    auto msg = vectornav_msgs::msg::CompositeData();
+    msg.groups = asyncPacket.groups();
+
+    // Fields
+    // Need to count the number of 1's in the group bitfield
+    //countSetBits(msg.groups);
+
+    // p->publish(msg);
+  }
+
 
   /// Count the number of set bits in an int
   static void countSetBits(uint32_t n) 
