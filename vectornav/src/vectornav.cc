@@ -3,17 +3,16 @@
 #include <memory>
 #include <string>
 
+// ROS2
 #include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/point_cloud2.hpp"
 #include "vectornav_msgs/msg/composite_data.hpp"
 
-// Include this header file to get access to VectorNav sensors.
+// VectorNav libvncxx
 #include "vn/sensors.h"
 #include "vn/compositedata.h"
 #include "vn/util.h"
 
 using namespace std::chrono_literals;
-
 
 class Vectornav : public rclcpp::Node
 {
@@ -100,6 +99,9 @@ public:
     declare_parameter<int>("BO3.attitudeField", vn::protocol::uart::AttitudeGroup::ATTITUDEGROUP_NONE);
     declare_parameter<int>("BO3.insField", vn::protocol::uart::InsGroup::INSGROUP_NONE);
     declare_parameter<int>("BO3.gps2Field", vn::protocol::uart::GpsGroup::GPSGROUP_NONE);
+
+    // Message Header
+    declare_parameter<std::string>("frame_id", "vectornav");
 
     // Composite Data Publisher
     pub_ = this->create_publisher<vectornav_msgs::msg::CompositeData>("vectornav/composite_data", 10);
@@ -334,8 +336,14 @@ private:
       return;
     }
 
-    // Groups
+    // Message to Send
     auto msg = vectornav_msgs::msg::CompositeData();
+
+    // Header
+    msg.header.stamp = node->now();
+    msg.header.frame_id = node->get_parameter("frame_id").as_string(); 
+
+    // Groups
     msg.groups = asyncPacket.groups();
 
     // Fields
@@ -351,6 +359,12 @@ private:
     // Parse data into CompositeData container
     vn::sensors::CompositeData cd = cd.parse(asyncPacket);
     parseCommonGroup(cd, msg);
+    parseTimeGroup(cd, msg);
+    parseImuGroup(cd, msg);
+    parseGpsGroup(cd, msg);
+    parseAttitudeGroup(cd, msg);
+    parseInsGroup(cd, msg);
+    parseGps2Group(cd, msg);
 
     node->pub_->publish(msg);
   }
@@ -526,7 +540,7 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseIMUGroup(vn::sensors::CompositeData& compositeData, vectornav_msgs::msg::CompositeData& msg)
+  static void parseImuGroup(vn::sensors::CompositeData& compositeData, vectornav_msgs::msg::CompositeData& msg)
   {
     // IMU Status is a reserved field, skip it.
 
@@ -596,7 +610,7 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseGPSGroup(vn::sensors::CompositeData& compositeData, vectornav_msgs::msg::CompositeData& msg)
+  static void parseGpsGroup(vn::sensors::CompositeData& compositeData, vectornav_msgs::msg::CompositeData& msg)
   {
     if(compositeData.hasTimeUtc())
     {
@@ -629,10 +643,11 @@ private:
       msg.gps_poslla = toMsg(compositeData.positionGpsLla());
     }
 
-    if(compositeData.hasPositionGpsEcef())
-    {
-      msg.gps_posecef = toMsg(compositeData.positionGpsEcef());
-    }
+    // TODO[Dereck] VNCXX is missing the read function for this field
+    // if(compositeData.hasPositionGpsEcef())
+    // {
+    //   msg.gps_posecef = toMsg(compositeData.positionGpsEcef());
+    // }
 
     if(compositeData.hasVelocityGpsNed())
     {
@@ -799,7 +814,7 @@ private:
    * 
    * TODO[Dereck] VNCXX is missing some read functions
    */
-  static void parseGPS2Group(vn::sensors::CompositeData& compositeData, vectornav_msgs::msg::CompositeData& msg)
+  static void parseGps2Group(vn::sensors::CompositeData& compositeData, vectornav_msgs::msg::CompositeData& msg)
   {
     // if(compositeData.hasTimeUtc2())
     // {

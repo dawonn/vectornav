@@ -21,16 +21,25 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(vectornav_msgs REQUIRED)
 
+# vncxx
 add_subdirectory(vnproglib-1.1.5.0/cpp)
 
-add_executable(${PROJECT_NAME} src/main.cc)
-ament_target_dependencies(${PROJECT_NAME} rclcpp sensor_msgs vectornav_msgs)
+# vectornav
+add_executable(${PROJECT_NAME} src/vectornav.cc)
+ament_target_dependencies(${PROJECT_NAME} rclcpp geometry_msgs vectornav_msgs)
 target_link_libraries(${PROJECT_NAME} vncxx )
 
+# vn_sensor_msgs
+add_executable(vn_sensor_msgs src/vn_sensor_msgs.cc)
+ament_target_dependencies(vn_sensor_msgs rclcpp sensor_msgs vectornav_msgs)
+
+# install
 install(TARGETS
   ${PROJECT_NAME}
+  vn_sensor_msgs
   DESTINATION lib/${PROJECT_NAME}
 )
 
