@@ -19,11 +19,16 @@ endif()
 # TODO[DERECK] Move to auto-dep macro
 find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/CompositeData.msg"
-  DEPENDENCIES std_msgs
+  "msg/TimeUTC.msg"
+  "msg/DOP.msg"
+  "msg/VpeStatus.msg"
+  "msg/TimeStatus.msg"
+  "msg/InsStatus.msg"
+  DEPENDENCIES geometry_msgs
   ADD_LINTER_TESTS
 )
 
