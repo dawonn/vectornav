@@ -486,7 +486,7 @@ private:
   {
     if(compositeData.hasTimeStartup())
     {
-      msg.common_timegpspps = compositeData.timeStartup();
+      msg.time_timestartup = compositeData.timeStartup();
     }
 
     if(compositeData.hasTimeGps())
