@@ -3,11 +3,11 @@
 <package format="3">
   <name>vectornav_msgs</name>
   <version>3.0.0</version>
-  <description>ROS2 interface for the VectorNav INS/GPS</description>
+  <description>ROS2 interface for VectorNav IMU/INS/GNSS</description>
   <maintainer email="dereck@gmail.com">Dereck Wonnacott</maintainer>
   <license>MIT</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_auto</buildtool_depend>
   <buildtool_depend>rosidl_default_generators</buildtool_depend>
 
   <depend>geometry_msgs</depend>
@@ -15,7 +15,6 @@
   <exec_depend>rosidl_default_runtime</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
 
   <member_of_group>rosidl_interface_packages</member_of_group>
 

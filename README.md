@@ -1,37 +1,39 @@
 # Vectornav ROS2 Driver
 
-A ROS2 node for VectorNav INS & GPS devices.
+A ROS2 node for VectorNav INS / GNSS devices. 
 
-This package provides a sensor_msg interface for the VN100, 200, & 300 
-devices. Simply configure your launch files to point to the serial port
-of the sensor and you can use ros2 topic to quickly get running. 
+This package that provides both raw and sensor_msg interfaces for the VN100, 200, & 300 devices. 
+It has been entirely redesigned from the ROS1 package to provide a good basis to build into applications
+without requiring modification of the node itself. The majority of the device configuration settings are 
+exposed as ROS2 parameters that can be modified from a launch file. 
 
-This driver is designed to get you running quickly, but you will likely want 
-to customize main.cc to change device parameters for your application.
 
-## QuickStart Guide
+## QuickStart
 
 Build
 
-1. git clone https://github.com/dawonn/vectornav.git -b foxy
+1. git clone https://github.com/dawonn/vectornav.git -b ros2
 2. cd vectornav 
 3. colcon build
 
 Run
 
-4. (Terminal 1) roslaunch vectornav vectornav.launch
-5. (Terminal 2) rostopic echo /vectornav/IMU
+4. (Terminal 1) ros2 run vectornav vectornav
+5. (Terminal 2) ros2 topic echo /vectornav/raw/common
+6. (Terminal 3) ros2 run vectornav vn_sensor_msgs
+6. (Terminal 4) ros2 topic echo /vectornav/imu
+
 
 ## vectornav node
 
 This node provides a ROS2 interface for a vectornav device. It can be configured
-via ROS parameters and publishes sensor data via ROS topics.
+via ROS parameters and publishes sensor data via custom ROS topics as close to raw as possible.
 
 
-## vectronav.launch
+## vn_sensor_msgs node
 
-This launch file contains the default parameters for connecting a device to ROS.
-You will probably want to copy it into your own project and modify as required. 
+This node will convert the custom raw data topics into ROS2 sensor_msgs topics to make it easier 
+to integrate with other ROS2 packages. 
 
 
 ## References 

@@ -16,13 +16,17 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # find dependencies
-# TODO[DERECK] Move to auto-dep macro
-find_package(ament_cmake REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
-find_package(geometry_msgs REQUIRED)
+find_package(ament_cmake_auto REQUIRED)
+ament_auto_find_build_dependencies()
+
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/CompositeData.msg"
+  "msg/CommonGroup.msg"
+  "msg/TimeGroup.msg"
+  "msg/ImuGroup.msg"
+  "msg/GpsGroup.msg"
+  "msg/AttitudeGroup.msg"
+  "msg/InsGroup.msg"
   "msg/TimeUTC.msg"
   "msg/DOP.msg"
   "msg/VpeStatus.msg"

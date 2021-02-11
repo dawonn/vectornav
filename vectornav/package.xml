@@ -3,7 +3,7 @@
 <package format="3">
   <name>vectornav</name>
   <version>3.0.0</version>
-  <description>ROS2 interface for the VectorNav INS/GPS</description>
+  <description>ROS2 interface for VectorNav IMU/INS/GNSS</description>
   <maintainer email="dereck@gmail.com">Dereck Wonnacott</maintainer>
   <license>MIT</license>
 
@@ -14,6 +14,9 @@
   <depend>sensor_msgs</depend>
   <depend>vectornav_msgs</depend>
   <depend>tf2_geometry_msgs</depend>
+
+  <!-- TODO: .msg Hex Constant Support Required -->
+  <depend version_gte="1.2.0">rosidl_adapter</depend> 
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
