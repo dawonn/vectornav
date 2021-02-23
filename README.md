@@ -7,6 +7,7 @@ This package provides a sensor_msg interface for the VN100, 200, & 300
 devices. Simply configure your launch files to point to the serial port
 of the deice and you can use rostopic to quickly get running.   
 
+Check out the ROS2 branch for ROS2 Support!
 
 
 The MIT License (MIT)
