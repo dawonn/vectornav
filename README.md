@@ -38,4 +38,4 @@ to integrate with other ROS2 packages.
 
 ## References 
 
-[1] http://www.vectornav.com/ "VectorNav"
+[1] [VectorNav](http://www.vectornav.com/)

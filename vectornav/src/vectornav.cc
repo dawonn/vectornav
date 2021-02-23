@@ -80,8 +80,8 @@ public:
     // Binary Output Register 1
     // 5.2.11
     declare_parameter<int>("BO1.asyncMode", vn::protocol::uart::AsyncMode::ASYNCMODE_BOTH);
-    declare_parameter<int>("BO1.rateDivisor", 40);  // 20Hz
-    declare_parameter<int>("BO1.commonField", 0x7FFF); 
+    declare_parameter<int>("BO1.rateDivisor", 40); // 20Hz
+    declare_parameter<int>("BO1.commonField", 0x7FFF);
     declare_parameter<int>("BO1.timeField", vn::protocol::uart::TimeGroup::TIMEGROUP_NONE);
     declare_parameter<int>("BO1.imuField", vn::protocol::uart::ImuGroup::IMUGROUP_NONE);
     declare_parameter<int>("BO1.gpsField", vn::protocol::uart::GpsGroup::GPSGROUP_FIX &
@@ -118,11 +118,25 @@ public:
     declare_parameter<int>("BO3.insField", vn::protocol::uart::InsGroup::INSGROUP_NONE);
     declare_parameter<int>("BO3.gps2Field", vn::protocol::uart::GpsGroup::GPSGROUP_NONE);
 
+    /// TODO(Dereck): Static Settings, read before write to protect flash memory?
+    /// User Tag
+    /// Magnetometer Compensation (7.2.1)
+    /// Acceleration Compensation (7.2.2)
+    /// Gyro Compensation (7.2.3)
+    /// Reference Frame Rotation (7.2.4)
+    /// IMU Filtering (7.2.5)
+    /// Delta Theta Velocity Configuration (7.2.6)
+    ///
+    /// GPS Configuration (8.2.1)
+    /// GPS Antenna A Offset (8.2.2)
+    /// GPS Compass Baseline (8.2.3)
+
     // Message Header
     declare_parameter<std::string>("frame_id", "vectornav");
 
     // Composite Data Publisher
-    pub_common_ = this->create_publisher<vectornav_msgs::msg::CommonGroup>("vectornav/raw/common", 10);
+    pub_common_ =
+        this->create_publisher<vectornav_msgs::msg::CommonGroup>("vectornav/raw/common", 10);
     pub_time_ = this->create_publisher<vectornav_msgs::msg::TimeGroup>("vectornav/raw/time", 10);
     pub_imu_ = this->create_publisher<vectornav_msgs::msg::ImuGroup>("vectornav/raw/imu", 10);
     pub_gps_ = this->create_publisher<vectornav_msgs::msg::GpsGroup>("vectornav/raw/gps", 10);
@@ -333,6 +347,26 @@ private:
     configBO3.insField = (vn::protocol::uart::InsGroup)get_parameter("BO3.insField").as_int();
     configBO3.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO3.gps2Field").as_int();
     vs_.writeBinaryOutput3(configBO3);
+
+    // GPS Configuration
+    // 8.2.1
+    auto gps_config = vs_.readGpsConfiguration();
+    RCLCPP_INFO(get_logger(), "GPS Mode       : %d", gps_config.mode);
+    RCLCPP_INFO(get_logger(), "GPS PPS Source : %d", gps_config.ppsSource);
+    /// TODO(Dereck): VnSensor::readGpsConfiguration() missing fields
+
+    // GPS Offset
+    // 8.2.2
+    auto gps_offset = vs_.readGpsAntennaOffset();
+    RCLCPP_INFO(get_logger(), "GPS Offset     : (%f, %f, %f)", gps_offset[0], gps_offset[1],
+                gps_offset[2]);
+
+    // GPS Compass Baseline
+    // 8.2.3
+    auto gps_baseline = vs_.readGpsCompassBaseline();
+    RCLCPP_INFO(get_logger(), "GPS Baseline     : (%f, %f, %f), (%f, %f, %f)",
+      gps_baseline.position[0], gps_baseline.position[1], gps_baseline.position[2],
+      gps_baseline.uncertainty[0], gps_baseline.uncertainty[1], gps_baseline.uncertainty[2]);
 
     // Register Binary Data Callback
     vs_.registerAsyncPacketReceivedHandler(this, Vectornav::AsyncPacketReceivedHandler);
