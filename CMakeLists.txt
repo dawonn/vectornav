@@ -7,7 +7,20 @@ project(vectornav)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED roscpp)
+find_package(catkin REQUIRED COMPONENTS
+    roscpp
+    message_generation
+)
+
+add_message_files(
+    FILES
+    Ins.msg
+)
+
+generate_messages(
+    DEPENDENCIES
+    std_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -33,6 +46,7 @@ include_directories(vnproglib-1.1.5.0/cpp/include ${catkin_INCLUDE_DIRS})
 ## Declare a cpp library
 ## Declare a cpp executable
 add_executable(vnpub src/main.cpp)
+add_dependencies(vnpub ${PROJECT_NAME}_generate_messages)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(vnpub

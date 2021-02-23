@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="frame_id" default="imu_link"/>
+	<arg name="frame_id" default="vectornav"/>
 
 	<node pkg="vectornav" type="vnpub" name="vectornav" output="screen" >
 	  <param name="frame_id" value="$(arg frame_id)"/>
-      <rosparam command="load" file="$(find vectornav)/params/vn100.yaml" />
+      <rosparam command="load" file="$(find vectornav)/params/vn200.yaml" />
 	</node>	
 	
 </launch>

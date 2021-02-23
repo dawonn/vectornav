@@ -1,0 +1,43 @@
+# Defined in udev rules, change according to your system. Typically /dev/ttyUSB0
+serial_port: /dev/ttyUSB0
+
+# Acceptable baud rates : 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600
+# Datasheet states 128000 works but from experiments it does not.
+serial_baud: 921600
+
+# Acceptable data rates in Hz: 1, 2, 4, 5, 10, 20, 25, 40, 50, 100, 200
+# Baud rate must be able to handle the data rate
+async_output_rate: 40
+
+# Device IMU Rate as set by the manufacturer (800Hz unless specified otherwise)
+# This value is used to set the serial data packet rate
+fixed_imu_rate: 800
+
+# Frame id to publish data in
+frame_id: Vectornav
+
+# Data publication form, true for East North Up or false for North East Down <- false is default setting
+tf_ned_to_enu: false
+
+# If publishing ENU, do we want to publish in the frame labeled on the device? Default is false.
+# If tf_ned_to_enu = true and frame_based_enu = false orientation is reported by: x->y y->x z->-z to rotate the quaternion
+# Proper method is to rotate the quaternion by multiplication
+# If tf_ned_to_enu = true and frame_based_enu = true we rotate the quaternion to the frame matched label by multiplication
+frame_based_enu: false
+
+# Make sure all covariances below are of type xx.xx , i.e. double so that the rpc is parsed correctly
+
+# Linear Acceleration Covariances not produced by the sensor
+linear_accel_covariance: [0.01,  0.0,    0.0,
+                          0.0,   0.01,   0.0,
+                          0.0,   0.0,    0.01]
+
+# Angular Velocity Covariances not produced by the sensor
+angular_vel_covariance: [0.01,  0.0,   0.0,
+                         0.0,   0.01,  0.0,
+                         0.0,   0.0,   0.01]
+
+# Orientation covariance overwritten in driver, this is included just as an extra
+orientation_covariance: [0.01,  0.0,   0.0,
+                            0.0,   0.01,  0.0,
+                            0.0,   0.0,   0.01]
