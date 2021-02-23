@@ -39,8 +39,10 @@
 #include "std_srvs/Empty.h"
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <vectornav/Ins.h>
 
-ros::Publisher pubIMU, pubMag, pubGPS, pubOdom, pubTemp, pubPres;
+
+ros::Publisher pubIMU, pubMag, pubGPS, pubOdom, pubTemp, pubPres, pubIns;
 ros::ServiceServer resetOdomSrv;
 
 //Unused covariances initilized to zero's
@@ -116,6 +118,7 @@ int main(int argc, char *argv[])
     pubOdom = n.advertise<nav_msgs::Odometry>("vectornav/Odom", 1000);
     pubTemp = n.advertise<sensor_msgs::Temperature>("vectornav/Temp", 1000);
     pubPres = n.advertise<sensor_msgs::FluidPressure>("vectornav/Pres", 1000);
+    pubIns = n.advertise<vectornav::Ins>("vectornav/INS", 1000);
 
     resetOdomSrv = n.advertiseService("reset_odom", resetOdom);
 
@@ -233,11 +236,15 @@ int main(int argc, char *argv[])
             ASYNCMODE_PORT1,
             SensorImuRate / async_output_rate,  // update rate [ms]
             COMMONGROUP_QUATERNION
+            | COMMONGROUP_YAWPITCHROLL
             | COMMONGROUP_ANGULARRATE
             | COMMONGROUP_POSITION
             | COMMONGROUP_ACCEL
             | COMMONGROUP_MAGPRES,
-            TIMEGROUP_NONE,
+            TIMEGROUP_NONE
+            | TIMEGROUP_GPSTOW
+            | TIMEGROUP_GPSWEEK
+            | TIMEGROUP_TIMEUTC,
             IMUGROUP_NONE,
             GPSGROUP_NONE,
             ATTITUDEGROUP_YPRU, //<-- returning yaw pitch roll uncertainties
@@ -245,7 +252,10 @@ int main(int argc, char *argv[])
             | INSGROUP_POSLLA
             | INSGROUP_POSECEF
             | INSGROUP_VELBODY
-            | INSGROUP_ACCELECEF,
+            | INSGROUP_ACCELECEF
+            | INSGROUP_VELNED
+            | INSGROUP_POSU
+            | INSGROUP_VELU,
             GPSGROUP_NONE);
 
     vs.writeBinaryOutput1(bor);
@@ -472,4 +482,72 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         msgPres.fluid_pressure = pres;
         pubPres.publish(msgPres);
     }
+
+    // INS
+    vectornav::Ins msgINS;
+    msgINS.header.stamp = ros::Time::now();
+    msgINS.header.frame_id = frame_id;
+
+    if (cd.hasInsStatus())
+    {
+        InsStatus insStatus = cd.insStatus();
+        msgINS.insStatus = static_cast<uint16_t>(insStatus);
+    }
+
+    if (cd.hasTow()){
+        msgINS.time = cd.tow();
+    }
+
+    if (cd.hasWeek()){
+        msgINS.week = cd.week();
+    }
+
+    if (cd.hasTimeUtc()){
+        TimeUtc utcTime = cd.timeUtc();
+        char* utcTimeBytes = reinterpret_cast<char*>(&utcTime);
+        //msgINS.utcTime bytes are in Little Endian Byte Order
+        std::memcpy(&msgINS.utcTime, utcTimeBytes, 8);
+    }
+
+    if (cd.hasYawPitchRoll()) {
+        vec3f rpy = cd.yawPitchRoll();
+        msgINS.yaw = rpy[0];
+        msgINS.pitch = rpy[1];
+        msgINS.roll = rpy[2];
+    }
+
+    if (cd.hasPositionEstimatedLla()) {
+        vec3d lla = cd.positionEstimatedLla();
+        msgINS.latitude = lla[0];
+        msgINS.longitude = lla[1];
+        msgINS.altitude = lla[2];
+    }
+
+    if (cd.hasVelocityEstimatedNed()) {
+        vec3f nedVel = cd.velocityEstimatedNed();
+        msgINS.nedVelX = nedVel[0];
+        msgINS.nedVelY = nedVel[1];
+        msgINS.nedVelZ = nedVel[2];
+    }
+
+    if (cd.hasAttitudeUncertainty())
+    {
+        vec3f attUncertainty = cd.attitudeUncertainty();
+        msgINS.attUncertainty[0] = attUncertainty[0];
+        msgINS.attUncertainty[1] = attUncertainty[1];
+        msgINS.attUncertainty[2] = attUncertainty[2];
+    }
+
+    if (cd.hasPositionUncertaintyEstimated()){
+        msgINS.posUncertainty = cd.positionUncertaintyEstimated();
+    }
+
+    if (cd.hasVelocityUncertaintyEstimated()){
+        msgINS.velUncertainty = cd.velocityUncertaintyEstimated();
+    }
+
+    if (msgINS.insStatus && msgINS.utcTime) {
+        pubIns.publish(msgINS);
+    }
+
 }
