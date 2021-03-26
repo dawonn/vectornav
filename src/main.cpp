@@ -68,6 +68,9 @@ using namespace vn::xplat;
 // Method declarations for future use.
 void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index);
 
+// frame id used only for Odom header.frame_id
+std::string map_frame_id;
+// frame id used for header.frame_id of other messages and for Odom child_frame_id
 std::string frame_id;
 // Boolean to use ned or enu frame. Defaults to enu which is data format from sensor.
 bool tf_ned_to_enu;
@@ -125,6 +128,7 @@ int main(int argc, char *argv[])
     int SensorImuRate;
 
     // Load all params
+    pn.param<std::string>("map_frame_id", map_frame_id, "map");
     pn.param<std::string>("frame_id", frame_id, "vectornav");
     pn.param<bool>("tf_ned_to_enu", tf_ned_to_enu, false);
     pn.param<bool>("frame_based_enu", frame_based_enu, false);
@@ -400,7 +404,8 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         {
             nav_msgs::Odometry msgOdom;
             msgOdom.header.stamp = msgIMU.header.stamp;
-            msgOdom.header.frame_id = msgIMU.header.frame_id;
+            msgOdom.child_frame_id = frame_id;
+            msgOdom.header.frame_id = map_frame_id;
             vec3d pos = cd.positionEstimatedEcef();
 
             if (!initial_position_set)

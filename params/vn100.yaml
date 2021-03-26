@@ -13,7 +13,10 @@ async_output_rate: 40
 # This value is used to set the serial data packet rate
 fixed_imu_rate: 800
 
-# Frame id to publish data in
+# Frame id where pose of Odom message is specified (used only for Odom header.frame_id)
+map_frame_id: map
+
+# Frame id of the sensor (used for header.frame_id of other messages and for Odom child_frame_id)
 frame_id: imu_link
 
 # Data publication form, true for East North Up or false for North East Down <- false is default setting
