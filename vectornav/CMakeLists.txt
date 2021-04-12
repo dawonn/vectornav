@@ -35,7 +35,7 @@ target_link_libraries(${PROJECT_NAME} vncxx )
 
 # vn_sensor_msgs
 add_executable(vn_sensor_msgs src/vn_sensor_msgs.cc)
-ament_target_dependencies(vn_sensor_msgs rclcpp sensor_msgs vectornav_msgs)
+ament_target_dependencies(vn_sensor_msgs rclcpp sensor_msgs vectornav_msgs tf2_geometry_msgs)
 
 # install
 install(TARGETS
