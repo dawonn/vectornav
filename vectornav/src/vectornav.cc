@@ -363,14 +363,17 @@ private:
 
     // GPS Compass Baseline
     // 8.2.3
-    auto gps_baseline = vs_.readGpsCompassBaseline();
-    RCLCPP_INFO(get_logger(), "GPS Baseline     : (%f, %f, %f), (%f, %f, %f)",
-      gps_baseline.position[0], gps_baseline.position[1], gps_baseline.position[2],
-      gps_baseline.uncertainty[0], gps_baseline.uncertainty[1], gps_baseline.uncertainty[2]);
+    try {
+      auto gps_baseline = vs_.readGpsCompassBaseline();
+      RCLCPP_INFO(get_logger(), "GPS Baseline     : (%f, %f, %f), (%f, %f, %f)",
+        gps_baseline.position[0], gps_baseline.position[1], gps_baseline.position[2],
+        gps_baseline.uncertainty[0], gps_baseline.uncertainty[1], gps_baseline.uncertainty[2]);
 
+    } catch (vn::sensors::sensor_error e) {
+      RCLCPP_ERROR(get_logger(), "readGpsCompassBaseline: %s", e.what());
+    }
     // Register Binary Data Callback
     vs_.registerAsyncPacketReceivedHandler(this, Vectornav::AsyncPacketReceivedHandler);
-
     // Connection Successful
     return true;
   }
