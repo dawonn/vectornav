@@ -84,11 +84,11 @@ public:
     declare_parameter<int>("BO1.commonField", 0x7FFF);
     declare_parameter<int>("BO1.timeField", vn::protocol::uart::TimeGroup::TIMEGROUP_NONE);
     declare_parameter<int>("BO1.imuField", vn::protocol::uart::ImuGroup::IMUGROUP_NONE);
-    declare_parameter<int>("BO1.gpsField", vn::protocol::uart::GpsGroup::GPSGROUP_FIX &
+    declare_parameter<int>("BO1.gpsField", vn::protocol::uart::GpsGroup::GPSGROUP_FIX | 
                                                vn::protocol::uart::GpsGroup::GPSGROUP_POSU);
     declare_parameter<int>("BO1.attitudeField",
                            vn::protocol::uart::AttitudeGroup::ATTITUDEGROUP_NONE);
-    declare_parameter<int>("BO1.insField", vn::protocol::uart::InsGroup::INSGROUP_POSECEF &
+    declare_parameter<int>("BO1.insField", vn::protocol::uart::InsGroup::INSGROUP_POSECEF | 
                                                vn::protocol::uart::InsGroup::INSGROUP_VELBODY);
     declare_parameter<int>("BO1.gps2Field", vn::protocol::uart::GpsGroup::GPSGROUP_NONE);
 
@@ -597,7 +597,6 @@ private:
                             uint16_t groupFields) {
     // Message to Send
     auto msg = vectornav_msgs::msg::ImuGroup();
-
     // Header
     msg.header.stamp = node->now();
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
