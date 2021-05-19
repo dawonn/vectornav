@@ -407,6 +407,16 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         msgGPS.latitude = lla[0];
         msgGPS.longitude = lla[1];
         msgGPS.altitude = lla[2];
+
+        // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+        if(cd.hasPositionUncertaintyEstimated())
+        {
+            float posVariance = pow(cd.positionUncertaintyEstimated(), 2);
+            msgGPS.position_covariance[0] = posVariance;   // East position variance
+            msgGPS.position_covariance[7] = posVariance;   // North position vaciance
+            msgGPS.position_covariance[14] = posVariance;  // Up position variance
+        }
+
         pubGPS.publish(msgGPS);
 
         // Odometry
