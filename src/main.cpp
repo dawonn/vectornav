@@ -417,6 +417,20 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             msgGPS.position_covariance[14] = posVariance;  // Up position variance
         }
 
+        // check the status of the INS
+        if(cd.hasInsStatus())
+        {
+            if(cd.insStatus() & InsStatus::INSSTATUS_GPS_FIX)
+            {
+                // Position available
+                msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
+            } else {
+                // position not detected
+                msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_NO_FIX;
+            }
+            
+        }
+
         pubGPS.publish(msgGPS);
 
         // Odometry
