@@ -471,7 +471,19 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 msgOdom.pose.pose.orientation.y = q[1];
                 msgOdom.pose.pose.orientation.z = q[2];
                 msgOdom.pose.pose.orientation.w = q[3];
+
+                // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+                if(cd.hasAttitudeUncertainty())
+                {
+                    vec3f orientationStdDev = cd.attitudeUncertainty();
+                    // convert the standard deviation values from all three axis from degrees to radiant and calculate the variances from these (squared), which are assigned to the covariance matrix.
+                    msgOdom.pose.covariance[21] = pow(orientationStdDev[0] * M_PI / 180, 2);    // yaw variance
+                    msgOdom.pose.covariance[28] = pow(orientationStdDev[1] * M_PI / 180, 2);    // pitch variance
+                    msgOdom.pose.covariance[35] = pow(orientationStdDev[2] * M_PI / 180, 2);    // roll variance
+                }
             }
+
+            // Add the velocity in the body frame (frame_id) to the message
             if (cd.hasVelocityEstimatedBody())
             {
                 vec3f vel = cd.velocityEstimatedBody();
@@ -479,6 +491,15 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 msgOdom.twist.twist.linear.x = vel[0];
                 msgOdom.twist.twist.linear.y = vel[1];
                 msgOdom.twist.twist.linear.z = vel[2];
+
+                // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+                if(cd.hasVelocityUncertaintyEstimated())
+                {
+                    float velVariance = pow(cd.velocityUncertaintyEstimated(), 2);
+                    msgOdom.twist.covariance[0] = velVariance;  // x-axis velocity variance
+                    msgOdom.twist.covariance[7] = velVariance;  // y-axis velocity vaciance
+                    msgOdom.twist.covariance[14] = velVariance; // z-axis velocity variance
+                }
             }
             if (cd.hasAngularRate())
             {
@@ -487,6 +508,16 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 msgOdom.twist.twist.angular.x = ar[0];
                 msgOdom.twist.twist.angular.y = ar[1];
                 msgOdom.twist.twist.angular.z = ar[2];
+
+                // add covariance matrix of the measured angular rate to odom message.
+                // go through matrix rows
+                for(int row = 0; row < 3; row++) {
+                    // go through matrix columns
+                    for(int col = 0; col < 3; col++) {
+                        // Target matrix has 6 rows and 6 columns, source matrix has 3 rows and 3 columns. The covariance values are put into the fields (3, 3) to (5, 5) of the destination matrix.
+                        msgOdom.twist.covariance[(row + 3) * 6 + (col + 3)] = angular_vel_covariance[row * 3 + col];
+                    }
+                }
             }
             pubOdom.publish(msgOdom);
         }
