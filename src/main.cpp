@@ -454,6 +454,15 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             msgOdom.pose.pose.position.y = pos[1] - initial_position[1];
             msgOdom.pose.pose.position.z = pos[2] - initial_position[2];
 
+            // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+            if(cd.hasPositionUncertaintyEstimated())
+            {
+                float posVariance = pow(cd.positionUncertaintyEstimated(), 2);
+                msgOdom.pose.covariance[0] = posVariance;   // x-axis position variance
+                msgOdom.pose.covariance[7] = posVariance;   // y-axis position vaciance
+                msgOdom.pose.covariance[14] = posVariance;  // z-axis position variance
+            }
+
             if (cd.hasQuaternion())
             {
                 vec4f q = cd.quaternion();
