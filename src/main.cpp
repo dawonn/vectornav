@@ -411,10 +411,14 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
         if(cd.hasPositionUncertaintyEstimated())
         {
-            float posVariance = pow(cd.positionUncertaintyEstimated(), 2);
+            double posVariance = pow(cd.positionUncertaintyEstimated(), 2);
             msgGPS.position_covariance[0] = posVariance;    // East position variance
             msgGPS.position_covariance[4] = posVariance;    // North position vaciance
             msgGPS.position_covariance[8] = posVariance;    // Up position variance
+
+            msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN;
+        } else {
+            msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_UNKNOWN;
         }
 
         // check the status of the INS
@@ -457,7 +461,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
             if(cd.hasPositionUncertaintyEstimated())
             {
-                float posVariance = pow(cd.positionUncertaintyEstimated(), 2);
+                double posVariance = pow(cd.positionUncertaintyEstimated(), 2);
                 msgOdom.pose.covariance[0] = posVariance;   // x-axis position variance
                 msgOdom.pose.covariance[7] = posVariance;   // y-axis position vaciance
                 msgOdom.pose.covariance[14] = posVariance;  // z-axis position variance
@@ -495,7 +499,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
                 if(cd.hasVelocityUncertaintyEstimated())
                 {
-                    float velVariance = pow(cd.velocityUncertaintyEstimated(), 2);
+                    double velVariance = pow(cd.velocityUncertaintyEstimated(), 2);
                     msgOdom.twist.covariance[0] = velVariance;  // x-axis velocity variance
                     msgOdom.twist.covariance[7] = velVariance;  // y-axis velocity vaciance
                     msgOdom.twist.covariance[14] = velVariance; // z-axis velocity variance
