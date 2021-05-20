@@ -412,9 +412,9 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         if(cd.hasPositionUncertaintyEstimated())
         {
             float posVariance = pow(cd.positionUncertaintyEstimated(), 2);
-            msgGPS.position_covariance[0] = posVariance;   // East position variance
-            msgGPS.position_covariance[7] = posVariance;   // North position vaciance
-            msgGPS.position_covariance[14] = posVariance;  // Up position variance
+            msgGPS.position_covariance[0] = posVariance;    // East position variance
+            msgGPS.position_covariance[4] = posVariance;    // North position vaciance
+            msgGPS.position_covariance[8] = posVariance;    // Up position variance
         }
 
         // check the status of the INS
