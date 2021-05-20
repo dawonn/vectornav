@@ -416,15 +416,8 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             msgGPS.position_covariance[4] = posVariance;    // North position vaciance
             msgGPS.position_covariance[8] = posVariance;    // Up position variance
 
-            msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN;
-        } else {
-            msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_UNKNOWN;
-        }
-
-        // check the status of the INS
-        if(cd.hasInsStatus())
-        {
-            if(cd.insStatus() & InsStatus::INSSTATUS_GPS_FIX)
+            // mark gps fix as not available if the outputted standard deviation is 0
+            if(cd.positionUncertaintyEstimated() != 0.0)
             {
                 // Position available
                 msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
@@ -432,7 +425,11 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 // position not detected
                 msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_NO_FIX;
             }
-            
+
+            // add the type of covariance to the gps message
+            msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN;
+        } else {
+            msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_UNKNOWN;
         }
 
         pubGPS.publish(msgGPS);
