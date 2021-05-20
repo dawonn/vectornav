@@ -305,9 +305,9 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         if (cd.hasAttitudeUncertainty())
         {
             vec3f orientationStdDev = cd.attitudeUncertainty();
-            msgIMU.orientation_covariance[0] = orientationStdDev[2]*orientationStdDev[2]*M_PI/180; // Convert to radians pitch
-            msgIMU.orientation_covariance[4] = orientationStdDev[1]*orientationStdDev[1]*M_PI/180; // Convert to radians Roll
-            msgIMU.orientation_covariance[8] = orientationStdDev[0]*orientationStdDev[0]*M_PI/180; // Convert to radians Yaw
+            msgIMU.orientation_covariance[0] = pow(orientationStdDev[2]*M_PI/180, 2); // Convert to radians pitch
+            msgIMU.orientation_covariance[4] = pow(orientationStdDev[1]*M_PI/180, 2); // Convert to radians Roll
+            msgIMU.orientation_covariance[8] = pow(orientationStdDev[0]*M_PI/180, 2); // Convert to radians Yaw
         }
 
         //Quaternion message comes in as a Yaw (z) pitch (y) Roll (x) format
@@ -355,9 +355,9 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 if (cd.hasAttitudeUncertainty())
                 {
                     vec3f orientationStdDev = cd.attitudeUncertainty();
-                    msgIMU.orientation_covariance[0] = orientationStdDev[1]*orientationStdDev[1]*M_PI/180; // Convert to radians pitch
-                    msgIMU.orientation_covariance[4] = orientationStdDev[0]*orientationStdDev[0]*M_PI/180; // Convert to radians Roll
-                    msgIMU.orientation_covariance[8] = orientationStdDev[2]*orientationStdDev[2]*M_PI/180; // Convert to radians Yaw
+                    msgIMU.orientation_covariance[0] = pow(orientationStdDev[1]*M_PI/180, 2); // Convert to radians pitch
+                    msgIMU.orientation_covariance[4] = pow(orientationStdDev[0]*M_PI/180, 2); // Convert to radians Roll
+                    msgIMU.orientation_covariance[8] = pow(orientationStdDev[2]*M_PI/180, 2); // Convert to radians Yaw
                 }
             }
 
