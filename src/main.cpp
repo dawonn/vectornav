@@ -441,6 +441,8 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             msgOdom.header.stamp = msgIMU.header.stamp;
             msgOdom.child_frame_id = frame_id;
             msgOdom.header.frame_id = map_frame_id;
+
+            // add position as earth fixed frame
             vec3d pos = cd.positionEstimatedEcef();
 
             if (!initial_position_set)
@@ -468,10 +470,30 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             {
                 vec4f q = cd.quaternion();
 
-                msgOdom.pose.pose.orientation.x = q[0];
-                msgOdom.pose.pose.orientation.y = q[1];
-                msgOdom.pose.pose.orientation.z = q[2];
-                msgOdom.pose.pose.orientation.w = q[3];
+                if(!tf_ned_to_enu) {
+                    // output in NED frame
+                    msgOdom.pose.pose.orientation.x = q[0];
+                    msgOdom.pose.pose.orientation.y = q[1];
+                    msgOdom.pose.pose.orientation.z = q[2];
+                    msgOdom.pose.pose.orientation.w = q[3];
+                } else if(tf_ned_to_enu && frame_based_enu) {
+                    // standard conversion from NED to ENU frame
+                    tf2::Quaternion tf2_quat(q[0],q[1],q[2],q[3]);
+                    // Create a rotation from NED -> ENU
+                    tf2::Quaternion q_rotate;
+                    q_rotate.setRPY (M_PI, 0.0, M_PI/2);
+                    // Apply the NED to ENU rotation such that the coordinate frame matches
+                    tf2_quat = q_rotate*tf2_quat;
+                    msgOdom.pose.pose.orientation = tf2::toMsg(tf2_quat);
+                } else if(tf_ned_to_enu && !frame_based_enu) {
+                    // alternative method for conversion to ENU frame (leads to another result)
+                    // put into ENU - swap X/Y, invert Z
+                    msgOdom.pose.pose.orientation.x = q[1];
+                    msgOdom.pose.pose.orientation.y = q[0];
+                    msgOdom.pose.pose.orientation.z = -q[2];
+                    msgOdom.pose.pose.orientation.w = q[3];
+                }
+                
 
                 // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
                 if(cd.hasAttitudeUncertainty())
