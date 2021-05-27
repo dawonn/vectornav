@@ -39,8 +39,10 @@
 #include "std_srvs/Empty.h"
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <vectornav/Ins.h>
 
-ros::Publisher pubIMU, pubMag, pubGPS, pubOdom, pubTemp, pubPres;
+
+ros::Publisher pubIMU, pubMag, pubGPS, pubOdom, pubTemp, pubPres, pubIns;
 ros::ServiceServer resetOdomSrv;
 
 //Unused covariances initilized to zero's
@@ -116,6 +118,7 @@ int main(int argc, char *argv[])
     pubOdom = n.advertise<nav_msgs::Odometry>("vectornav/Odom", 1000);
     pubTemp = n.advertise<sensor_msgs::Temperature>("vectornav/Temp", 1000);
     pubPres = n.advertise<sensor_msgs::FluidPressure>("vectornav/Pres", 1000);
+    pubIns = n.advertise<vectornav::Ins>("vectornav/INS", 1000);
 
     resetOdomSrv = n.advertiseService("reset_odom", resetOdom);
 
@@ -233,11 +236,15 @@ int main(int argc, char *argv[])
             ASYNCMODE_PORT1,
             SensorImuRate / async_output_rate,  // update rate [ms]
             COMMONGROUP_QUATERNION
+            | COMMONGROUP_YAWPITCHROLL
             | COMMONGROUP_ANGULARRATE
             | COMMONGROUP_POSITION
             | COMMONGROUP_ACCEL
             | COMMONGROUP_MAGPRES,
-            TIMEGROUP_NONE,
+            TIMEGROUP_NONE
+            | TIMEGROUP_GPSTOW
+            | TIMEGROUP_GPSWEEK
+            | TIMEGROUP_TIMEUTC,
             IMUGROUP_NONE,
             GPSGROUP_NONE,
             ATTITUDEGROUP_YPRU, //<-- returning yaw pitch roll uncertainties
@@ -245,7 +252,10 @@ int main(int argc, char *argv[])
             | INSGROUP_POSLLA
             | INSGROUP_POSECEF
             | INSGROUP_VELBODY
-            | INSGROUP_ACCELECEF,
+            | INSGROUP_ACCELECEF
+            | INSGROUP_VELNED
+            | INSGROUP_POSU
+            | INSGROUP_VELU,
             GPSGROUP_NONE);
 
     vs.writeBinaryOutput1(bor);
@@ -295,9 +305,9 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         if (cd.hasAttitudeUncertainty())
         {
             vec3f orientationStdDev = cd.attitudeUncertainty();
-            msgIMU.orientation_covariance[0] = orientationStdDev[2]*orientationStdDev[2]*M_PI/180; // Convert to radians pitch
-            msgIMU.orientation_covariance[4] = orientationStdDev[1]*orientationStdDev[1]*M_PI/180; // Convert to radians Roll
-            msgIMU.orientation_covariance[8] = orientationStdDev[0]*orientationStdDev[0]*M_PI/180; // Convert to radians Yaw
+            msgIMU.orientation_covariance[0] = pow(orientationStdDev[2]*M_PI/180, 2); // Convert to radians pitch
+            msgIMU.orientation_covariance[4] = pow(orientationStdDev[1]*M_PI/180, 2); // Convert to radians Roll
+            msgIMU.orientation_covariance[8] = pow(orientationStdDev[0]*M_PI/180, 2); // Convert to radians Yaw
         }
 
         //Quaternion message comes in as a Yaw (z) pitch (y) Roll (x) format
@@ -345,9 +355,9 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 if (cd.hasAttitudeUncertainty())
                 {
                     vec3f orientationStdDev = cd.attitudeUncertainty();
-                    msgIMU.orientation_covariance[0] = orientationStdDev[1]*orientationStdDev[1]*M_PI/180; // Convert to radians pitch
-                    msgIMU.orientation_covariance[4] = orientationStdDev[0]*orientationStdDev[0]*M_PI/180; // Convert to radians Roll
-                    msgIMU.orientation_covariance[8] = orientationStdDev[2]*orientationStdDev[2]*M_PI/180; // Convert to radians Yaw
+                    msgIMU.orientation_covariance[0] = pow(orientationStdDev[1]*M_PI/180, 2); // Convert to radians pitch
+                    msgIMU.orientation_covariance[4] = pow(orientationStdDev[0]*M_PI/180, 2); // Convert to radians Roll
+                    msgIMU.orientation_covariance[8] = pow(orientationStdDev[2]*M_PI/180, 2); // Convert to radians Yaw
                 }
             }
 
@@ -397,6 +407,31 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         msgGPS.latitude = lla[0];
         msgGPS.longitude = lla[1];
         msgGPS.altitude = lla[2];
+
+        // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+        if(cd.hasPositionUncertaintyEstimated())
+        {
+            double posVariance = pow(cd.positionUncertaintyEstimated(), 2);
+            msgGPS.position_covariance[0] = posVariance;    // East position variance
+            msgGPS.position_covariance[4] = posVariance;    // North position vaciance
+            msgGPS.position_covariance[8] = posVariance;    // Up position variance
+
+            // mark gps fix as not available if the outputted standard deviation is 0
+            if(cd.positionUncertaintyEstimated() != 0.0)
+            {
+                // Position available
+                msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
+            } else {
+                // position not detected
+                msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_NO_FIX;
+            }
+
+            // add the type of covariance to the gps message
+            msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN;
+        } else {
+            msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_UNKNOWN;
+        }
+
         pubGPS.publish(msgGPS);
 
         // Odometry
@@ -420,6 +455,15 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             msgOdom.pose.pose.position.y = pos[1] - initial_position[1];
             msgOdom.pose.pose.position.z = pos[2] - initial_position[2];
 
+            // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+            if(cd.hasPositionUncertaintyEstimated())
+            {
+                double posVariance = pow(cd.positionUncertaintyEstimated(), 2);
+                msgOdom.pose.covariance[0] = posVariance;   // x-axis position variance
+                msgOdom.pose.covariance[7] = posVariance;   // y-axis position vaciance
+                msgOdom.pose.covariance[14] = posVariance;  // z-axis position variance
+            }
+
             if (cd.hasQuaternion())
             {
                 vec4f q = cd.quaternion();
@@ -428,7 +472,19 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 msgOdom.pose.pose.orientation.y = q[1];
                 msgOdom.pose.pose.orientation.z = q[2];
                 msgOdom.pose.pose.orientation.w = q[3];
+
+                // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+                if(cd.hasAttitudeUncertainty())
+                {
+                    vec3f orientationStdDev = cd.attitudeUncertainty();
+                    // convert the standard deviation values from all three axis from degrees to radiant and calculate the variances from these (squared), which are assigned to the covariance matrix.
+                    msgOdom.pose.covariance[21] = pow(orientationStdDev[0] * M_PI / 180, 2);    // yaw variance
+                    msgOdom.pose.covariance[28] = pow(orientationStdDev[1] * M_PI / 180, 2);    // pitch variance
+                    msgOdom.pose.covariance[35] = pow(orientationStdDev[2] * M_PI / 180, 2);    // roll variance
+                }
             }
+
+            // Add the velocity in the body frame (frame_id) to the message
             if (cd.hasVelocityEstimatedBody())
             {
                 vec3f vel = cd.velocityEstimatedBody();
@@ -436,6 +492,15 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 msgOdom.twist.twist.linear.x = vel[0];
                 msgOdom.twist.twist.linear.y = vel[1];
                 msgOdom.twist.twist.linear.z = vel[2];
+
+                // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+                if(cd.hasVelocityUncertaintyEstimated())
+                {
+                    double velVariance = pow(cd.velocityUncertaintyEstimated(), 2);
+                    msgOdom.twist.covariance[0] = velVariance;  // x-axis velocity variance
+                    msgOdom.twist.covariance[7] = velVariance;  // y-axis velocity vaciance
+                    msgOdom.twist.covariance[14] = velVariance; // z-axis velocity variance
+                }
             }
             if (cd.hasAngularRate())
             {
@@ -444,6 +509,16 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 msgOdom.twist.twist.angular.x = ar[0];
                 msgOdom.twist.twist.angular.y = ar[1];
                 msgOdom.twist.twist.angular.z = ar[2];
+
+                // add covariance matrix of the measured angular rate to odom message.
+                // go through matrix rows
+                for(int row = 0; row < 3; row++) {
+                    // go through matrix columns
+                    for(int col = 0; col < 3; col++) {
+                        // Target matrix has 6 rows and 6 columns, source matrix has 3 rows and 3 columns. The covariance values are put into the fields (3, 3) to (5, 5) of the destination matrix.
+                        msgOdom.twist.covariance[(row + 3) * 6 + (col + 3)] = angular_vel_covariance[row * 3 + col];
+                    }
+                }
             }
             pubOdom.publish(msgOdom);
         }
@@ -472,4 +547,72 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         msgPres.fluid_pressure = pres;
         pubPres.publish(msgPres);
     }
+
+    // INS
+    vectornav::Ins msgINS;
+    msgINS.header.stamp = ros::Time::now();
+    msgINS.header.frame_id = frame_id;
+
+    if (cd.hasInsStatus())
+    {
+        InsStatus insStatus = cd.insStatus();
+        msgINS.insStatus = static_cast<uint16_t>(insStatus);
+    }
+
+    if (cd.hasTow()){
+        msgINS.time = cd.tow();
+    }
+
+    if (cd.hasWeek()){
+        msgINS.week = cd.week();
+    }
+
+    if (cd.hasTimeUtc()){
+        TimeUtc utcTime = cd.timeUtc();
+        char* utcTimeBytes = reinterpret_cast<char*>(&utcTime);
+        //msgINS.utcTime bytes are in Little Endian Byte Order
+        std::memcpy(&msgINS.utcTime, utcTimeBytes, 8);
+    }
+
+    if (cd.hasYawPitchRoll()) {
+        vec3f rpy = cd.yawPitchRoll();
+        msgINS.yaw = rpy[0];
+        msgINS.pitch = rpy[1];
+        msgINS.roll = rpy[2];
+    }
+
+    if (cd.hasPositionEstimatedLla()) {
+        vec3d lla = cd.positionEstimatedLla();
+        msgINS.latitude = lla[0];
+        msgINS.longitude = lla[1];
+        msgINS.altitude = lla[2];
+    }
+
+    if (cd.hasVelocityEstimatedNed()) {
+        vec3f nedVel = cd.velocityEstimatedNed();
+        msgINS.nedVelX = nedVel[0];
+        msgINS.nedVelY = nedVel[1];
+        msgINS.nedVelZ = nedVel[2];
+    }
+
+    if (cd.hasAttitudeUncertainty())
+    {
+        vec3f attUncertainty = cd.attitudeUncertainty();
+        msgINS.attUncertainty[0] = attUncertainty[0];
+        msgINS.attUncertainty[1] = attUncertainty[1];
+        msgINS.attUncertainty[2] = attUncertainty[2];
+    }
+
+    if (cd.hasPositionUncertaintyEstimated()){
+        msgINS.posUncertainty = cd.positionUncertaintyEstimated();
+    }
+
+    if (cd.hasVelocityUncertaintyEstimated()){
+        msgINS.velUncertainty = cd.velocityUncertaintyEstimated();
+    }
+
+    if (msgINS.insStatus && msgINS.utcTime) {
+        pubIns.publish(msgINS);
+    }
+
 }
