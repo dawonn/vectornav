@@ -305,8 +305,8 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         if (cd.hasAttitudeUncertainty())
         {
             vec3f orientationStdDev = cd.attitudeUncertainty();
-            msgIMU.orientation_covariance[0] = pow(orientationStdDev[2]*M_PI/180, 2); // Convert to radians pitch
-            msgIMU.orientation_covariance[4] = pow(orientationStdDev[1]*M_PI/180, 2); // Convert to radians Roll
+            msgIMU.orientation_covariance[0] = pow(orientationStdDev[2]*M_PI/180, 2); // Convert to radians Roll
+            msgIMU.orientation_covariance[4] = pow(orientationStdDev[1]*M_PI/180, 2); // Convert to radians Pitch
             msgIMU.orientation_covariance[8] = pow(orientationStdDev[0]*M_PI/180, 2); // Convert to radians Yaw
         }
 
@@ -500,9 +500,9 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 {
                     vec3f orientationStdDev = cd.attitudeUncertainty();
                     // convert the standard deviation values from all three axis from degrees to radiant and calculate the variances from these (squared), which are assigned to the covariance matrix.
-                    msgOdom.pose.covariance[21] = pow(orientationStdDev[0] * M_PI / 180, 2);    // yaw variance
+                    msgOdom.pose.covariance[21] = pow(orientationStdDev[0] * M_PI / 180, 2);    // roll variance
                     msgOdom.pose.covariance[28] = pow(orientationStdDev[1] * M_PI / 180, 2);    // pitch variance
-                    msgOdom.pose.covariance[35] = pow(orientationStdDev[2] * M_PI / 180, 2);    // roll variance
+                    msgOdom.pose.covariance[35] = pow(orientationStdDev[2] * M_PI / 180, 2);    // yaw variance
                 }
             }
 
