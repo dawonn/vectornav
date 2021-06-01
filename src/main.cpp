@@ -506,7 +506,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                         msgOdom.pose.covariance[28] = pow(orientationStdDev[1] * M_PI / 180, 2);    // pitch variance
                         msgOdom.pose.covariance[35] = pow(orientationStdDev[2] * M_PI / 180, 2);    // yaw variance
                     } else {
-                        // variance assignment for conversion by swapping and invering (not frame_based_enu)
+                        // variance assignment for conversion by swapping and inverting (not frame_based_enu)
 
                         // TODO not supported yet
                     }
@@ -518,9 +518,18 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             {
                 vec3f vel = cd.velocityEstimatedBody();
 
-                msgOdom.twist.twist.linear.x = vel[0];
-                msgOdom.twist.twist.linear.y = vel[1];
-                msgOdom.twist.twist.linear.z = vel[2];
+                if(!tf_ned_to_enu || frame_based_enu) {
+                    // standard assignment of values for NED frame and conversion to ENU frame by rotation
+                    msgOdom.twist.twist.linear.x = vel[0];
+                    msgOdom.twist.twist.linear.y = vel[1];
+                    msgOdom.twist.twist.linear.z = vel[2];
+                } else {
+                    // value assignment for conversion by swapping and inverting (not frame_based_enu)
+                    // Flip x and y then invert z
+                    msgOdom.twist.twist.linear.x = vel[1];
+                    msgOdom.twist.twist.linear.y = vel[0];
+                    msgOdom.twist.twist.linear.z = -vel[2];
+                }
 
                 // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
                 if(cd.hasVelocityUncertaintyEstimated())
@@ -535,9 +544,18 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             {
                 vec3f ar = cd.angularRate();
 
-                msgOdom.twist.twist.angular.x = ar[0];
-                msgOdom.twist.twist.angular.y = ar[1];
-                msgOdom.twist.twist.angular.z = ar[2];
+                 if(!tf_ned_to_enu || frame_based_enu) {
+                    // standard assignment of values for NED frame and conversion to ENU frame by rotation
+                    msgOdom.twist.twist.angular.x = ar[0];
+                    msgOdom.twist.twist.angular.y = ar[1];
+                    msgOdom.twist.twist.angular.z = ar[2];
+                } else {
+                    // value assignment for conversion by swapping and inverting (not frame_based_enu)
+                    // Flip x and y then invert z
+                    msgOdom.twist.twist.angular.x = ar[1];
+                    msgOdom.twist.twist.angular.y = ar[0];
+                    msgOdom.twist.twist.angular.z = -ar[2];
+                }
 
                 // add covariance matrix of the measured angular rate to odom message.
                 // go through matrix rows
