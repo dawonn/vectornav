@@ -1,7 +1,7 @@
 Vectornav ROS Driver
 ====================
 
-A ROS node for VectorNav INS & GPS devices.
+A ROS node for `VectorNav` INS & GPS devices.
 
 This package provides a sensor_msg interface for the VN100, 200, & 300 
 devices. Simply configure your launch files to point to the serial port
@@ -12,6 +12,7 @@ Check out the ROS2 branch for ROS2 Support!
 
 The MIT License (MIT)
 ----------------------
+```
 
 Copyright (c) 2018 Dereck Wonnacott <dereck@gmail.com>
 
@@ -33,30 +34,32 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-
+```
 
 QuickStart Guide
 ----------------
 
 This assumes that you have a VectorNav device connected to your computer 
-via a USB cable and that you have already created a [catkin workspace][2]
+via a USB cable and that you have already created a `[catkin workspace]`[2]
 
 Build:
 
-1. cd ~/catkin_ws/src
-2. git clone https://github.com/dawonn/vectornav.git
-3. cd ..
-4. catkin_make
-
+```bash
+$ cd ~/catkin_ws/src
+$ git clone https://github.com/dawonn/vectornav.git
+$ cd ..
+$ catkin_make
+```
 
 Run:
 
-5. (Terminal 1) roscore
-6. (Terminal 2) roslaunch vectornav vectornav.launch
-7. (Terminal 3) rostopic list
-8. (Terminal 3) rostopic echo /vectornav/IMU
-9. (Terminal #) ctrl+c to quit
-
+```bash
+(Terminal 1) $ roscore
+(Terminal 2) $ roslaunch vectornav vectornav.launch
+(Terminal 3) $ rostopic list
+(Terminal 3) $ rostopic echo /vectornav/IMU
+(Terminal #) $ ctrl+c to quit
+```
 
 
 Overview 
@@ -77,9 +80,10 @@ You will problaby want to copy it into your own project and modify as required.
 References 
 ----------
 
+```
 [1]: http://www.vectornav.com/ "VectorNav"
 [2]: http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment "ROS Workspace Tutorial"
-
+```
 
 
 
