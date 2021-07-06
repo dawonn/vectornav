@@ -541,9 +541,9 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
 
                     // set velocity variances to a high value if no data is available (this is the case at startup during INS is initializing)
                     if(msgOdom.twist.twist.linear.x == 0 && msgOdom.twist.twist.linear.y == 0 && msgOdom.twist.twist.linear.z == 0 && msgOdom.twist.covariance[0] == 0 && msgOdom.twist.covariance[7] == 0 && msgOdom.twist.covariance[14] == 0){
-                        msgOdom.twist.covariance[0] = 10000000000000000;
-                        msgOdom.twist.covariance[7] = 10000000000000000;
-                        msgOdom.twist.covariance[15] = 10000000000000000;
+                        msgOdom.twist.covariance[0] = 200;
+                        msgOdom.twist.covariance[7] = 200;
+                        msgOdom.twist.covariance[15] = 200;
                     }
                 }
             }
