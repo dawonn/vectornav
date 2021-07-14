@@ -121,7 +121,8 @@ int main(int argc, char *argv[])
     pubPres = n.advertise<sensor_msgs::FluidPressure>("vectornav/Pres", 1000);
     pubIns = n.advertise<vectornav::Ins>("vectornav/INS", 1000);
 
-    resetOdomSrv = n.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("reset_odom", boost::bind(&resetOdom, _1, _2, user_data)) ;
+    resetOdomSrv = n.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>(
+        "reset_odom", boost::bind(&resetOdom, _1, _2, user_data)) ;
 
     // Serial Port Settings
     string SensorPort;
@@ -284,10 +285,10 @@ int main(int argc, char *argv[])
 
 //Helper function to create IMU message
 void fill_imu_message(
-    sensor_msgs::Imu &msgIMU, vn::sensors::CompositeData &cd, ros::Time &time, UserData &user_data)
+    sensor_msgs::Imu &msgIMU, vn::sensors::CompositeData &cd, ros::Time &time, UserData *user_data)
 {
     msgIMU.header.stamp = time;
-    msgIMU.header.frame_id = user_data.frame_id;
+    msgIMU.header.frame_id = user_data->frame_id;
 
     if (cd.hasQuaternion() && cd.hasAngularRate() && cd.hasAcceleration())
     {
@@ -305,12 +306,12 @@ void fill_imu_message(
         }
 
         //Quaternion message comes in as a Yaw (z) pitch (y) Roll (x) format
-        if (user_data.tf_ned_to_enu)
+        if (user_data->tf_ned_to_enu)
         {
             // If we want the orientation to be based on the reference label on the imu
             geometry_msgs::Quaternion quat_msg;
 
-            if(user_data.frame_based_enu)
+            if(user_data->frame_based_enu)
             {
                 // Create a rotation from NED -> ENU
                 tf2::Quaternion q_rotate;
@@ -374,16 +375,16 @@ void fill_imu_message(
     }
 
     // Covariances pulled from parameters
-    msgIMU.angular_velocity_covariance = user_data.angular_vel_covariance;
-    msgIMU.linear_acceleration_covariance = user_data.linear_accel_covariance;
+    msgIMU.angular_velocity_covariance = user_data->angular_vel_covariance;
+    msgIMU.linear_acceleration_covariance = user_data->linear_accel_covariance;
 }
 
 //Helper function to create magnetic field message
 void fill_mag_message(
-    sensor_msgs::MagneticField &msgMag, vn::sensors::CompositeData &cd, ros::Time &time, UserData &user_data)
+    sensor_msgs::MagneticField &msgMag, vn::sensors::CompositeData &cd, ros::Time &time, UserData *user_data)
 {
     msgMag.header.stamp = time;
-    msgMag.header.frame_id = user_data.frame_id;
+    msgMag.header.frame_id = user_data->frame_id;
 
     // Magnetic Field
     if (cd.hasMagnetic())
@@ -397,10 +398,10 @@ void fill_mag_message(
 
 //Helper function to create temperature message
 void fill_temp_message(
-    sensor_msgs::Temperature &msgTemp, vn::sensors::CompositeData &cd, ros::Time &time, UserData &user_data)
+    sensor_msgs::Temperature &msgTemp, vn::sensors::CompositeData &cd, ros::Time &time, UserData *user_data)
 {
     msgTemp.header.stamp = time;
-    msgTemp.header.frame_id = user_data.frame_id;
+    msgTemp.header.frame_id = user_data->frame_id;
     if (cd.hasTemperature())
     {
         float temp = cd.temperature();
@@ -410,10 +411,10 @@ void fill_temp_message(
 
 //Helper function to create pressure message
 void fill_pres_message(
-    sensor_msgs::FluidPressure &msgPres, vn::sensors::CompositeData &cd, ros::Time &time, UserData &user_data)
+    sensor_msgs::FluidPressure &msgPres, vn::sensors::CompositeData &cd, ros::Time &time, UserData *user_data)
 {
     msgPres.header.stamp = time;
-    msgPres.header.frame_id = user_data.frame_id;
+    msgPres.header.frame_id = user_data->frame_id;
     if (cd.hasPressure())
     {
         float pres = cd.pressure();
@@ -423,10 +424,10 @@ void fill_pres_message(
 
 //Helper function to create gps message
 void fill_gps_message(
-    sensor_msgs::NavSatFix &msgGPS, vn::sensors::CompositeData &cd, ros::Time &time, UserData &user_data)
+    sensor_msgs::NavSatFix &msgGPS, vn::sensors::CompositeData &cd, ros::Time &time, UserData *user_data)
 {
     msgGPS.header.stamp = time;
-    msgGPS.header.frame_id = user_data.frame_id;
+    msgGPS.header.frame_id = user_data->frame_id;
 
     if(cd.hasPositionEstimatedLla())
     {
@@ -464,28 +465,29 @@ void fill_gps_message(
 
 //Helper function to create odometry message
 void fill_odom_message(
-    nav_msgs::Odometry &msgOdom, vn::sensors::CompositeData &cd, ros::Time &time, UserData &user_data)
+    nav_msgs::Odometry &msgOdom, vn::sensors::CompositeData &cd, ros::Time &time, UserData *user_data)
 {
     msgOdom.header.stamp = time;
-    msgOdom.child_frame_id = user_data.frame_id;
-    msgOdom.header.frame_id = user_data.map_frame_id;
+    msgOdom.child_frame_id = user_data->frame_id;
+    msgOdom.header.frame_id = user_data->map_frame_id;
 
     if(cd.hasPositionEstimatedEcef())
     {
         // add position as earth fixed frame
         vec3d pos = cd.positionEstimatedEcef();
 
-        if (!user_data.initial_position_set)
+        if (!user_data->initial_position_set)
         {
-            user_data.initial_position_set = true;
-            user_data.initial_position.x = pos[0];
-            user_data.initial_position.y = pos[1];
-            user_data.initial_position.z = pos[2];
+            user_data->initial_position_set = true;
+            user_data->initial_position.x = pos[0];
+            user_data->initial_position.y = pos[1];
+            user_data->initial_position.z = pos[2];
+            ROS_INFO("set initial position %d %d", cd.hasPositionEstimatedEcef(), user_data->initial_position_set);
         }
 
-        msgOdom.pose.pose.position.x = pos[0] - user_data.initial_position[0];
-        msgOdom.pose.pose.position.y = pos[1] - user_data.initial_position[1];
-        msgOdom.pose.pose.position.z = pos[2] - user_data.initial_position[2];
+        msgOdom.pose.pose.position.x = pos[0] - user_data->initial_position[0];
+        msgOdom.pose.pose.position.y = pos[1] - user_data->initial_position[1];
+        msgOdom.pose.pose.position.z = pos[2] - user_data->initial_position[2];
     }
 
     // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
@@ -501,13 +503,13 @@ void fill_odom_message(
     {
         vec4f q = cd.quaternion();
 
-        if(!user_data.tf_ned_to_enu) {
+        if(!user_data->tf_ned_to_enu) {
             // output in NED frame
             msgOdom.pose.pose.orientation.x = q[0];
             msgOdom.pose.pose.orientation.y = q[1];
             msgOdom.pose.pose.orientation.z = q[2];
             msgOdom.pose.pose.orientation.w = q[3];
-        } else if(user_data.tf_ned_to_enu && user_data.frame_based_enu) {
+        } else if(user_data->tf_ned_to_enu && user_data->frame_based_enu) {
             // standard conversion from NED to ENU framevec3d initial_position;
             tf2::Quaternion q_rotate;
             q_rotate.setRPY (M_PI, 0.0, M_PI/2);
@@ -515,7 +517,7 @@ void fill_odom_message(
             tf2::Quaternion tf2_quat(q[0],q[1],q[2],q[3]);
             tf2_quat = q_rotate*tf2_quat;
             msgOdom.pose.pose.orientation = tf2::toMsg(tf2_quat);
-        } else if(user_data.tf_ned_to_enu && !user_data.frame_based_enu) {
+        } else if(user_data->tf_ned_to_enu && !user_data->frame_based_enu) {
             // alternative method for conversion to ENU frame (leads to another result)
             // put into ENU - swap X/Y, invert Z
             msgOdom.pose.pose.orientation.x = q[1];
@@ -529,7 +531,7 @@ void fill_odom_message(
         {
             vec3f orientationStdDev = cd.attitudeUncertainty();
             // convert the standard deviation values from all three axis from degrees to radiant and calculate the variances from these (squared), which are assigned to the covariance matrix.
-            if(!user_data.tf_ned_to_enu || user_data.frame_based_enu) {
+            if(!user_data->tf_ned_to_enu || user_data->frame_based_enu) {
                 // standard assignment of variance values for NED frame and conversion to ENU frame by rotation
                 msgOdom.pose.covariance[21] = pow(orientationStdDev[0] * M_PI / 180, 2);    // roll variance
                 msgOdom.pose.covariance[28] = pow(orientationStdDev[1] * M_PI / 180, 2);    // pitch variance
@@ -547,7 +549,7 @@ void fill_odom_message(
     {
         vec3f vel = cd.velocityEstimatedBody();
 
-        if(!user_data.tf_ned_to_enu || user_data.frame_based_enu) {
+        if(!user_data->tf_ned_to_enu || user_data->frame_based_enu) {
             // standard assignment of values for NED frame and conversion to ENU frame by rotation
             msgOdom.twist.twist.linear.x = vel[0];
             msgOdom.twist.twist.linear.y = vel[1];
@@ -573,7 +575,7 @@ void fill_odom_message(
     {
         vec3f ar = cd.angularRate();
 
-            if(!user_data.tf_ned_to_enu || user_data.frame_based_enu) {
+            if(!user_data->tf_ned_to_enu || user_data->frame_based_enu) {
             // standard assignment of values for NED frame and conversion to ENU frame by rotation
             msgOdom.twist.twist.angular.x = ar[0];
             msgOdom.twist.twist.angular.y = ar[1];
@@ -593,7 +595,7 @@ void fill_odom_message(
             // go through matrix columns
             for(int col = 0; col < 3; col++) {
                 // Target matrix has 6 rows and 6 columns, source matrix has 3 rows and 3 columns. The covariance values are put into the fields (3, 3) to (5, 5) of the destination matrix.
-                msgOdom.twist.covariance[(row + 3) * 6 + (col + 3)] = user_data.angular_vel_covariance[row * 3 + col];
+                msgOdom.twist.covariance[(row + 3) * 6 + (col + 3)] = user_data->angular_vel_covariance[row * 3 + col];
             }
         }
     }
@@ -601,10 +603,10 @@ void fill_odom_message(
 
 //Helper function to create ins message
 void fill_ins_message(
-    vectornav::Ins &msgINS, vn::sensors::CompositeData &cd, ros::Time &time, UserData &user_data)
+    vectornav::Ins &msgINS, vn::sensors::CompositeData &cd, ros::Time &time, UserData *user_data)
 {
     msgINS.header.stamp = time;
-    msgINS.header.frame_id = user_data.frame_id;
+    msgINS.header.frame_id = user_data->frame_id;
 
     if (cd.hasInsStatus())
     {
@@ -668,10 +670,11 @@ void fill_ins_message(
 //
 // Callback function to process data packet from sensor
 //
-void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
+void BinaryAsyncMessageReceived(void* user_data, Packet& p, size_t index)
 {
     vn::sensors::CompositeData cd = vn::sensors::CompositeData::parse(p);
-    UserData user_data = *static_cast<UserData*>(userData);
+    //UserData* user_data = static_cast<UserData*>(userData);
+    ROS_INFO("async callback %d", user_data->initial_position_set);
 
     ros::Time time = ros::Time::now();
 
@@ -708,7 +711,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // GPS
-    if (user_data.device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubGPS.getNumSubscribers() > 0)
+    if (user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubGPS.getNumSubscribers() > 0)
     {
         sensor_msgs::NavSatFix msgGPS;
         fill_gps_message(msgGPS, cd, time, user_data);
@@ -716,7 +719,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // Odometry
-    if (user_data.device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubOdom.getNumSubscribers() > 0)
+    if (user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubOdom.getNumSubscribers() > 0)
     {
         nav_msgs::Odometry msgOdom;
         fill_odom_message(msgOdom, cd, time, user_data);
@@ -724,11 +727,11 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // INS
-    if (user_data.device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubIns.getNumSubscribers() > 0)
+    if (user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubIns.getNumSubscribers() > 0)
     {
         vectornav::Ins msgINS;
         fill_ins_message(msgINS, cd, time, user_data);
         pubIns.publish(msgINS);
     }
-
+    ROS_INFO("async callback end %d", user_data->initial_position_set);
 }
