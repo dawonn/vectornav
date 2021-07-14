@@ -97,9 +97,10 @@ boost::array<double, 9ul> setCov(XmlRpc::XmlRpcValue rpc){
 }
 
 // Reset initial position to current position
-bool resetOdom(std_srvs::Empty::Request &req, std_srvs::Empty::Response &resp, UserData &user_data)
+bool resetOdom(std_srvs::Empty::Request &req, std_srvs::Empty::Response &resp, UserData *user_data)
 {
-    user_data.initial_position_set = false;
+    ROS_INFO("Reset Odometry");
+    user_data->initial_position_set = false;
     return true;
 }
 
@@ -122,7 +123,7 @@ int main(int argc, char *argv[])
     pubIns = n.advertise<vectornav::Ins>("vectornav/INS", 1000);
 
     resetOdomSrv = n.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>(
-        "reset_odom", boost::bind(&resetOdom, _1, _2, user_data)) ;
+        "reset_odom", boost::bind(&resetOdom, _1, _2, &user_data)) ;
 
     // Serial Port Settings
     string SensorPort;
@@ -478,11 +479,11 @@ void fill_odom_message(
 
         if (!user_data->initial_position_set)
         {
+            ROS_INFO("Set initial position to %f %f %f", pos[0], pos[1], pos[2]);
             user_data->initial_position_set = true;
             user_data->initial_position.x = pos[0];
             user_data->initial_position.y = pos[1];
             user_data->initial_position.z = pos[2];
-            ROS_INFO("set initial position %d %d", cd.hasPositionEstimatedEcef(), user_data->initial_position_set);
         }
 
         msgOdom.pose.pose.position.x = pos[0] - user_data->initial_position[0];
@@ -674,7 +675,6 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
 {
     vn::sensors::CompositeData cd = vn::sensors::CompositeData::parse(p);
     UserData *user_data = static_cast<UserData*>(userData);
-    ROS_INFO("async callback %d", user_data->initial_position_set);
 
     ros::Time time = ros::Time::now();
 
@@ -733,5 +733,4 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
         fill_ins_message(msgINS, cd, time, user_data);
         pubIns.publish(msgINS);
     }
-    ROS_INFO("async callback end %d", user_data->initial_position_set);
 }
