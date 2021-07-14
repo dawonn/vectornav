@@ -27,6 +27,8 @@ set(SOURCE
         src/packetfinder.cpp
         src/port.cpp
         src/position.cpp
+        src/rtcmlistener.cpp
+        src/rtcmmessage.cpp
         src/searcher.cpp
         src/sensors.cpp
         src/serialport.cpp
@@ -44,6 +46,8 @@ set(SOURCE
         include/vn/error_detection.h
         include/vn/position.h
         include/vn/registers.h
+        include/vn/rtcmlistener.h
+        include/vn/rtcmmessage.h
         include/vn/utilities.h
         include/vn/memoryport.h
         include/vn/nocopy.h

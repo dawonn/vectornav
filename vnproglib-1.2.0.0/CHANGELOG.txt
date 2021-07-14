@@ -1,0 +1,51 @@
+Changelog for VectorNav Programming Library
+
+2021-06-08 v1.2.0.0
+ - Added support and examples for embedded firmware updates (C,C++,.NET)
+ - Added support and example for passing through RTCM corrections to Tactical products (C++)
+ - Added Heave Configuration Register & binary output parsing (C++)
+ - Added examples supporting Visual Studio 2019 (C,C++,.NET)
+ - Updated Python help files for installation troubleshooting
+ - Fixed bug (C++) Delta Theta/Velocity Configuration Register, bad enumeration for 
+   Accelerometer Compensation, added EarthRateCorrection enumeration 
+   * NOT BACKWARDS COMPATIBLE *
+ - Updated GPS Basic Configuration register (C++) for setting antenna power
+ - Fixed bug (C++) in dcm2quat() function
+ - Fixed bug (C++) to add support for CompositeData::positionGpsEcef()
+ - Fixed bug (C++) for timing on Mac systems
+ - Fixed bug (C++) for using SYNCINMODE_ASYNC3
+ - Added support for connecting to multiple sensors simultaneously (C++)
+ - Fixed bug (C++) for parsing Binary Group GPS-2 data
+ - Cleaned up ASCII response packet parsing, including InsStatus field (C++)
+ - Fixed bug (C++) in packet handler when not waiting for response
+ - Fixed bug (C++) in parsing GpsTow from VNGPS & VNGPE messages
+ - Cleaned up packetfinder (C++), including putting checks on packet lengths to prevent
+   ouf-of-memory issues and increasing buffer sizes to handle larger binary messages
+ 
+2019-06-10 v1.1.5.0
+ - Added a license file to the distribution (which includes the version number)
+ - Updated the C++ library to support GPS-2
+ - Added .NET-library getting_started example project for Visual Studio 2017 and x64 builds 
+   (which also supports Matlab and Labview)
+ - Fixed bug (C) that prevented writing to the User Tag register
+ - Fixed bug (C++) in serial parser that could lead to program hanging due to never unlocking
+   a CriticalSection
+ - Added support in C++ for SYNCINMODE_ASYNC3
+ - Updated C-library to be able to be compiled as C++ code (restoring past functionality)
+
+2018-06-13 v1.1.4.0
+ - Fixed bug (C,C++,.NET) that could cause process to hang when both ASCII and binary data 
+   present on port
+ - Fixed bug (C,C++) that can cause process to crash or consume 100% CPU on Linux machines
+ - Re-compiled the .NET DLLs so Labview examples work properly
+ - Added support for UTC time outputs in both C & C++
+ - Added Binary Group 7 (GPS2) outputs to C-library (not available in any other language)
+ - Added support to C-library for binary outputs  SyncOutCnt, TimeStatus, TimeInfo, GpsDOP 
+   (now available across C, C++, .NET)
+ - Fixed bug (C) that output garbage when parsing hex printed values in ASCII outputs: VNERR 
+   message, INS Status, Binary Output Configuration Registers
+ - Fixed bug (C++) in example Makefiles causing linking error
+
+2018-03-05 v1.1.2.0
+ - Added support in C++ & .NET for binary outputs: SyncInCnt, TimeStatus, TimeInfo, GpsDOP 
+
