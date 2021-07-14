@@ -310,6 +310,7 @@ void fill_imu_message(
         if (user_data->tf_ned_to_enu)
         {
             // If we want the orientation to be based on the reference label on the imu
+            tf2::Quaternion tf2_quat(q[0],q[1],q[2],q[3]);
             geometry_msgs::Quaternion quat_msg;
 
             if(user_data->frame_based_enu)
@@ -318,7 +319,6 @@ void fill_imu_message(
                 tf2::Quaternion q_rotate;
                 q_rotate.setRPY (M_PI, 0.0, M_PI/2);
                 // Apply the NED to ENU rotation such that the coordinate frame matches
-                tf2::Quaternion tf2_quat(q[0],q[1],q[2],q[3]);
                 tf2_quat = q_rotate*tf2_quat;
                 quat_msg = tf2::toMsg(tf2_quat);
 
@@ -511,11 +511,12 @@ void fill_odom_message(
             msgOdom.pose.pose.orientation.z = q[2];
             msgOdom.pose.pose.orientation.w = q[3];
         } else if(user_data->tf_ned_to_enu && user_data->frame_based_enu) {
-            // standard conversion from NED to ENU framevec3d initial_position;
+            // standard conversion from NED to ENU frame
+            tf2::Quaternion tf2_quat(q[0],q[1],q[2],q[3]);
+            // Create a rotation from NED -> ENU
             tf2::Quaternion q_rotate;
             q_rotate.setRPY (M_PI, 0.0, M_PI/2);
             // Apply the NED to ENU rotation such that the coordinate frame matches
-            tf2::Quaternion tf2_quat(q[0],q[1],q[2],q[3]);
             tf2_quat = q_rotate*tf2_quat;
             msgOdom.pose.pose.orientation = tf2::toMsg(tf2_quat);
         } else if(user_data->tf_ned_to_enu && !user_data->frame_based_enu) {
