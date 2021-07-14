@@ -223,13 +223,14 @@ int main(int argc, char *argv[])
     uint32_t sn = vs.readSerialNumber();
     ROS_INFO("Model Number: %s, Firmware Version: %s", mn.c_str(), fv.c_str());
     ROS_INFO("Hardware Revision : %d, Serial Number : %d", hv, sn);
+    ROS_INFO("Publish Rate: %d Hz", async_output_rate);
 
     // Set the device info for passing to the packet callback function
     UserData user_data;
     user_data.device_family = vs.determineDeviceFamily();
 
-    // Set Data output Freq [Hz]
-    vs.writeAsyncDataOutputFrequency(async_output_rate);
+    // Make sure no generic async output is registered
+    vs.writeAsyncDataOutputType(VNOFF);
 
     // Configure binary output message
     BinaryOutputRegister bor(
@@ -260,8 +261,7 @@ int main(int argc, char *argv[])
 
     vs.writeBinaryOutput1(bor);
 
-    // Set Data output Freq [Hz]
-    vs.writeAsyncDataOutputFrequency(async_output_rate);
+    // Register async callback function
     vs.registerAsyncPacketReceivedHandler(&user_data, BinaryAsyncMessageReceived);
 
     // You spin me right round, baby
