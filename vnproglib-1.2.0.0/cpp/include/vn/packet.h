@@ -88,6 +88,13 @@ struct vn_proglib_DLLEXPORT Packet
 	///     otherwise <c>false</c>.
 	bool isAsciiAsync();
 
+	/// \brief Indicates if the packet is a Bootloader message.
+	///
+	/// \return <c>true</c> if the packet is a Bootloader message;
+	///     otherwise <c>false</c>.
+	bool isBootloader();
+
+
 	/// \brief Determines the type of ASCII asynchronous message this packet
 	/// is.
 	///
@@ -373,6 +380,14 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \return The total number bytes in the generated command.
 	static size_t genReset(ErrorDetectionMode errorDetectionMode, char *buffer, size_t size);
 
+	/// \brief Generates a command to put the sensor in firmware update mode.
+	///
+	/// \param[in] errorDetectionMode The type of error-detection to use in generating the command.
+	/// \param[in] buffer Caller provided buffer to place the generated command.
+	/// \param[in] size Number of bytes available in the provided buffer.
+	/// \return The total number bytes in the generated command.
+	static size_t genFirmwareUpdate(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size);
+
 	/// \brief Generates a command to read the Serial Baud Rate register on a VectorNav sensor.
 	///
 	/// \param[in] errorDetectionMode The type of error-detection to use in generating the command.
@@ -429,6 +444,15 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \param[in] port The port to write to.
 	/// \return The total number bytes in the generated command.
 	static size_t genWriteAsyncDataOutputFrequency(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint32_t adof, uint8_t port);
+
+	/// \brief Generates a command to write to a firmware update record on a VectorNav sensor to the bootloader.
+	///
+	/// \param[in] errorDetectionMode The type of error-detection to use in generating the command.
+	/// \param[in] buffer Caller provided buffer to place the generated command.
+	/// \param[in] size Number of bytes available in the provided buffer.
+	/// \param[in] record The record to write to the bootloader for a specific processor on the sensor.
+	/// \return The total number bytes in the generated command.
+	static size_t genWriteFirmwareUpdateRecord(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, std::string record);
 
 	/// \brief Generates a command to read the User Tag register on a VectorNav sensor.
 	///
@@ -791,6 +815,36 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \return The total number bytes in the generated command.
 	static size_t genWriteFilterBasicControl(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint8_t magMode, uint8_t extMagMode, uint8_t extAccMode, uint8_t extGyroMode, vn::math::vec3f gyroLimit);
 
+	/// \brief Generates a command to read the Heave Configuration register on a VectorNav sensor.
+	///
+	/// \param[in] errorDetectionMode The type of error-detection to use in generating the command.
+	/// \param[in] buffer Caller provided buffer to place the generated command.
+	/// \param[in] size Number of bytes available in the provided buffer.
+	/// \return The total number bytes in the generated command.
+	static size_t genReadHeaveConfiguration(ErrorDetectionMode errorDetectionMode, char *buffer, size_t size);
+
+	/// \brief Generates a command to write to the VPE Basic Control register on a VectorNav sensor.
+	///
+	/// \param[in] errorDetectionMode The type of error-detection to use in generating the command.
+	/// \param[in] buffer Caller provided buffer to place the generated command.
+	/// \param[in] size Number of bytes available in the provided buffer.
+	/// \param[in] initialWavePeriod Value for the initialWavePeriod field.
+	/// \param[in] initialWaveAmplitude Value for the initialWaveAmplitude field.
+	/// \param[in] maxWavePeriod Value for the maxWavePeriod field.
+	/// \param[in] minWaveAmplitude Value for the minWaveAmplitude field.
+	/// \param[in] delayedHeaveCutoffFreq Value for the delayedHeaveCutoffFreq field.
+	/// \param[in] heaveCutoffFreq Value for the heaveCutoffFreq field.
+	/// \param[in] heaveRateCutoffFreq Value for the heaveRateCutoffFreq field.
+	/// \return The total number bytes in the generated command.
+	static size_t genWriteHeaveConfiguration(ErrorDetectionMode errorDetectionMode,char *buffer, size_t size, 
+							float initialWavePeriod, 
+							float initialWaveAmplitude, 
+							float maxWavePeriod,
+							float minWaveAmplitude,
+							float delayedHeaveCutoffFreq,
+							float heaveCutoffFreq,
+							float heaveRateCutoffFreq);
+
 	/// \brief Generates a command to read the VPE Basic Control register on a VectorNav sensor.
 	///
 	/// \param[in] errorDetectionMode The type of error-detection to use in generating the command.
@@ -1031,7 +1085,7 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \return The total number bytes in the generated command.
 	static size_t genReadGpsConfiguration(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size);
 
-	/// \brief Generates a command to write to the GPS Configuration register on a VectorNav sensor.
+	/// \brief Generates a command to write to the GPS Configuration register on a VectorNav sensor (deprecated).
 	///
 	/// \param[in] errorDetectionMode The type of error-detection to use in generating the command.
 	/// \param[in] buffer Caller provided buffer to place the generated command.
@@ -1040,6 +1094,18 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \param[in] ppsSource The register's PpsSource field.
 	/// \return The total number bytes in the generated command.
 	static size_t genWriteGpsConfiguration(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint8_t mode, uint8_t ppsSource);
+
+	/// \brief Generates a command to write to the GPS Configuration register on a VectorNav sensor.
+	///
+	/// \param[in] errorDetectionMode The type of error-detection to use in generating the command.
+	/// \param[in] buffer Caller provided buffer to place the generated command.
+	/// \param[in] size Number of bytes available in the provided buffer.
+	/// \param[in] mode The register's Mode field.
+	/// \param[in] ppsSource The register's PpsSource field.
+	/// \param[in] rate The register's Rate field.
+	/// \param[in] antPow The register's AntPower field.
+	/// \return The total number bytes in the generated command.
+	static size_t genWriteGpsConfiguration(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint8_t mode, uint8_t ppsSource, uint8_t rate, uint8_t antPow);
 
 	/// \brief Generates a command to read the GPS Antenna Offset register on a VectorNav sensor.
 	///
@@ -1191,7 +1257,7 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \return The total number bytes in the generated command.
 	static size_t genReadDeltaThetaAndDeltaVelocityConfiguration(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size);
 
-	/// \brief Generates a command to write to the Delta Theta and Delta Velocity Configuration register on a VectorNav sensor.
+	/// \brief Generates a command to write to the Delta Theta and Delta Velocity Configuration register on a VectorNav sensor (deprecated).
 	///
 	/// \param[in] errorDetectionMode The type of error-detection to use in generating the command.
 	/// \param[in] buffer Caller provided buffer to place the generated command.
@@ -1201,6 +1267,18 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \param[in] accelCompensation The register's AccelCompensation field.
 	/// \return The total number bytes in the generated command.
 	static size_t genWriteDeltaThetaAndDeltaVelocityConfiguration(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint8_t integrationFrame, uint8_t gyroCompensation, uint8_t accelCompensation);
+
+	/// \brief Generates a command to write to the Delta Theta and Delta Velocity Configuration register on a VectorNav sensor.
+	///
+	/// \param[in] errorDetectionMode The type of error-detection to use in generating the command.
+	/// \param[in] buffer Caller provided buffer to place the generated command.
+	/// \param[in] size Number of bytes available in the provided buffer.
+	/// \param[in] integrationFrame The register's IntegrationFrame field.
+	/// \param[in] gyroCompensation The register's GyroCompensation field.
+	/// \param[in] accelCompensation The register's AccelCompensation field.
+	/// \param[in] earthRateCorrection The register's EarthRateCorrection field.
+	/// \return The total number bytes in the generated command.
+	static size_t genWriteDeltaThetaAndDeltaVelocityConfiguration(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, uint8_t integrationFrame, uint8_t gyroCompensation, uint8_t accelCompensation, uint8_t earthRateCorrection);
 
 	/// \brief Generates a command to read the Reference Vector Configuration register on a VectorNav sensor.
 	///
@@ -1794,6 +1872,15 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \param[out] gyroLimit The register's GyroLimit field.
 	void parseFilterBasicControl(uint8_t* magMode, uint8_t* extMagMode, uint8_t* extAccMode, uint8_t* extGyroMode, vn::math::vec3f* gyroLimit);
 
+	// Added by jesperh 2021-02-09
+	void parseHeaveConfiguration(	
+		float* initialWavePeriod, 
+		float* initialWaveAmplitude, 
+		float* maxWavePeriod,
+		float* minWaveAmplitude,	
+		float* delayedHeaveCutoffFreq,
+		float* heaveCutoffFreq,
+		float* heaveRateCutoffFreq);
 	/// \brief Parses a response from reading the VPE Basic Control register.
 	///
 	/// \param[out] enable The register's Enable field.
@@ -1893,11 +1980,19 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \param[out] pressure The register's Pressure field.
 	void parseImuMeasurements(vn::math::vec3f* mag, vn::math::vec3f* accel, vn::math::vec3f* gyro, float* temp, float* pressure);
 
-	/// \brief Parses a response from reading the GPS Configuration register.
+	/// \brief Parses a response from reading the GPS Configuration register (deprecated).
 	///
 	/// \param[out] mode The register's Mode field.
 	/// \param[out] ppsSource The register's PpsSource field.
 	void parseGpsConfiguration(uint8_t* mode, uint8_t* ppsSource);
+
+	/// \brief Parses a response from reading the GPS Configuration register.
+	///
+	/// \param[out] mode The register's Mode field.
+	/// \param[out] ppsSource The register's PpsSource field.
+	/// \param[out] rate The register's Rate field.
+	/// \param[out] antPow The register's AntPower field.
+	void parseGpsConfiguration(uint8_t* mode, uint8_t* ppsSource, uint8_t* rate, uint8_t* antPow);
 
 	/// \brief Parses a response from reading the GPS Antenna Offset register.
 	///
@@ -2020,12 +2115,20 @@ struct vn_proglib_DLLEXPORT Packet
 	/// \param[out] deltaVelocity The register's DeltaVelocity field.
 	void parseDeltaThetaAndDeltaVelocity(float* deltaTime, vn::math::vec3f* deltaTheta, vn::math::vec3f* deltaVelocity);
 
-	/// \brief Parses a response from reading the Delta Theta and Delta Velocity Configuration register.
+	/// \brief Parses a response from reading the Delta Theta and Delta Velocity Configuration register (deprecated).
 	///
 	/// \param[out] integrationFrame The register's IntegrationFrame field.
 	/// \param[out] gyroCompensation The register's GyroCompensation field.
 	/// \param[out] accelCompensation The register's AccelCompensation field.
 	void parseDeltaThetaAndDeltaVelocityConfiguration(uint8_t* integrationFrame, uint8_t* gyroCompensation, uint8_t* accelCompensation);
+
+	/// \brief Parses a response from reading the Delta Theta and Delta Velocity Configuration register.
+	///
+	/// \param[out] integrationFrame The register's IntegrationFrame field.
+	/// \param[out] gyroCompensation The register's GyroCompensation field.
+	/// \param[out] accelCompensation The register's AccelCompensation field.
+	/// \param[out] earthRateCorrection The register's EarthRateCorrection field.
+	void parseDeltaThetaAndDeltaVelocityConfiguration(uint8_t* integrationFrame, uint8_t* gyroCompensation, uint8_t* accelCompensation, uint8_t* earthRateCorrection);
 
 	/// \brief Parses a response from reading the Reference Vector Configuration register.
 	///

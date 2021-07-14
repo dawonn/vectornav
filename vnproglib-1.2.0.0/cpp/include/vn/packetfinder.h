@@ -57,6 +57,7 @@ public:
 	/// \param[in] data The data buffer containing the received data.
 	/// \param[in] length The number of bytes of data in the buffer.
 	void processReceivedData(char data[], size_t length);
+	void processReceivedData(char data[], size_t length, bool bootloaderFilter);
 
 	/// \brief Adds new data to the internal buffers and processes the received
 	/// data to determine if any new received packets are available.
@@ -64,7 +65,7 @@ public:
 	/// \param[in] data The data buffer containing the received data.
 	/// \param[in] length The number of bytes of data in the buffer.
 	/// \param[in] timestamp The time when the data was received.
-	void processReceivedData(char data[], size_t length, xplat::TimeStamp timestamp);
+	void processReceivedData(char data[], size_t length, bool bootloaderFilter, xplat::TimeStamp timestamp);
 
 	#if PYTHON
 

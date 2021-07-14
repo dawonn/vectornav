@@ -172,6 +172,7 @@ enum AttitudeGroup
 	ATTITUDEGROUP_LINEARACCELBODY	= 0x0040,	///< LinearAccelBody.
 	ATTITUDEGROUP_LINEARACCELNED	= 0x0080,	///< LinearAccelNed.
 	ATTITUDEGROUP_YPRU				= 0x0100,	///< YprU.
+	ATTITUDEGROUP_HEAVE				= 0x1000,	///< Heave.
 };
 
 /// \brief Flags for the binary group 6 'INS' in the binary output registers.
@@ -207,6 +208,24 @@ enum SensorError
 	ERR_OUTPUT_BUFFER_OVERFLOW = 11,	///< Output buffer overflow.
 	ERR_INSUFFICIENT_BAUD_RATE = 12,	///< Insufficient baud rate.
 	ERR_ERROR_BUFFER_OVERFLOW = 255		///< Error buffer overflow.
+};
+
+enum BootloaderError
+{
+	BLE_NONE = 0,						///< No Error
+	BLE_INVALID_COMMAND = 1,			///< Problem with VNX record, abort
+	BLE_INVALID_RECORD_TYPE = 2,		///< Problem with VNX record, abort
+	BLE_INVALID_BYTE_COUNT = 3,			///< Problem with VNX record, abort
+	BLE_INVALID_MEMORY_ADDRESS = 4,		///< Problem with VNX record, abort
+	BLE_COMM_ERROR = 5,					///< Checksum error, resend record
+	BLE_INVALID_HEX_FILE = 6,			///< Problem with VNX record, abort
+	BLE_DECRYPTION_ERROR = 7,			///< Invalid VNX file or record sent out of order, abort
+	BLE_INVALID_BLOCK_CRC = 8,			///< Data verification failed, abort
+	BLE_INVALID_PROGRAM_CRC = 9,		///< Problemw ith firmware on device
+	BLE_INVALID_PROGRAM_SIZE = 10,		///< Problemw ith firmware on device
+	BLE_MAX_RETRY_COUNT = 11,			///< Too many errors, abort
+	BLE_TIMEOUT = 12,					///< Timeout expired, reset
+	BLE_RESERVED = 13					///< Contact VectorNav, abort
 };
 
 /// \brief Different modes for the SyncInMode field of the Synchronization Control register.
@@ -336,13 +355,40 @@ enum IntegrationFrame
 	INTEGRATIONFRAME_NED = 1
 };
 
-/// \brief Compensation modes for the Delta Theta and Delta Velocity configuration register.
+/// \brief Gyro compensation modes for the Delta Theta and Delta Velocity configuration register.
 enum CompensationMode
 {
 	/// \brief None.
 	COMPENSATIONMODE_NONE = 0,
 	/// \brief Bias.
 	COMPENSATIONMODE_BIAS = 1
+};
+
+/// \brief Accelerometer compensation modes for the Delta Theta and Delta Velocity configuration register.
+enum AccCompensationMode
+{
+	/// \brief None.
+	ACCCOMPENSATIONMODE_NONE = 0,
+	/// \brief Gravity.
+	ACCCOMPENSATIONMODE_GRAV = 1,
+	/// \brief Bias.
+	ACCCOMPENSATIONMODE_BIAS = 2,
+	/// \brief Bias + gravity.
+	ACCCOMPENSATIONMODE_BIASGRAV = 3
+};
+
+
+/// \brief Earth's angular rate correction for the Delta Theta and Delta Velocity configuration register.
+enum EarthRateCorrection
+{
+	/// \brief None.
+	EARTHRATECORR_NONE = 0,
+	/// \brief Angular rate.
+	EARTHRATECORR_RATE = 1,
+	/// \brief Coriolis acceleration.
+	EARTHRATECORR_CORIOLIS = 2,
+	/// \brief Angular rate + coriolis acceleration.
+	EARTHRATECORR_RATECOR = 3
 };
 
 /// \brief GPS fix modes for the GPS Solution - LLA register.
@@ -380,6 +426,26 @@ enum PpsSource
 	PPSSOURCE_SYNCINRISING = 2,
 	/// \brief GPS PPS signal on SyncIn pin and triggered on falling edge.
 	PPSSOURCE_SYNCINFALLING = 3
+};
+
+/// \brief GPS Rate for the GPS Configuration register.
+enum GpsRate
+{
+	/// \brief GPS update rate : 1 Hz
+	GPSRATE_1HZ = 1,
+	/// \brief GPS update rate : 5 Hz
+	GPSRATE_5HZ = 5
+};
+
+/// \brief GPS Antenna Power mode for the GPS Configuration register.
+enum AntPower
+{
+	/// \brief GPS antenna power source: off/resv (reserved as 0 on some Industrial Series firmwares)
+	ANTPOWER_OFFRESV = 0,
+	/// \brief GPS antenna,power source: internal
+	ANTPOWER_INTERNAL = 1,
+	/// \brief GPS antenna power source: external
+	ANTPOWER_EXTERNAL = 2
 };
 
 /// \brief VPE Enable mode for the VPE Basic Control register.

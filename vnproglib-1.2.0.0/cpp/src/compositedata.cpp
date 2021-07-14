@@ -743,10 +743,22 @@ struct CompositeData::Impl
     gpsTow = tow;
   }
 
+  void setGpsTow(double tow)
+  {
+    hasGpsTow = true;
+    gpsTow = static_cast<uint64_t>(tow*1e9);
+  }
+
   void setGps2Tow(uint64_t tow)
   {
     hasGps2Tow = true;
     gps2Tow = tow;
+  }
+
+  void setGps2Tow(double tow)
+  {
+    hasGps2Tow = true;
+    gps2Tow = static_cast<uint64_t>(tow*1e9);
   }
 
   void setPositionUncertaintyGpsNed(vec3f u)
@@ -1327,6 +1339,13 @@ bool CompositeData::hasPositionGps2Ecef()
   return _i->hasPositionGps2Ecef;
 }
 
+vec3d CompositeData::positionGpsEcef()
+{
+	if (!hasPositionGpsEcef())
+		throw invalid_operation();	
+
+	return _i->positionGpsEcef;
+}
 vec3d CompositeData::positionGps2Ecef()
 {
 	if (!hasPositionGps2Ecef())

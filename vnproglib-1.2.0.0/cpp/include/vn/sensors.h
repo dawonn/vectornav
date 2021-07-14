@@ -25,6 +25,9 @@ namespace xplat {
 }
 namespace sensors {
 
+// Define the max record size of a firmware update file
+#define MAXFIRMWAREUPDATERECORDSIZE 300
+
 /// \brief Represents an error from a VectorNav sensor.
 struct sensor_error : public std::exception
 {
@@ -66,6 +69,14 @@ public:
 		VnSensor_Family_Vn100,		///< A device of the VectorNav VN-100 sensor family.
 		VnSensor_Family_Vn200,		///< A device of the VectorNav VN-200 sensor family.
 		VnSensor_Family_Vn300		///< A device of the VectorNav VN-300 sensor family.
+	};
+
+	/** \brief The different types of processors. */
+	enum VnProcessorType
+	{
+		VNPROCESSOR_NAV,	// Navigation Processor (Main Processor)
+		VNPROCESSOR_GPS,	// GPS Processor
+		VNPROCESSOR_IMU		// IMU Processor
 	};
 
 	#if PYTHON
@@ -300,6 +311,24 @@ public:
 	/// \param[in] waitForReply Indicates if the method should wait for a
 	///     response from the sensor.
 	void reset(bool waitForReply = true);
+
+	/// \brief Issues a Firmware Update command to the VectorNav sensor.
+	///
+	/// \param[in] waitForReply Indicates if the method should wait for a
+	///     response from the sensor.
+	void firmwareUpdateMode(bool waitForReply = true);
+
+	/// \brief Write a firmware update record to the bootloader
+	///
+	/// \param[in] record The firmware update record to write to the bootloader
+	/// \param[in] waitForReply Indicates if the method should wait for a
+	///     response from the sensor.
+	void writeFirmwareUpdateRecord(const std::string& record, bool waitForReply = true);
+
+	/// \brief Calibrate the bootloader with current baudrate.
+	///
+	/// return string - Bootloader Version Number
+	std::string calibrateBootloader();
 
 	/// \brief Issues a change baudrate to the VectorNav sensor and then
 	/// reconnects the attached serial port at the new baudrate.
@@ -864,6 +893,36 @@ public:
 		const vn::math::vec3f &gyroLimit,
 		bool waitForReply = true);
 
+	/// \brief Reads the Heave Configuration register.
+	///
+	/// \return The register's values.
+	HeaveConfigurationRegister readHeaveConfiguration(); 
+
+	/// \brief Writes to the Heave Configuration register.
+	///
+	/// \param[in] fields The register's fields.
+	/// \param[in] waitForReply Indicates if the method should wait for a response from the sensor.
+	void writeHeaveConfiguration(HeaveConfigurationRegister &fields, bool waitForReply = true);
+
+	/// \brief Writes to the Heave Configuration register.
+	///
+	/// \param[in] initialWavePeriod Value for the initialWavePeriod field.
+	/// \param[in] initialWaveAmplitude Value for the initialWaveAmplitude field.
+	/// \param[in] maxWavePeriod Value for the maxWavePeriod field.
+	/// \param[in] minWaveAmplitude Value for the minWaveAmplitude field.
+	/// \param[in] delayedHeaveCutoffFreq Value for the delayedHeaveCutoffFreq field.
+	/// \param[in] heaveCutoffFreq Value for the heaveCutoffFreq field.
+	/// \param[in] heaveRateCutoffFreq Value for the heaveRateCutoffFreq field.
+	void writeHeaveConfiguration(
+		const float &initialWavePeriod,
+		const float &initialWaveAmplitude,
+		const float &maxWavePeriod,
+		const float &minWaveAmplitude,
+		const float &delayedHeaveCutoffFreq,
+		const float &heaveCutoffFreq,
+		const float &heaveRateCutoffFreq,
+		bool waitForReply = true);
+
 	/// \brief Reads the VPE Basic Control register.
 	///
 	/// \return The register's values.
@@ -1117,7 +1176,7 @@ public:
 	/// \param[in] waitForReply Indicates if the method should wait for a response from the sensor.
 	void writeGpsConfiguration(GpsConfigurationRegister &fields, bool waitForReply = true);
 
-	/// \brief Writes to the GPS Configuration register.
+	/// \brief Writes to the GPS Configuration register (deprecated).
 	///
 	/// \param[in] mode Value for the Mode field.
 	/// \param[in] ppsSource Value for the PpsSource field.
@@ -1125,6 +1184,20 @@ public:
 	void writeGpsConfiguration(
 		protocol::uart::GpsMode mode,
 		protocol::uart::PpsSource ppsSource,
+		bool waitForReply = true);
+
+	/// \brief Writes to the GPS Configuration register.
+	///
+	/// \param[in] mode Value for the Mode field.
+	/// \param[in] ppsSource Value for the PpsSource field.
+	/// \param[in] rate Value for the Rate field.
+	/// \param[in] antPow Value for the AntPow field.
+	/// \param[in] waitForReply Indicates if the method should wait for a response from the sensor.
+	void writeGpsConfiguration(
+		protocol::uart::GpsMode mode,
+		protocol::uart::PpsSource ppsSource,
+		protocol::uart::GpsRate rate,
+		protocol::uart::AntPower antPow,
 		bool waitForReply = true);
 
 	/// \brief Reads the GPS Antenna Offset register.
@@ -1254,7 +1327,7 @@ public:
 	/// \param[in] waitForReply Indicates if the method should wait for a response from the sensor.
 	void writeDeltaThetaAndDeltaVelocityConfiguration(DeltaThetaAndDeltaVelocityConfigurationRegister &fields, bool waitForReply = true);
 
-	/// \brief Writes to the Delta Theta and Delta Velocity Configuration register.
+	/// \brief Writes to the Delta Theta and Delta Velocity Configuration register (deprecated).
 	///
 	/// \param[in] integrationFrame Value for the IntegrationFrame field.
 	/// \param[in] gyroCompensation Value for the GyroCompensation field.
@@ -1263,7 +1336,21 @@ public:
 	void writeDeltaThetaAndDeltaVelocityConfiguration(
 		protocol::uart::IntegrationFrame integrationFrame,
 		protocol::uart::CompensationMode gyroCompensation,
-		protocol::uart::CompensationMode accelCompensation,
+		protocol::uart::AccCompensationMode accelCompensation,
+		bool waitForReply = true);
+
+	/// \brief Writes to the Delta Theta and Delta Velocity Configuration register.
+	///
+	/// \param[in] integrationFrame Value for the IntegrationFrame field.
+	/// \param[in] gyroCompensation Value for the GyroCompensation field.
+	/// \param[in] accelCompensation Value for the AccelCompensation field.
+	/// \param[in] earthRateCorrection Value for the EarthRateCorrection field.
+	/// \param[in] waitForReply Indicates if the method should wait for a response from the sensor.
+	void writeDeltaThetaAndDeltaVelocityConfiguration(
+		protocol::uart::IntegrationFrame integrationFrame,
+		protocol::uart::CompensationMode gyroCompensation,
+		protocol::uart::AccCompensationMode accelCompensation,
+		protocol::uart::EarthRateCorrection earthRateCorrection,
 		bool waitForReply = true);
 
 	/// \brief Reads the Reference Vector Configuration register.
@@ -1412,6 +1499,36 @@ public:
 	/// \return The register's values.
 	YawPitchRollTrueInertialAccelerationAndAngularRatesRegister readYawPitchRollTrueInertialAccelerationAndAngularRates();
 
+	/// \brief Upgrade the connected sensor with the supplied firmware file
+	///
+	/// \param[in] processor The target processor to switch to.
+	/// \param[in] model		The model of sensor.
+	/// \param[in] firmware	The current firmware version of sensor.
+	void switchProcessors(VnProcessorType processor, std::string model, std::string firmware);
+
+	/// \brief Upgrade the connected sensor with the supplied firmware file
+	///
+	/// \param]in] portName The baud rate used to update the firmware. (Can be different than the current baud rate)
+	/// \param[in] filename The path to the VNX firmware file for the sensor.
+	void firmwareUpdate(int baudRate, std::string fileName);
+
+	/// \brief Upgrade the connected sensor with the supplied firmware file
+	///
+	/// \param]in] portName The baud rate used to update the firmware. (Can be different than the current baud rate)
+	void setFirmwareUpdateBaudRate(int baudRate);
+
+	/// \brief Get the next Firmware Update Record
+	///
+	/// \return The next record in the Firmware Update file, else an empty string
+	std::string getNextFirwareUpdateRecord();
+
+	/// \brief Open the firmware update file
+	void openFirmwareUpdateFile(std::string filename);
+
+	/// \brief Close the firmware update file
+	void closeFirmwareUpdateFile();
+
+
 	/// \}
 
 	#ifdef PYTHON_WRAPPERS
@@ -1431,6 +1548,11 @@ public:
 private:
 	struct Impl;
 	Impl *_pi;
+
+	// For Firmware Update Files
+	FILE* firmwareUpdateFile;
+	bool bootloaderFiltering;
+
 
 };
 
