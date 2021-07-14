@@ -670,10 +670,10 @@ void fill_ins_message(
 //
 // Callback function to process data packet from sensor
 //
-void BinaryAsyncMessageReceived(void* user_data, Packet& p, size_t index)
+void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
 {
     vn::sensors::CompositeData cd = vn::sensors::CompositeData::parse(p);
-    //UserData* user_data = static_cast<UserData*>(userData);
+    UserData *user_data = static_cast<UserData*>(userData);
     ROS_INFO("async callback %d", user_data->initial_position_set);
 
     ros::Time time = ros::Time::now();
