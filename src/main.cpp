@@ -41,8 +41,11 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <vectornav/Ins.h>
 
+
 ros::Publisher pubIMU, pubMag, pubGPS, pubOdom, pubTemp, pubPres, pubIns;
 ros::ServiceServer resetOdomSrv;
+
+XmlRpc::XmlRpcValue rpc_temp;
 
 // Include this header file to get access to VectorNav sensors.
 #include "vn/sensors.h"
@@ -57,9 +60,6 @@ using namespace vn::xplat;
 
 // Method declarations for future use.
 void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index);
-
-
-XmlRpc::XmlRpcValue rpc_temp;
 
 // Custom user data to pass to packet callback function
 struct UserData {
