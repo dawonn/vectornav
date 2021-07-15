@@ -41,6 +41,9 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <vectornav/Ins.h>
 
+ros::Publisher pubIMU, pubMag, pubGPS, pubOdom, pubTemp, pubPres, pubIns;
+ros::ServiceServer resetOdomSrv;
+
 // Include this header file to get access to VectorNav sensors.
 #include "vn/sensors.h"
 #include "vn/compositedata.h"
@@ -52,8 +55,9 @@ using namespace vn::sensors;
 using namespace vn::protocol::uart;
 using namespace vn::xplat;
 
-ros::Publisher pubIMU, pubMag, pubGPS, pubOdom, pubTemp, pubPres, pubIns;
-ros::ServiceServer resetOdomSrv;
+// Method declarations for future use.
+void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index);
+
 
 XmlRpc::XmlRpcValue rpc_temp;
 
@@ -77,9 +81,6 @@ struct UserData {
     boost::array<double, 9ul> angular_vel_covariance = { };
     boost::array<double, 9ul> orientation_covariance = { };
 };
-
-// Method declarations for future use.
-void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index);
 
 // Basic loop so we can initilize our covariance parameters above
 boost::array<double, 9ul> setCov(XmlRpc::XmlRpcValue rpc){
