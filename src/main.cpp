@@ -397,32 +397,6 @@ void fill_mag_message(
     }
 }
 
-//Helper function to create temperature message
-void fill_temp_message(
-    sensor_msgs::Temperature &msgTemp, vn::sensors::CompositeData &cd, ros::Time &time, UserData *user_data)
-{
-    msgTemp.header.stamp = time;
-    msgTemp.header.frame_id = user_data->frame_id;
-    if (cd.hasTemperature())
-    {
-        float temp = cd.temperature();
-        msgTemp.temperature = temp;
-    }
-}
-
-//Helper function to create pressure message
-void fill_pres_message(
-    sensor_msgs::FluidPressure &msgPres, vn::sensors::CompositeData &cd, ros::Time &time, UserData *user_data)
-{
-    msgPres.header.stamp = time;
-    msgPres.header.frame_id = user_data->frame_id;
-    if (cd.hasPressure())
-    {
-        float pres = cd.pressure();
-        msgPres.fluid_pressure = pres;
-    }
-}
-
 //Helper function to create gps message
 void fill_gps_message(
     sensor_msgs::NavSatFix &msgGPS, vn::sensors::CompositeData &cd, ros::Time &time, UserData *user_data)
@@ -600,6 +574,33 @@ void fill_odom_message(
                 msgOdom.twist.covariance[(row + 3) * 6 + (col + 3)] = user_data->angular_vel_covariance[row * 3 + col];
             }
         }
+    }
+}
+
+
+//Helper function to create temperature message
+void fill_temp_message(
+    sensor_msgs::Temperature &msgTemp, vn::sensors::CompositeData &cd, ros::Time &time, UserData *user_data)
+{
+    msgTemp.header.stamp = time;
+    msgTemp.header.frame_id = user_data->frame_id;
+    if (cd.hasTemperature())
+    {
+        float temp = cd.temperature();
+        msgTemp.temperature = temp;
+    }
+}
+
+//Helper function to create pressure message
+void fill_pres_message(
+    sensor_msgs::FluidPressure &msgPres, vn::sensors::CompositeData &cd, ros::Time &time, UserData *user_data)
+{
+    msgPres.header.stamp = time;
+    msgPres.header.frame_id = user_data->frame_id;
+    if (cd.hasPressure())
+    {
+        float pres = cd.pressure();
+        msgPres.fluid_pressure = pres;
     }
 }
 
