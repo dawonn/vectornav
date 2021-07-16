@@ -371,11 +371,11 @@ void fill_imu_message(
             msgIMU.linear_acceleration.y = al[1];
             msgIMU.linear_acceleration.z = al[2];
         }
-    }
 
-    // Covariances pulled from parameters
-    msgIMU.angular_velocity_covariance = angular_vel_covariance;
-    msgIMU.linear_acceleration_covariance = linear_accel_covariance;
+        // Covariances pulled from parameters (only fill if remaining fields are filled)
+        msgIMU.angular_velocity_covariance = angular_vel_covariance;
+        msgIMU.linear_acceleration_covariance = linear_accel_covariance;
+    }
 }
 
 //Helper function to create magnetic field message
