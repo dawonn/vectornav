@@ -409,30 +409,31 @@ void fill_gps_message(
         msgGPS.latitude = lla[0];
         msgGPS.longitude = lla[1];
         msgGPS.altitude = lla[2];
-    }
 
-    // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
-    if(cd.hasPositionUncertaintyEstimated())
-    {
-        double posVariance = pow(cd.positionUncertaintyEstimated(), 2);
-        msgGPS.position_covariance[0] = posVariance;    // East position variance
-        msgGPS.position_covariance[4] = posVariance;    // North position vaciance
-        msgGPS.position_covariance[8] = posVariance;    // Up position variance
-
-        // mark gps fix as not available if the outputted standard deviation is 0
-        if(cd.positionUncertaintyEstimated() != 0.0)
+        // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+        // Only fill if position is defined
+        if(cd.hasPositionUncertaintyEstimated())
         {
-            // Position available
-            msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
-        } else {
-            // position not detected
-            msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_NO_FIX;
-        }
+            double posVariance = pow(cd.positionUncertaintyEstimated(), 2);
+            msgGPS.position_covariance[0] = posVariance;    // East position variance
+            msgGPS.position_covariance[4] = posVariance;    // North position vaciance
+            msgGPS.position_covariance[8] = posVariance;    // Up position variance
 
-        // add the type of covariance to the gps message
-        msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN;
-    } else {
-        msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_UNKNOWN;
+            // mark gps fix as not available if the outputted standard deviation is 0
+            if(cd.positionUncertaintyEstimated() != 0.0)
+            {
+                // Position available
+                msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
+            } else {
+                // position not detected
+                msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_NO_FIX;
+            }
+
+            // add the type of covariance to the gps message
+            msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN;
+        } else {
+            msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_UNKNOWN;
+        }
     }
 }
 
