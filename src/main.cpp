@@ -282,17 +282,11 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-//
-// Callback function to process data packet from sensor
-//
-void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
+//Helper function to create IMU message
+void fill_imu_message(
+    sensor_msgs::Imu &msgIMU, vn::sensors::CompositeData &cd, ros::Time &time)
 {
-    vn::sensors::CompositeData cd = vn::sensors::CompositeData::parse(p);
-    UserData user_data = *static_cast<UserData*>(userData);
-
-    // IMU
-    sensor_msgs::Imu msgIMU;
-    msgIMU.header.stamp = ros::Time::now();
+    msgIMU.header.stamp = time;
     msgIMU.header.frame_id = frame_id;
 
     if (cd.hasQuaternion() && cd.hasAngularRate() && cd.hasAcceleration())
@@ -361,7 +355,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
                 }
             }
 
-          msgIMU.orientation = quat_msg;
+        msgIMU.orientation = quat_msg;
         }
         else
         {
@@ -377,234 +371,249 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
             msgIMU.linear_acceleration.y = al[1];
             msgIMU.linear_acceleration.z = al[2];
         }
-        // Covariances pulled from parameters
-        msgIMU.angular_velocity_covariance = angular_vel_covariance;
-        msgIMU.linear_acceleration_covariance = linear_accel_covariance;
-        pubIMU.publish(msgIMU);
     }
+
+    // Covariances pulled from parameters
+    msgIMU.angular_velocity_covariance = angular_vel_covariance;
+    msgIMU.linear_acceleration_covariance = linear_accel_covariance;
+}
+
+//Helper function to create magnetic field message
+void fill_mag_message(
+    sensor_msgs::MagneticField &msgMag, vn::sensors::CompositeData &cd, ros::Time &time)
+{
+    msgMag.header.stamp = time;
+    msgMag.header.frame_id = frame_id;
 
     // Magnetic Field
     if (cd.hasMagnetic())
     {
         vec3f mag = cd.magnetic();
-        sensor_msgs::MagneticField msgMag;
-        msgMag.header.stamp = msgIMU.header.stamp;
-        msgMag.header.frame_id = msgIMU.header.frame_id;
         msgMag.magnetic_field.x = mag[0];
         msgMag.magnetic_field.y = mag[1];
         msgMag.magnetic_field.z = mag[2];
-        pubMag.publish(msgMag);
     }
+}
 
-    // GPS
-    if (user_data.device_family != VnSensor::Family::VnSensor_Family_Vn100)
+ //Helper function to create gps message
+void fill_gps_message(
+    sensor_msgs::NavSatFix &msgGPS, vn::sensors::CompositeData &cd, ros::Time &time)
+{
+    msgGPS.header.stamp = time;
+    msgGPS.header.frame_id = frame_id;
+
+    if(cd.hasPositionEstimatedLla())
     {
         vec3d lla = cd.positionEstimatedLla();
 
-        sensor_msgs::NavSatFix msgGPS;
-        msgGPS.header.stamp = msgIMU.header.stamp;
-        msgGPS.header.frame_id = msgIMU.header.frame_id;
         msgGPS.latitude = lla[0];
         msgGPS.longitude = lla[1];
         msgGPS.altitude = lla[2];
+    }
 
-        // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
-        if(cd.hasPositionUncertaintyEstimated())
+    // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+    if(cd.hasPositionUncertaintyEstimated())
+    {
+        double posVariance = pow(cd.positionUncertaintyEstimated(), 2);
+        msgGPS.position_covariance[0] = posVariance;    // East position variance
+        msgGPS.position_covariance[4] = posVariance;    // North position vaciance
+        msgGPS.position_covariance[8] = posVariance;    // Up position variance
+
+        // mark gps fix as not available if the outputted standard deviation is 0
+        if(cd.positionUncertaintyEstimated() != 0.0)
         {
-            double posVariance = pow(cd.positionUncertaintyEstimated(), 2);
-            msgGPS.position_covariance[0] = posVariance;    // East position variance
-            msgGPS.position_covariance[4] = posVariance;    // North position vaciance
-            msgGPS.position_covariance[8] = posVariance;    // Up position variance
-
-            // mark gps fix as not available if the outputted standard deviation is 0
-            if(cd.positionUncertaintyEstimated() != 0.0)
-            {
-                // Position available
-                msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
-            } else {
-                // position not detected
-                msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_NO_FIX;
-            }
-
-            // add the type of covariance to the gps message
-            msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN;
+            // Position available
+            msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
         } else {
-            msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_UNKNOWN;
+            // position not detected
+            msgGPS.status.status = sensor_msgs::NavSatStatus::STATUS_NO_FIX;
         }
 
-        pubGPS.publish(msgGPS);
+        // add the type of covariance to the gps message
+        msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN;
+    } else {
+        msgGPS.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_UNKNOWN;
+    }
+}
 
-        // Odometry
-        if (pubOdom.getNumSubscribers() > 0)
+//Helper function to create odometry message
+void fill_odom_message(
+    nav_msgs::Odometry &msgOdom, vn::sensors::CompositeData &cd, ros::Time &time)
+{
+    msgOdom.header.stamp = time;
+    msgOdom.child_frame_id = frame_id;
+    msgOdom.header.frame_id = map_frame_id;
+
+    if(cd.hasPositionEstimatedEcef())
+    {
+        // add position as earth fixed frame
+        vec3d pos = cd.positionEstimatedEcef();
+
+        if (!initial_position_set)
         {
-            nav_msgs::Odometry msgOdom;
-            msgOdom.header.stamp = msgIMU.header.stamp;
-            msgOdom.child_frame_id = frame_id;
-            msgOdom.header.frame_id = map_frame_id;
+            ROS_INFO("Set initial position to %f %f %f", pos[0], pos[1], pos[2]);
+            initial_position_set = true;
+            initial_position.x = pos[0];
+            initial_position.y = pos[1];
+            initial_position.z = pos[2];
+        }
 
-            // add position as earth fixed frame
-            vec3d pos = cd.positionEstimatedEcef();
+        msgOdom.pose.pose.position.x = pos[0] - initial_position[0];
+        msgOdom.pose.pose.position.y = pos[1] - initial_position[1];
+        msgOdom.pose.pose.position.z = pos[2] - initial_position[2];
+    }
 
-            if (!initial_position_set)
-            {
-                initial_position_set = true;
-                initial_position.x = pos[0];
-                initial_position.y = pos[1];
-                initial_position.z = pos[2];
+    // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+    if(cd.hasPositionUncertaintyEstimated())
+    {
+        double posVariance = pow(cd.positionUncertaintyEstimated(), 2);
+        msgOdom.pose.covariance[0] = posVariance;   // x-axis position variance
+        msgOdom.pose.covariance[7] = posVariance;   // y-axis position vaciance
+        msgOdom.pose.covariance[14] = posVariance;  // z-axis position variance
+    }
+
+    if (cd.hasQuaternion())
+    {
+        vec4f q = cd.quaternion();
+
+        if(!tf_ned_to_enu) {
+            // output in NED frame
+            msgOdom.pose.pose.orientation.x = q[0];
+            msgOdom.pose.pose.orientation.y = q[1];
+            msgOdom.pose.pose.orientation.z = q[2];
+            msgOdom.pose.pose.orientation.w = q[3];
+        } else if(tf_ned_to_enu && frame_based_enu) {
+            // standard conversion from NED to ENU frame
+            tf2::Quaternion tf2_quat(q[0],q[1],q[2],q[3]);
+            // Create a rotation from NED -> ENU
+            tf2::Quaternion q_rotate;
+            q_rotate.setRPY (M_PI, 0.0, M_PI/2);
+            // Apply the NED to ENU rotation such that the coordinate frame matches
+            tf2_quat = q_rotate*tf2_quat;
+            msgOdom.pose.pose.orientation = tf2::toMsg(tf2_quat);
+        } else if(tf_ned_to_enu && !frame_based_enu) {
+            // alternative method for conversion to ENU frame (leads to another result)
+            // put into ENU - swap X/Y, invert Z
+            msgOdom.pose.pose.orientation.x = q[1];
+            msgOdom.pose.pose.orientation.y = q[0];
+            msgOdom.pose.pose.orientation.z = -q[2];
+            msgOdom.pose.pose.orientation.w = q[3];
+        }
+        
+
+        // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+        if(cd.hasAttitudeUncertainty())
+        {
+            vec3f orientationStdDev = cd.attitudeUncertainty();
+            // convert the standard deviation values from all three axis from degrees to radiant and calculate the variances from these (squared), which are assigned to the covariance matrix.
+            if(!tf_ned_to_enu || frame_based_enu) {
+                // standard assignment of variance values for NED frame and conversion to ENU frame by rotation
+                msgOdom.pose.covariance[21] = pow(orientationStdDev[0] * M_PI / 180, 2);    // roll variance
+                msgOdom.pose.covariance[28] = pow(orientationStdDev[1] * M_PI / 180, 2);    // pitch variance
+                msgOdom.pose.covariance[35] = pow(orientationStdDev[2] * M_PI / 180, 2);    // yaw variance
+            } else {
+                // variance assignment for conversion by swapping and inverting (not frame_based_enu)
+
+                // TODO not supported yet
             }
-
-            msgOdom.pose.pose.position.x = pos[0] - initial_position[0];
-            msgOdom.pose.pose.position.y = pos[1] - initial_position[1];
-            msgOdom.pose.pose.position.z = pos[2] - initial_position[2];
-
-            // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
-            if(cd.hasPositionUncertaintyEstimated())
-            {
-                double posVariance = pow(cd.positionUncertaintyEstimated(), 2);
-                msgOdom.pose.covariance[0] = posVariance;   // x-axis position variance
-                msgOdom.pose.covariance[7] = posVariance;   // y-axis position vaciance
-                msgOdom.pose.covariance[14] = posVariance;  // z-axis position variance
-            }
-
-            if (cd.hasQuaternion())
-            {
-                vec4f q = cd.quaternion();
-
-                if(!tf_ned_to_enu) {
-                    // output in NED frame
-                    msgOdom.pose.pose.orientation.x = q[0];
-                    msgOdom.pose.pose.orientation.y = q[1];
-                    msgOdom.pose.pose.orientation.z = q[2];
-                    msgOdom.pose.pose.orientation.w = q[3];
-                } else if(tf_ned_to_enu && frame_based_enu) {
-                    // standard conversion from NED to ENU frame
-                    tf2::Quaternion tf2_quat(q[0],q[1],q[2],q[3]);
-                    // Create a rotation from NED -> ENU
-                    tf2::Quaternion q_rotate;
-                    q_rotate.setRPY (M_PI, 0.0, M_PI/2);
-                    // Apply the NED to ENU rotation such that the coordinate frame matches
-                    tf2_quat = q_rotate*tf2_quat;
-                    msgOdom.pose.pose.orientation = tf2::toMsg(tf2_quat);
-                } else if(tf_ned_to_enu && !frame_based_enu) {
-                    // alternative method for conversion to ENU frame (leads to another result)
-                    // put into ENU - swap X/Y, invert Z
-                    msgOdom.pose.pose.orientation.x = q[1];
-                    msgOdom.pose.pose.orientation.y = q[0];
-                    msgOdom.pose.pose.orientation.z = -q[2];
-                    msgOdom.pose.pose.orientation.w = q[3];
-                }
-                
-
-                // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
-                if(cd.hasAttitudeUncertainty())
-                {
-                    vec3f orientationStdDev = cd.attitudeUncertainty();
-                    // convert the standard deviation values from all three axis from degrees to radiant and calculate the variances from these (squared), which are assigned to the covariance matrix.
-                    if(!tf_ned_to_enu || frame_based_enu) {
-                        // standard assignment of variance values for NED frame and conversion to ENU frame by rotation
-                        msgOdom.pose.covariance[21] = pow(orientationStdDev[0] * M_PI / 180, 2);    // roll variance
-                        msgOdom.pose.covariance[28] = pow(orientationStdDev[1] * M_PI / 180, 2);    // pitch variance
-                        msgOdom.pose.covariance[35] = pow(orientationStdDev[2] * M_PI / 180, 2);    // yaw variance
-                    } else {
-                        // variance assignment for conversion by swapping and inverting (not frame_based_enu)
-
-                        // TODO not supported yet
-                    }
-                }
-            }
-
-            // Add the velocity in the body frame (frame_id) to the message
-            if (cd.hasVelocityEstimatedBody())
-            {
-                vec3f vel = cd.velocityEstimatedBody();
-
-                if(!tf_ned_to_enu || frame_based_enu) {
-                    // standard assignment of values for NED frame and conversion to ENU frame by rotation
-                    msgOdom.twist.twist.linear.x = vel[0];
-                    msgOdom.twist.twist.linear.y = vel[1];
-                    msgOdom.twist.twist.linear.z = vel[2];
-                } else {
-                    // value assignment for conversion by swapping and inverting (not frame_based_enu)
-                    // Flip x and y then invert z
-                    msgOdom.twist.twist.linear.x = vel[1];
-                    msgOdom.twist.twist.linear.y = vel[0];
-                    msgOdom.twist.twist.linear.z = -vel[2];
-                }
-
-                // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
-                if(cd.hasVelocityUncertaintyEstimated())
-                {
-                    double velVariance = pow(cd.velocityUncertaintyEstimated(), 2);
-                    msgOdom.twist.covariance[0] = velVariance;  // x-axis velocity variance
-                    msgOdom.twist.covariance[7] = velVariance;  // y-axis velocity vaciance
-                    msgOdom.twist.covariance[14] = velVariance; // z-axis velocity variance
-
-                    // set velocity variances to a high value if no data is available (this is the case at startup during INS is initializing)
-                    if(msgOdom.twist.twist.linear.x == 0 && msgOdom.twist.twist.linear.y == 0 && msgOdom.twist.twist.linear.z == 0 && msgOdom.twist.covariance[0] == 0 && msgOdom.twist.covariance[7] == 0 && msgOdom.twist.covariance[14] == 0){
-                        msgOdom.twist.covariance[0] = 200;
-                        msgOdom.twist.covariance[7] = 200;
-                        msgOdom.twist.covariance[15] = 200;
-                    }
-                }
-            }
-            if (cd.hasAngularRate())
-            {
-                vec3f ar = cd.angularRate();
-
-                 if(!tf_ned_to_enu || frame_based_enu) {
-                    // standard assignment of values for NED frame and conversion to ENU frame by rotation
-                    msgOdom.twist.twist.angular.x = ar[0];
-                    msgOdom.twist.twist.angular.y = ar[1];
-                    msgOdom.twist.twist.angular.z = ar[2];
-                } else {
-                    // value assignment for conversion by swapping and inverting (not frame_based_enu)
-                    // Flip x and y then invert z
-                    msgOdom.twist.twist.angular.x = ar[1];
-                    msgOdom.twist.twist.angular.y = ar[0];
-                    msgOdom.twist.twist.angular.z = -ar[2];
-                }
-
-                // add covariance matrix of the measured angular rate to odom message.
-                // go through matrix rows
-                for(int row = 0; row < 3; row++) {
-                    // go through matrix columns
-                    for(int col = 0; col < 3; col++) {
-                        // Target matrix has 6 rows and 6 columns, source matrix has 3 rows and 3 columns. The covariance values are put into the fields (3, 3) to (5, 5) of the destination matrix.
-                        msgOdom.twist.covariance[(row + 3) * 6 + (col + 3)] = angular_vel_covariance[row * 3 + col];
-                    }
-                }
-            }
-            pubOdom.publish(msgOdom);
         }
     }
 
-    // Temperature
+    // Add the velocity in the body frame (frame_id) to the message
+    if (cd.hasVelocityEstimatedBody())
+    {
+        vec3f vel = cd.velocityEstimatedBody();
+
+        if(!tf_ned_to_enu || frame_based_enu) {
+            // standard assignment of values for NED frame and conversion to ENU frame by rotation
+            msgOdom.twist.twist.linear.x = vel[0];
+            msgOdom.twist.twist.linear.y = vel[1];
+            msgOdom.twist.twist.linear.z = vel[2];
+        } else {
+            // value assignment for conversion by swapping and inverting (not frame_based_enu)
+            // Flip x and y then invert z
+            msgOdom.twist.twist.linear.x = vel[1];
+            msgOdom.twist.twist.linear.y = vel[0];
+            msgOdom.twist.twist.linear.z = -vel[2];
+        }
+
+        // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+        if(cd.hasVelocityUncertaintyEstimated())
+        {
+            double velVariance = pow(cd.velocityUncertaintyEstimated(), 2);
+            msgOdom.twist.covariance[0] = velVariance;  // x-axis velocity variance
+            msgOdom.twist.covariance[7] = velVariance;  // y-axis velocity vaciance
+            msgOdom.twist.covariance[14] = velVariance; // z-axis velocity variance
+
+            // set velocity variances to a high value if no data is available (this is the case at startup during INS is initializing)
+            if(msgOdom.twist.twist.linear.x == 0 && msgOdom.twist.twist.linear.y == 0 && msgOdom.twist.twist.linear.z == 0 && msgOdom.twist.covariance[0] == 0 && msgOdom.twist.covariance[7] == 0 && msgOdom.twist.covariance[14] == 0){
+                msgOdom.twist.covariance[0] = 200;
+                msgOdom.twist.covariance[7] = 200;
+                msgOdom.twist.covariance[15] = 200;
+            }
+        }
+    }
+    if (cd.hasAngularRate())
+    {
+        vec3f ar = cd.angularRate();
+
+            if(!tf_ned_to_enu || frame_based_enu) {
+            // standard assignment of values for NED frame and conversion to ENU frame by rotation
+            msgOdom.twist.twist.angular.x = ar[0];
+            msgOdom.twist.twist.angular.y = ar[1];
+            msgOdom.twist.twist.angular.z = ar[2];
+        } else {
+            // value assignment for conversion by swapping and inverting (not frame_based_enu)
+            // Flip x and y then invert z
+            msgOdom.twist.twist.angular.x = ar[1];
+            msgOdom.twist.twist.angular.y = ar[0];
+            msgOdom.twist.twist.angular.z = -ar[2];
+        }
+
+        // add covariance matrix of the measured angular rate to odom message.
+        // go through matrix rows
+        for(int row = 0; row < 3; row++) {
+            // go through matrix columns
+            for(int col = 0; col < 3; col++) {
+                // Target matrix has 6 rows and 6 columns, source matrix has 3 rows and 3 columns. The covariance values are put into the fields (3, 3) to (5, 5) of the destination matrix.
+                msgOdom.twist.covariance[(row + 3) * 6 + (col + 3)] = angular_vel_covariance[row * 3 + col];
+            }
+        }
+    }
+}
+
+ 
+//Helper function to create temperature message
+void fill_temp_message(
+    sensor_msgs::Temperature &msgTemp, vn::sensors::CompositeData &cd, ros::Time &time)
+{
+    msgTemp.header.stamp = time;
+    msgTemp.header.frame_id = frame_id;
     if (cd.hasTemperature())
     {
         float temp = cd.temperature();
-
-        sensor_msgs::Temperature msgTemp;
-        msgTemp.header.stamp = msgIMU.header.stamp;
-        msgTemp.header.frame_id = msgIMU.header.frame_id;
         msgTemp.temperature = temp;
-        pubTemp.publish(msgTemp);
     }
+}
 
-    // Barometer
+//Helper function to create pressure message
+void fill_pres_message(
+    sensor_msgs::FluidPressure &msgPres, vn::sensors::CompositeData &cd, ros::Time &time)
+{
+    msgPres.header.stamp = time;
+    msgPres.header.frame_id = frame_id;
     if (cd.hasPressure())
     {
         float pres = cd.pressure();
-
-        sensor_msgs::FluidPressure msgPres;
-        msgPres.header.stamp = msgIMU.header.stamp;
-        msgPres.header.frame_id = msgIMU.header.frame_id;
         msgPres.fluid_pressure = pres;
-        pubPres.publish(msgPres);
     }
+}
 
-    // INS
-    vectornav::Ins msgINS;
-    msgINS.header.stamp = ros::Time::now();
+//Helper function to create ins message
+void fill_ins_message(
+    vectornav::Ins &msgINS, vn::sensors::CompositeData &cd, ros::Time &time)
+{
+    msgINS.header.stamp = time;
     msgINS.header.frame_id = frame_id;
 
     if (cd.hasInsStatus())
@@ -664,9 +673,72 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     if (cd.hasVelocityUncertaintyEstimated()){
         msgINS.velUncertainty = cd.velocityUncertaintyEstimated();
     }
+}
 
-    if (msgINS.insStatus && msgINS.utcTime) {
-        pubIns.publish(msgINS);
+//
+// Callback function to process data packet from sensor
+//
+void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
+{
+    // evaluate time first, to have it as close to the measurement time as possible
+    ros::Time time = ros::Time::now();
+
+    vn::sensors::CompositeData cd = vn::sensors::CompositeData::parse(p);
+    UserData *user_data = static_cast<UserData*>(userData);
+
+    // IMU
+    if (pubIMU.getNumSubscribers() > 0)
+    {
+        sensor_msgs::Imu msgIMU;
+        fill_imu_message(msgIMU, cd, time);
+        pubIMU.publish(msgIMU);
     }
 
+    // Magnetic Field
+    if (pubMag.getNumSubscribers() > 0)
+    {
+        sensor_msgs::MagneticField msgMag;
+        fill_mag_message(msgMag, cd, time);
+        pubMag.publish(msgMag);
+    }
+
+    // Temperature
+    if (pubTemp.getNumSubscribers() > 0)
+    {
+        sensor_msgs::Temperature msgTemp;
+        fill_temp_message(msgTemp, cd, time);
+        pubTemp.publish(msgTemp);
+    }
+
+    // Barometer
+    if (pubPres.getNumSubscribers() > 0)
+    {
+        sensor_msgs::FluidPressure msgPres;
+        fill_pres_message(msgPres, cd, time);
+        pubPres.publish(msgPres);
+    }
+
+    // GPS
+    if (device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubGPS.getNumSubscribers() > 0)
+    {
+        sensor_msgs::NavSatFix msgGPS;
+        fill_gps_message(msgGPS, cd, time);
+        pubGPS.publish(msgGPS);
+    }
+
+    // Odometry
+    if (device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubOdom.getNumSubscribers() > 0)
+    {
+        nav_msgs::Odometry msgOdom;
+        fill_odom_message(msgOdom, cd, time);
+        pubOdom.publish(msgOdom);
+    }
+
+    // INS
+    if (device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubIns.getNumSubscribers() > 0)
+    {
+        vectornav::Ins msgINS;
+        fill_ins_message(msgINS, cd, time);
+        pubIns.publish(msgINS);
+    }
 }
