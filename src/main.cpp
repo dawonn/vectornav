@@ -461,7 +461,6 @@ void fill_odom_message(
         msgOdom.pose.pose.position.y = pos[1] - initial_position[1];
         msgOdom.pose.pose.position.z = pos[2] - initial_position[2];
 
-
         // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
         if(cd.hasPositionUncertaintyEstimated())
         {
@@ -499,7 +498,6 @@ void fill_odom_message(
             msgOdom.pose.pose.orientation.z = -q[2];
             msgOdom.pose.pose.orientation.w = q[3];
         }
-        
 
         // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
         if(cd.hasAttitudeUncertainty())
