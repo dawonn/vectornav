@@ -371,8 +371,7 @@ void fill_imu_message(
             msgIMU.linear_acceleration.y = al[1];
             msgIMU.linear_acceleration.z = al[2];
         }
-
-        // Covariances pulled from parameters (only fill if remaining fields are filled)
+        // Covariances pulled from parameters
         msgIMU.angular_velocity_covariance = angular_vel_covariance;
         msgIMU.linear_acceleration_covariance = linear_accel_covariance;
     }
@@ -411,7 +410,6 @@ void fill_gps_message(
         msgGPS.altitude = lla[2];
 
         // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
-        // Only fill if position is defined
         if(cd.hasPositionUncertaintyEstimated())
         {
             double posVariance = pow(cd.positionUncertaintyEstimated(), 2);
@@ -462,15 +460,16 @@ void fill_odom_message(
         msgOdom.pose.pose.position.x = pos[0] - initial_position[0];
         msgOdom.pose.pose.position.y = pos[1] - initial_position[1];
         msgOdom.pose.pose.position.z = pos[2] - initial_position[2];
-    }
 
-    // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
-    if(cd.hasPositionUncertaintyEstimated())
-    {
-        double posVariance = pow(cd.positionUncertaintyEstimated(), 2);
-        msgOdom.pose.covariance[0] = posVariance;   // x-axis position variance
-        msgOdom.pose.covariance[7] = posVariance;   // y-axis position vaciance
-        msgOdom.pose.covariance[14] = posVariance;  // z-axis position variance
+
+        // Read the estimation uncertainty (1 Sigma) from the sensor and write it to the covariance matrix.
+        if(cd.hasPositionUncertaintyEstimated())
+        {
+            double posVariance = pow(cd.positionUncertaintyEstimated(), 2);
+            msgOdom.pose.covariance[0] = posVariance;   // x-axis position variance
+            msgOdom.pose.covariance[7] = posVariance;   // y-axis position vaciance
+            msgOdom.pose.covariance[14] = posVariance;  // z-axis position variance
+        }
     }
 
     if (cd.hasQuaternion())
@@ -554,6 +553,7 @@ void fill_odom_message(
             }
         }
     }
+
     if (cd.hasAngularRate())
     {
         vec3f ar = cd.angularRate();
