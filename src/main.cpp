@@ -684,7 +684,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     ros::Time time = ros::Time::now();
 
     vn::sensors::CompositeData cd = vn::sensors::CompositeData::parse(p);
-    UserData *user_data = static_cast<UserData*>(userData);
+    UserData user_data = *static_cast<UserData*>(userData);
 
     // IMU
     if (pubIMU.getNumSubscribers() > 0)
@@ -719,7 +719,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // GPS
-    if (device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubGPS.getNumSubscribers() > 0)
+    if (user_data.device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubGPS.getNumSubscribers() > 0)
     {
         sensor_msgs::NavSatFix msgGPS;
         fill_gps_message(msgGPS, cd, time);
@@ -727,7 +727,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // Odometry
-    if (device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubOdom.getNumSubscribers() > 0)
+    if (user_data.device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubOdom.getNumSubscribers() > 0)
     {
         nav_msgs::Odometry msgOdom;
         fill_odom_message(msgOdom, cd, time);
@@ -735,7 +735,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // INS
-    if (device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubIns.getNumSubscribers() > 0)
+    if (user_data.device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubIns.getNumSubscribers() > 0)
     {
         vectornav::Ins msgINS;
         fill_ins_message(msgINS, cd, time);
