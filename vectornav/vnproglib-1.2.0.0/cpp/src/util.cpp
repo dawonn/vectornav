@@ -132,6 +132,43 @@ string str(SensorError val)
 	}
 }
 
+string str(BootloaderError val)
+{
+	switch (val)
+	{
+	case BLE_NONE:
+		return "No Error";
+	case BLE_INVALID_COMMAND:
+		return "Problem with VNX record, abort";
+	case BLE_INVALID_RECORD_TYPE:
+		return "Problem with VNX record, abort";
+	case BLE_INVALID_BYTE_COUNT:
+		return "Problem with VNX record, abort";
+	case BLE_INVALID_MEMORY_ADDRESS:
+		return "Problem with VNX record, abort";
+	case BLE_COMM_ERROR:
+		return "Checksum error, resend record";
+	case BLE_INVALID_HEX_FILE:
+		return "Problem with VNX record, abort";
+	case BLE_DECRYPTION_ERROR:
+		return "Invalid VNX file or record sent out of order, abort";
+	case BLE_INVALID_BLOCK_CRC:
+		return "Data verification failed, abort";
+	case BLE_INVALID_PROGRAM_CRC:
+		return "Problem with firmware on device";
+	case BLE_INVALID_PROGRAM_SIZE:
+		return "Problem with firmware on device";
+	case BLE_MAX_RETRY_COUNT:
+		return "Too many errors, abort";
+	case BLE_TIMEOUT:
+		return "Timeout expired, reset";
+	case BLE_RESERVED:
+		return "Contact VectorNav, abort";
+	default:
+		throw invalid_argument("val");
+	}
+}
+
 ostream& operator<<(ostream& out, SensorError e)
 {
 	out << str(e);
@@ -156,6 +193,8 @@ string str(SyncInMode val)
 			 return "Imu";
 		case SYNCINMODE_ASYNC:
 			 return "Async";
+		case SYNCINMODE_ASYNC3:
+			 return "Async3";
 		default:
 			throw invalid_argument("val");
 	}
@@ -313,6 +352,40 @@ string str(CompensationMode val)
 	}
 }
 
+string str(AccCompensationMode val)
+{
+	switch (val)
+	{
+		case ACCCOMPENSATIONMODE_NONE:
+			 return "None";
+		case ACCCOMPENSATIONMODE_BIAS:
+			 return "Bias";
+		case ACCCOMPENSATIONMODE_GRAV:
+			 return "Gravity";
+		case ACCCOMPENSATIONMODE_BIASGRAV:
+			 return "Bias & Gravity";
+		default:
+			throw invalid_argument("val");
+	}
+}
+
+string str(EarthRateCorrection val)
+{
+	switch (val)
+	{
+		case EARTHRATECORR_NONE:
+			 return "None";
+		case EARTHRATECORR_RATE:
+			 return "Angular Rate";
+		case EARTHRATECORR_CORIOLIS:
+			 return "Coriolis Acceleration";
+		case EARTHRATECORR_RATECOR:
+			 return "Angular Rate & Coriolis";
+		default:
+			throw invalid_argument("val");
+	}
+}
+
 string str(GpsFix val)
 {
 	switch (val)
@@ -357,6 +430,34 @@ string str(PpsSource val)
 			 return "SyncInRising";
 		case PPSSOURCE_SYNCINFALLING:
 			 return "SyncInFalling";
+		default:
+			throw invalid_argument("val");
+	}
+}
+
+string str(GpsRate val)
+{
+	switch (val)
+	{
+		case GPSRATE_1HZ:
+			 return "Rate1Hz";
+		case GPSRATE_5HZ:
+			 return "Rate5Hz";
+		default:
+			throw invalid_argument("val");
+	}
+}
+
+string str(AntPower val)
+{
+	switch (val)
+	{
+		case ANTPOWER_OFFRESV:
+			 return "AntPowOffResv";
+		case ANTPOWER_INTERNAL:
+			 return "AntPowInternal";
+		case ANTPOWER_EXTERNAL:
+			 return "AntPowExternal";
 		default:
 			throw invalid_argument("val");
 	}
@@ -576,6 +677,18 @@ ostream& operator<<(ostream& out, CompensationMode e)
 	return out;
 }
 
+ostream& operator<<(ostream& out, AccCompensationMode e)
+{
+	out << str(e);
+	return out;
+}
+
+ostream& operator<<(ostream& out, EarthRateCorrection e)
+{
+	out << str(e);
+	return out;
+}
+
 ostream& operator<<(ostream& out, GpsFix e)
 {
 	out << str(e);
@@ -589,6 +702,18 @@ ostream& operator<<(ostream& out, GpsMode e)
 }
 
 ostream& operator<<(ostream& out, PpsSource e)
+{
+	out << str(e);
+	return out;
+}
+
+ostream& operator<<(ostream& out, GpsRate e)
+{
+	out << str(e);
+	return out;
+}
+
+ostream& operator<<(ostream& out, AntPower e)
 {
 	out << str(e);
 	return out;

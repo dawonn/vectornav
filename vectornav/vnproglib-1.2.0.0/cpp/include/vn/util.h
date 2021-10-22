@@ -2,6 +2,7 @@
 #define _VNPROTOCOL_UART_UTIL_H_
 
 #include <string>
+#include <sstream>
 #include "types.h"
 
 namespace vn {
@@ -29,6 +30,12 @@ std::ostream& operator<<(std::ostream& out, AsciiAsync e);
 /// \param[in] val The SensorError enum value to convert to string.
 /// \return The converted value.
 std::string str(SensorError val);
+
+/// \brief Converts a BootloaderError enum into a string.
+///
+/// \param[in] val The BootloaderError enum value to convert to string.
+/// \return The converted value.
+std::string str(BootloaderError val);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// SensorError enums.
@@ -104,6 +111,18 @@ std::string str(IntegrationFrame val);
 /// \return The converted value.
 std::string str(CompensationMode val);
 
+/// \brief Converts a AccCompensationMode enum into a string.
+///
+/// \param[in] val The AccCompensationMode enum value to convert to string.
+/// \return The converted value.
+std::string str(AccCompensationMode val);
+
+/// \brief Converts a EarthRateCorrection enum into a string.
+///
+/// \param[in] val The EarthRateCorrection enum value to convert to string.
+/// \return The converted value.
+std::string str(EarthRateCorrection val);
+
 /// \brief Converts a GpsFix enum into a string.
 ///
 /// \param[in] val The GpsFix enum value to convert to string.
@@ -121,6 +140,19 @@ std::string str(GpsMode val);
 /// \param[in] val The PpsSource enum value to convert to string.
 /// \return The converted value.
 std::string str(PpsSource val);
+
+/// \brief Converts a GpsRate enum into a string.
+///
+/// \param[in] val The GpsRate enum value to convert to string.
+/// \return The converted value.
+std::string str(GpsRate val);
+
+/// \brief Converts a AntPower enum into a string.
+///
+/// \param[in] val The AntPower enum value to convert to string.
+/// \return The converted value.
+std::string str(AntPower val);
+
 
 /// \brief Converts a VpeEnable enum into a string.
 ///
@@ -271,6 +303,22 @@ std::ostream& operator<<(std::ostream& out, IntegrationFrame e);
 std::ostream& operator<<(std::ostream& out, CompensationMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
+/// AccCompensationMode enums.
+///
+/// \param[in] out The ostream being output to.
+/// \param[in] e The enum to output to ostream.
+/// \return Reference to the current ostream.
+std::ostream& operator<<(std::ostream& out, AccCompensationMode e);
+
+/// \brief Overloads the ostream << operator for easy usage in displaying
+/// EarthRateCorrection enums.
+///
+/// \param[in] out The ostream being output to.
+/// \param[in] e The enum to output to ostream.
+/// \return Reference to the current ostream.
+std::ostream& operator<<(std::ostream& out, EarthRateCorrection e);
+
+/// \brief Overloads the ostream << operator for easy usage in displaying
 /// GpsFix enums.
 ///
 /// \param[in] out The ostream being output to.
@@ -293,6 +341,22 @@ std::ostream& operator<<(std::ostream& out, GpsMode e);
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
 std::ostream& operator<<(std::ostream& out, PpsSource e);
+
+/// \brief Overloads the ostream << operator for easy usage in displaying
+/// GpsRate enums.
+///
+/// \param[in] out The ostream being output to.
+/// \param[in] e The enum to output to ostream.
+/// \return Reference to the current ostream.
+std::ostream& operator<<(std::ostream& out, GpsRate e);
+
+/// \brief Overloads the ostream << operator for easy usage in displaying
+/// AntPower enums.
+///
+/// \param[in] out The ostream being output to.
+/// \param[in] e The enum to output to ostream.
+/// \return Reference to the current ostream.
+std::ostream& operator<<(std::ostream& out, AntPower e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// VpeEnable enums.

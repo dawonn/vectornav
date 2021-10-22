@@ -472,6 +472,47 @@ struct VpeBasicControlRegister
 
 };
 
+/// \brief Structure representing the Heave Configuration Register
+struct HeaveConfigurationRegister
+{
+	float initialWavePeriod; 
+	float initialWaveAmplitude; 
+	float maxWavePeriod;
+	float minWaveAmplitude;	
+	float delayedHeaveCutoffFreq;
+	float heaveCutoffFreq;
+	float heaveRateCutoffFreq;
+	
+	HeaveConfigurationRegister() { }
+
+	/// \brief Creates and initializes a new HeaveConfigurationRegister structure.
+	///
+	/// \param[in] initialWavePeriodIn Value to initialize the initialWavePeriod field with.
+	/// \param[in] initialWaveAmplitudeIn Value to initialize the initialWaveAmplitude field with.
+	/// \param[in] maxWavePeriodIn Value to initialize the maxWavePeriod field with.
+	/// \param[in] minWaveAmplitudeIn Value to initialize the minWaveAmplitude field with.
+	/// \param[in] delayedHeaveCutoffFreqIn Value to initialize the delayedHeaveCutoffFreq field with.
+	/// \param[in] heaveCutoffFreqIn Value to initialize the heaveCutoffFreq field with.
+	/// \param[in] heaveRateCutoffFreqIn Value to initialize the heaveRateCutoffFreq field with.
+	HeaveConfigurationRegister(
+		float initialWavePeriodIn, 
+		float initialWaveAmplitudeIn, 
+		float maxWavePeriodIn,
+		float minWaveAmplitudeIn,
+		float delayedHeaveCutoffFreqIn,
+		float heaveCutoffFreqIn,
+		float heaveRateCutoffFreqIn
+		) :
+			initialWavePeriod(initialWavePeriodIn),
+			initialWaveAmplitude(initialWaveAmplitudeIn),
+			maxWavePeriod(maxWavePeriodIn),
+			minWaveAmplitude(minWaveAmplitudeIn),
+			delayedHeaveCutoffFreq(delayedHeaveCutoffFreqIn),
+			heaveCutoffFreq(heaveCutoffFreqIn),
+			heaveRateCutoffFreq(heaveRateCutoffFreqIn)
+		{ }
+};
+
 /// \brief Structure representing the VPE Magnetometer Basic Tuning register.
 struct VpeMagnetometerBasicTuningRegister
 {
@@ -751,10 +792,15 @@ struct GpsConfigurationRegister
 {
 	protocol::uart::GpsMode mode; ///< The mode field.
 	protocol::uart::PpsSource ppsSource; ///< The ppsSource field.
+	protocol::uart::GpsRate rate; ///< The rate field.
+	protocol::uart::AntPower antPow; ///< The antPow field.
 
-	GpsConfigurationRegister() { }
+	GpsConfigurationRegister() : 
+		rate(protocol::uart::GPSRATE_5HZ),
+		antPow(protocol::uart::ANTPOWER_OFFRESV)
+	{ }
 
-	/// \brief Creates an initializes a new GpsConfigurationRegister structure.
+	/// \brief Creates an initializes a new GpsConfigurationRegister structure (deprecated).
 	///
 	/// \param[in] modeIn Value to initialize the mode field with.
 	/// \param[in] ppsSourceIn Value to initialize the ppsSource field with.
@@ -762,9 +808,27 @@ struct GpsConfigurationRegister
 		protocol::uart::GpsMode modeIn,
 		protocol::uart::PpsSource ppsSourceIn) :
 		mode(modeIn),
-		ppsSource(ppsSourceIn)
+		ppsSource(ppsSourceIn),
+		rate(protocol::uart::GPSRATE_5HZ),
+		antPow(protocol::uart::ANTPOWER_OFFRESV)
 	{ }
 
+	/// \brief Creates an initializes a new GpsConfigurationRegister structure.
+	///
+	/// \param[in] modeIn Value to initialize the mode field with.
+	/// \param[in] ppsSourceIn Value to initialize the ppsSource field with.
+	/// \param[in] rateIn Value to initialize the rate field with.
+	/// \param[in] antPowIn Value to initialize the antPow field with.
+	GpsConfigurationRegister(
+		protocol::uart::GpsMode modeIn,
+		protocol::uart::PpsSource ppsSourceIn,
+		protocol::uart::GpsRate rateIn,
+		protocol::uart::AntPower antPowIn) :
+		mode(modeIn),
+		ppsSource(ppsSourceIn),
+		rate(rateIn),
+		antPow(antPowIn)
+	{ }
 };
 
 /// \brief Structure representing the GPS Solution - LLA register.
@@ -1203,11 +1267,14 @@ struct DeltaThetaAndDeltaVelocityConfigurationRegister
 {
 	protocol::uart::IntegrationFrame integrationFrame; ///< The integrationFrame field.
 	protocol::uart::CompensationMode gyroCompensation; ///< The gyroCompensation field.
-	protocol::uart::CompensationMode accelCompensation; ///< The accelCompensation field.
+	protocol::uart::AccCompensationMode accelCompensation; ///< The accelCompensation field.
+	protocol::uart::EarthRateCorrection earthRateCorrection; ///< The earthRateCorrection field.
 
-	DeltaThetaAndDeltaVelocityConfigurationRegister() { }
+	DeltaThetaAndDeltaVelocityConfigurationRegister() :
+		earthRateCorrection(protocol::uart::EARTHRATECORR_NONE)
+	{ }
 
-	/// \brief Creates an initializes a new DeltaThetaAndDeltaVelocityConfigurationRegister structure.
+	/// \brief Creates an initializes a new DeltaThetaAndDeltaVelocityConfigurationRegister structure (deprecated).
 	///
 	/// \param[in] integrationFrameIn Value to initialize the integrationFrame field with.
 	/// \param[in] gyroCompensationIn Value to initialize the gyroCompensation field with.
@@ -1215,10 +1282,28 @@ struct DeltaThetaAndDeltaVelocityConfigurationRegister
 	DeltaThetaAndDeltaVelocityConfigurationRegister(
 		protocol::uart::IntegrationFrame integrationFrameIn,
 		protocol::uart::CompensationMode gyroCompensationIn,
-		protocol::uart::CompensationMode accelCompensationIn) :
+		protocol::uart::AccCompensationMode accelCompensationIn) :
 		integrationFrame(integrationFrameIn),
 		gyroCompensation(gyroCompensationIn),
-		accelCompensation(accelCompensationIn)
+		accelCompensation(accelCompensationIn),
+		earthRateCorrection(protocol::uart::EARTHRATECORR_NONE)
+	{ }
+
+	/// \brief Creates an initializes a new DeltaThetaAndDeltaVelocityConfigurationRegister structure.
+	///
+	/// \param[in] integrationFrameIn Value to initialize the integrationFrame field with.
+	/// \param[in] gyroCompensationIn Value to initialize the gyroCompensation field with.
+	/// \param[in] accelCompensationIn Value to initialize the accelCompensation field with.
+	/// \param[in] earthRateCorrection Value to initialize the earthRateCorrection field with.
+	DeltaThetaAndDeltaVelocityConfigurationRegister(
+		protocol::uart::IntegrationFrame integrationFrameIn,
+		protocol::uart::CompensationMode gyroCompensationIn,
+		protocol::uart::AccCompensationMode accelCompensationIn,
+		protocol::uart::EarthRateCorrection earthRateCorrectionIn) :
+		integrationFrame(integrationFrameIn),
+		gyroCompensation(gyroCompensationIn),
+		accelCompensation(accelCompensationIn),
+		earthRateCorrection(earthRateCorrectionIn)
 	{ }
 
 };
