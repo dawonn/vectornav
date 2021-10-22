@@ -207,7 +207,7 @@ vec4f dcm2quat(mat3f dcm)
 
 	float maxNum = b2[0];
 	size_t maxIndex = 0;
-	for (size_t i = 1; i < sizeof(b2); i++)
+	for (size_t i = 1; i < 4; i++)
 	{
 		if (b2[i] > maxNum)
 		{

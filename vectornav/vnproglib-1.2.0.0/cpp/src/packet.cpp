@@ -29,7 +29,7 @@
 #define ATOFF static_cast<float>(std::atof(result))
 #define ATOFD std::atof(result)
 #define ATOU32 static_cast<uint32_t>(std::atoi(result))
-#define ATOU16X ((uint16_t) std::strtol(result, NULL, 16))
+#define ATOU16X ((uint16_t) std::strtoul(result, NULL, 16))
 #define ATOU16 static_cast<uint16_t>(std::atoi(result))
 #define ATOU8 static_cast<uint8_t>(std::atoi(result))
 
@@ -49,7 +49,7 @@ const unsigned char Packet::BinaryGroupLengths[sizeof(uint8_t)*8][sizeof(uint16_
 	{ 8,  8,  8,  2,  8,  8,  8,  4,  4,  1,  0,  0,  0,  0,  0},		// Group 2
 	{ 2, 12, 12, 12,  4,  4, 16, 12, 12, 12, 12,  2, 40,  0,  0},		// Group 3
 	{ 8,  8,  2,  1,  1, 24, 24, 12, 12, 12,  4,  4,  2, 28,  0},		// Group 4
-	{ 2, 12, 16, 36, 12, 12, 12, 12, 12, 12, 28, 24,  0,  0,  0},		// Group 5
+	{ 2, 12, 16, 36, 12, 12, 12, 12, 12, 12, 28, 24,  12,  0,  0},		// Group 5
 	{ 2, 24, 24, 12, 12, 12, 12, 12, 12,  4,  4, 68, 64,  0,  0},		// Group 6
 	{ 8,  8,  2,  1,  1, 24, 24, 12, 12, 12,  4,  4,  2, 28,  0},		// Group 7
 	{ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}		// Invalid group
@@ -172,6 +172,15 @@ bool Packet::isValid()
 
 			return packetCrc == computedCrc;
 		}
+		else if (_data[_length - 6] == '*') // ASCII Responses curing bootloader mode
+		{
+			// Appears we have a 16-bit CRC packet.
+			uint16_t packetCrc = to_uint16_from_hexstr(_data + _length - 5);
+
+			uint16_t computedCrc = Crc16::compute(_data + 1, _length - 7);
+
+			return packetCrc == computedCrc;
+		}
 		else
 		{
 			// Don't know what we have.
@@ -186,6 +195,13 @@ bool Packet::isValid()
 	}
 	else
 	{
+		// Check for special case for switching to bootloader mode
+		char bootloadSignature[] = "VectorNav Bootloader";
+		if (strncmp(_data, bootloadSignature, sizeof(bootloadSignature) - 1) == 0)
+		{
+			return true;
+		}
+
 		throw not_implemented();
 	}
 }
@@ -220,6 +236,18 @@ bool Packet::isResponse()
 	if (std::strncmp(_data + 3, "KAD", 3) == 0)
 		return true;
 	if (std::strncmp(_data + 3, "SGB", 3) == 0)
+		return true;
+	if (std::strncmp(_data + 3, "DBS", 3) == 0)
+		return true;
+	if (std::strncmp(_data + 3, "MCU", 3) == 0)
+		return true;
+	if (std::strncmp(_data + 3, "SBL", 3) == 0)
+		return true;
+	if (std::strncmp(_data + 3, "SPS", 3) == 0)
+		return true;
+	if (std::strncmp(_data + 3, "BLD", 3) == 0)
+		return true;
+	if (std::strncmp(_data, "VectorNav Bootloader", 20) == 0)
 		return true;
 
 	return false;
@@ -290,11 +318,11 @@ bool Packet::isAsciiAsync()
 		return true;
 	if (strncmp(pAT, "DTV", 3) == 0)
 		return true;
-  if(strncmp(pAT, "G2S", 3) == 0)
-    return true;
-  if(strncmp(pAT, "G2E", 3) == 0)
-    return true;
-#ifdef INTERNAL
+	if(strncmp(pAT, "G2S", 3) == 0)
+		return true;
+	if(strncmp(pAT, "G2E", 3) == 0)
+		return true;
+	#ifdef INTERNAL
 	if (strncmp(pAT, "RAW", 3) == 0)
 		return true;
 	if (strncmp(pAT, "CMV", 3) == 0)
@@ -304,8 +332,20 @@ bool Packet::isAsciiAsync()
 	if (strncmp(pAT, "COV", 3) == 0)
 		return true;
 	#endif
-	else
-		return false;
+	if (strncmp(pAT, "RTK", 3) == 0)
+		return true;
+
+	return false;
+}
+
+bool Packet::isBootloader()
+{
+	if (std::strncmp(_data + 3, "BLD", 3) == 0)
+		return true;
+	if (std::strncmp(_data, "VectorNav Bootloader", 20) == 0)
+		return true;
+
+	return false;
 }
 
 AsciiAsync Packet::determineAsciiAsyncType()
@@ -505,13 +545,6 @@ char* startAsciiPacketParse(char* packetStart, size_t& index)
 	return vnstrtok(packetStart, index);
 }
 
-char* startAsciiResponsePacketParse(char* packetStart, size_t& index)
-{
-	startAsciiPacketParse(packetStart, index);
-
-	return vnstrtok(packetStart, index);
-}
-
 char* getNextData(char* str, size_t& startIndex)
 {
 	return vnstrtok(str, startIndex);
@@ -521,9 +554,16 @@ char* vnstrtok(char* str, size_t& startIndex)
 {
 	size_t origIndex = startIndex;
 
+	if (str[startIndex-1] == '*') // attempting to read too many fields
+		return NULL;
+		
 	while (str[startIndex] != ',' && str[startIndex] != '*')
+	{
+		if((str[startIndex] < ' ') || (str[startIndex] > '~') || (str[startIndex] == '$')) // check for garbage characters
+			return NULL;
 		startIndex++;
-
+	}
+	
 	str[startIndex++] = '\0';
 
 	return str + origIndex;
@@ -907,6 +947,17 @@ size_t Packet::genReset(ErrorDetectionMode errorDetectionMode, char *buffer, siz
 	return finalizeCommand(errorDetectionMode, buffer, length);
 }
 
+size_t Packet::genFirmwareUpdate(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size)
+{
+#if VN_HAVE_SECURE_CRT
+	size_t length = sprintf_s(buffer, size, "$VNFWU");
+#else
+	size_t length = sprintf(buffer, "$VNFWU");
+#endif
+
+	return finalizeCommand(errorDetectionMode, buffer, length);
+}
+
 size_t Packet::genReadSerialBaudRate(ErrorDetectionMode errorDetectionMode, char *buffer, size_t size, uint8_t port)
 {
 	#if VN_HAVE_SECURE_CRT
@@ -990,6 +1041,19 @@ size_t Packet::genWriteFilterMeasurementsVarianceParameters(ErrorDetectionMode e
 		accelerationVariance.x,
 		accelerationVariance.y,
 		accelerationVariance.z);
+
+	return finalizeCommand(errorDetectionMode, buffer, length);
+}
+
+size_t Packet::genWriteFirmwareUpdateRecord(ErrorDetectionMode errorDetectionMode, char* buffer, size_t size, string record)
+{
+#if VN_HAVE_SECURE_CRT
+	size_t length = sprintf_s(buffer, size, "$VNBLD,%s"
+#else
+	size_t length = sprintf(buffer, "$VNBLD,%s"
+#endif
+		,
+		record.c_str());
 
 	return finalizeCommand(errorDetectionMode, buffer, length);
 }
@@ -1507,6 +1571,43 @@ size_t Packet::genWriteFilterBasicControl(ErrorDetectionMode errorDetectionMode,
 	return finalizeCommand(errorDetectionMode, buffer, length);
 }
 
+size_t Packet::genReadHeaveConfiguration(ErrorDetectionMode errorDetectionMode, char *buffer, size_t size)
+{
+	#if VN_HAVE_SECURE_CRT
+	size_t length = sprintf_s(buffer, size, "$VNRRG,116");
+	#else
+	size_t length = sprintf(buffer, "$VNRRG,116");
+	#endif
+
+	return finalizeCommand(errorDetectionMode, buffer, length);
+}
+
+size_t Packet::genWriteHeaveConfiguration(ErrorDetectionMode errorDetectionMode, char *buffer, size_t size, 
+							float initialWavePeriod, 
+							float initialWaveAmplitude, 
+							float maxWavePeriod,
+							float minWaveAmplitude,
+							float delayedHeaveCutoffFreq,
+							float heaveCutoffFreq,
+							float heaveRateCutoffFreq)
+{
+	#if VN_HAVE_SECURE_CRT
+	size_t length = sprintf_s(buffer, size, "$VNWRG,116,%f,%f,%f,%f,%f,%f,%f"
+	#else
+	size_t length = sprintf(buffer, "$VNWRG,116,%f,%f,%f,%f,%f,%f,%f"
+	#endif
+,
+		initialWavePeriod,
+		initialWaveAmplitude,
+		maxWavePeriod,
+		minWaveAmplitude,
+		delayedHeaveCutoffFreq,
+		heaveCutoffFreq,
+		heaveRateCutoffFreq);
+
+	return finalizeCommand(errorDetectionMode, buffer, length);
+}
+
 size_t Packet::genReadVpeBasicControl(ErrorDetectionMode errorDetectionMode, char *buffer, size_t size)
 {
 	#if VN_HAVE_SECURE_CRT
@@ -1880,6 +1981,22 @@ size_t Packet::genWriteGpsConfiguration(ErrorDetectionMode errorDetectionMode, c
 	return finalizeCommand(errorDetectionMode, buffer, length);
 }
 
+size_t Packet::genWriteGpsConfiguration(ErrorDetectionMode errorDetectionMode, char *buffer, size_t size, uint8_t mode, uint8_t ppsSource, uint8_t rate, uint8_t antPow)
+{
+	#if VN_HAVE_SECURE_CRT
+	size_t length = sprintf_s(buffer, size, "$VNWRG,55,%u,%u,%u,0,%u"
+	#else
+	size_t length = sprintf(buffer, "$VNWRG,55,%u,%u,%u,0,%u"
+	#endif
+,
+		mode,
+		ppsSource,
+		rate,
+		antPow);
+
+	return finalizeCommand(errorDetectionMode, buffer, length);
+}
+
 size_t Packet::genReadGpsAntennaOffset(ErrorDetectionMode errorDetectionMode, char *buffer, size_t size)
 {
 	#if VN_HAVE_SECURE_CRT
@@ -2090,15 +2207,21 @@ size_t Packet::genReadDeltaThetaAndDeltaVelocityConfiguration(ErrorDetectionMode
 
 size_t Packet::genWriteDeltaThetaAndDeltaVelocityConfiguration(ErrorDetectionMode errorDetectionMode, char *buffer, size_t size, uint8_t integrationFrame, uint8_t gyroCompensation, uint8_t accelCompensation)
 {
+	return genWriteDeltaThetaAndDeltaVelocityConfiguration(errorDetectionMode, buffer, size, integrationFrame, gyroCompensation, accelCompensation, 0);	
+}
+
+size_t Packet::genWriteDeltaThetaAndDeltaVelocityConfiguration(ErrorDetectionMode errorDetectionMode, char *buffer, size_t size, uint8_t integrationFrame, uint8_t gyroCompensation, uint8_t accelCompensation, uint8_t earthRateCorrection)
+{
 	#if VN_HAVE_SECURE_CRT
-	size_t length = sprintf_s(buffer, size, "$VNWRG,82,%u,%u,%u,0,0"
+	size_t length = sprintf_s(buffer, size, "$VNWRG,82,%u,%u,%u,%u,0"
 	#else
-	size_t length = sprintf(buffer, "$VNWRG,82,%u,%u,%u,0,0"
+	size_t length = sprintf(buffer, "$VNWRG,82,%u,%u,%u,%u,0"
 	#endif
 ,
 		integrationFrame,
 		gyroCompensation,
-		accelCompensation);
+		accelCompensation,
+		earthRateCorrection);
 
 	return finalizeCommand(errorDetectionMode, buffer, length);
 }
@@ -2646,9 +2769,9 @@ void Packet::parseVNGPS(double* time, uint16_t* week, uint8_t* gpsFix, uint8_t* 
 	char* result = startAsciiPacketParse(_data, parseIndex);
 
 	*time = ATOFD; NEXT
-	*week = static_cast<uint16_t>(atoi(result)); NEXT
-	*gpsFix = static_cast<uint8_t>(atoi(result)); NEXT
-	*numSats = static_cast<uint8_t>(atoi(result)); NEXT
+	*week = ATOU16; NEXT
+	*gpsFix = ATOU8; NEXT
+	*numSats = ATOU8; NEXT
 	lla->x = ATOFD; NEXT
 	lla->y = ATOFD; NEXT
 	lla->z = ATOFD; NEXT
@@ -2669,8 +2792,8 @@ void Packet::parseVNINS(double* time, uint16_t* week, uint16_t* status, vec3f* y
 	char* result = startAsciiPacketParse(_data, parseIndex);
 
 	*time = ATOFD; NEXT
-	*week = static_cast<uint16_t>(atoi(result)); NEXT
-	*status = static_cast<uint16_t>(atoi(result)); NEXT
+	*week = ATOU16; NEXT
+	*status = ATOU16X; NEXT
 	yawPitchRoll->x = ATOFF; NEXT
 	yawPitchRoll->y = ATOFF; NEXT
 	yawPitchRoll->z = ATOFF; NEXT
@@ -2692,8 +2815,8 @@ void Packet::parseVNINE(double* time, uint16_t* week, uint16_t* status, vec3f* y
 	char* result = startAsciiPacketParse(_data, parseIndex);
 
 	*time = ATOFD; NEXT
-	*week = static_cast<uint16_t>(atoi(result)); NEXT
-	*status = static_cast<uint16_t>(atoi(result)); NEXT
+	*week = ATOU16; NEXT
+	*status = ATOU16X; NEXT
 	ypr->x = ATOFF; NEXT
 	ypr->y = ATOFF; NEXT
 	ypr->z = ATOFF; NEXT
@@ -2830,9 +2953,9 @@ void Packet::parseVNGPE(double* tow, uint16_t* week, uint8_t* gpsFix, uint8_t* n
 	char* result = startAsciiPacketParse(_data, parseIndex);
 
 	*tow = ATOFD; NEXT
-	*week = static_cast<uint16_t>(atoi(result)); NEXT
-	*gpsFix = static_cast<uint8_t>(atoi(result)); NEXT
-	*numSats = static_cast<uint8_t>(atoi(result)); NEXT
+	*week = ATOU16; NEXT
+	*gpsFix = ATOU8; NEXT
+	*numSats = ATOU8; NEXT
 	position->x = ATOFD; NEXT
 	position->y = ATOFD; NEXT
 	position->z = ATOFD; NEXT
@@ -2903,6 +3026,12 @@ size_t Packet::computeBinaryPacketLength(char const* startOfPossibleBinaryPacket
 		pCurrentGroupField += 2;
 	}
 
+	if (groupsPresent & BINARYGROUP_GPS2)
+	{
+		runningPayloadLength += 2 + computeNumOfBytesForBinaryGroupPayload(BINARYGROUP_GPS2, stoh(*reinterpret_cast<const uint16_t*>(pCurrentGroupField)));
+		pCurrentGroupField += 2;
+	}
+
 	return runningPayloadLength + 2;	// Add 2 bytes for CRC.
 }
 
@@ -2967,7 +3096,7 @@ void Packet::parseBinaryOutput(
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*commonField = 0;
 	*timeField = 0;
@@ -3020,23 +3149,23 @@ void Packet::parseUserTag(char* tag)
 {
 	size_t parseIndex;
 
-	char* next = startAsciiPacketParse(_data, parseIndex);
+	char* result = startAsciiPacketParse(_data, parseIndex);
 
-	if (*(next + strlen(next) + 1) == '*')
+	if (*(result + strlen(result) + 1) == '*')
 	{
 		tag[0] = '\0';
 		return;
 	}
 
-	next = getNextData(_data, parseIndex);
-
+	NEXT
+	
 	#if defined(_MSC_VER)
 		//Unable to use strcpy_s since we do not have length of the output array.
 		#pragma warning(push)
 		#pragma warning(disable:4996)
 	#endif
 
-	strcpy(tag, next);
+	strcpy(tag, result);
 
 	#if defined(_MSC_VER)
 		#pragma warning(pop)
@@ -3047,23 +3176,23 @@ void Packet::parseModelNumber(char* productName)
 {
 	size_t parseIndex;
 
-	char* next = startAsciiPacketParse(_data, parseIndex);
+	char* result = startAsciiPacketParse(_data, parseIndex);
 
-	if (*(next + strlen(next) + 1) == '*')
+	if (*(result + strlen(result) + 1) == '*')
 	{
 		productName[0] = '\0';
 		return;
 	}
 
-	next = getNextData(_data, parseIndex);
-
+	NEXT
+	
 	#if defined(_MSC_VER)
 		//Unable to use strcpy_s since we do not have length of the output array.
 		#pragma warning(push)
 		#pragma warning(disable:4996)
 	#endif
 
-	strcpy(productName, next);
+	strcpy(productName, result);
 
 	#if defined(_MSC_VER)
 		#pragma warning(pop)
@@ -3074,7 +3203,7 @@ void Packet::parseHardwareRevision(uint32_t* revision)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*revision = ATOU32;
 }
@@ -3083,7 +3212,7 @@ void Packet::parseSerialNumber(uint32_t* serialNum)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*serialNum = ATOU32;
 }
@@ -3092,15 +3221,15 @@ void Packet::parseFirmwareVersion(char* firmwareVersion)
 {
 	size_t parseIndex;
 
-	char* next = startAsciiPacketParse(_data, parseIndex);
+	char* result = startAsciiPacketParse(_data, parseIndex);
 
-	if (*(next + strlen(next) + 1) == '*')
+	if (*(result + strlen(result) + 1) == '*')
 	{
 		firmwareVersion[0] = '\0';
 		return;
 	}
 
-	next = getNextData(_data, parseIndex);
+	NEXT
 
 	#if defined(_MSC_VER)
 		//Unable to use strcpy_s since we do not have length of the output array.
@@ -3108,7 +3237,7 @@ void Packet::parseFirmwareVersion(char* firmwareVersion)
 		#pragma warning(disable:4996)
 	#endif
 
-	strcpy(firmwareVersion, next);
+	strcpy(firmwareVersion, result);
 
 	#if defined(_MSC_VER)
 		#pragma warning(pop)
@@ -3119,7 +3248,7 @@ void Packet::parseSerialBaudRate(uint32_t* baudrate)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*baudrate = ATOU32;
 }
@@ -3128,7 +3257,7 @@ void Packet::parseAsyncDataOutputType(uint32_t* ador)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*ador = ATOU32;
 }
@@ -3137,7 +3266,7 @@ void Packet::parseAsyncDataOutputFrequency(uint32_t* adof)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*adof = ATOU32;
 }
@@ -3146,7 +3275,7 @@ void Packet::parseYawPitchRoll(vec3f* yawPitchRoll)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	yawPitchRoll->x = ATOFF; NEXT
 	yawPitchRoll->y = ATOFF; NEXT
@@ -3157,7 +3286,7 @@ void Packet::parseAttitudeQuaternion(vec4f* quat)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	quat->x = ATOFF; NEXT
 	quat->y = ATOFF; NEXT
@@ -3169,7 +3298,7 @@ void Packet::parseQuaternionMagneticAccelerationAndAngularRates(vec4f* quat, vec
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	quat->x = ATOFF; NEXT
 	quat->y = ATOFF; NEXT
@@ -3190,7 +3319,7 @@ void Packet::parseMagneticMeasurements(vec3f* mag)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	mag->x = ATOFF; NEXT
 	mag->y = ATOFF; NEXT
@@ -3201,7 +3330,7 @@ void Packet::parseAccelerationMeasurements(vec3f* accel)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	accel->x = ATOFF; NEXT
 	accel->y = ATOFF; NEXT
@@ -3212,7 +3341,7 @@ void Packet::parseAngularRateMeasurements(vec3f* gyro)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	gyro->x = ATOFF; NEXT
 	gyro->y = ATOFF; NEXT
@@ -3223,7 +3352,7 @@ void Packet::parseMagneticAccelerationAndAngularRates(vec3f* mag, vec3f* accel, 
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	mag->x = ATOFF; NEXT
 	mag->y = ATOFF; NEXT
@@ -3240,7 +3369,7 @@ void Packet::parseMagneticAndGravityReferenceVectors(vec3f* magRef, vec3f* accRe
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	magRef->x = ATOFF; NEXT
 	magRef->y = ATOFF; NEXT
@@ -3254,7 +3383,7 @@ void Packet::parseFilterMeasurementsVarianceParameters(float* angularWalkVarianc
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*angularWalkVariance = ATOFF; NEXT
 	angularRateVariance->x = ATOFF; NEXT
@@ -3272,7 +3401,7 @@ void Packet::parseMagnetometerCompensation(mat3f* c, vec3f* b)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	c->e00 = ATOFF; NEXT
 	c->e01 = ATOFF; NEXT
@@ -3292,7 +3421,7 @@ void Packet::parseFilterActiveTuningParameters(float* magneticDisturbanceGain, f
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*magneticDisturbanceGain = ATOFF; NEXT
 	*accelerationDisturbanceGain = ATOFF; NEXT
@@ -3304,7 +3433,7 @@ void Packet::parseAccelerationCompensation(mat3f* c, vec3f* b)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	c->e00 = ATOFF; NEXT
 	c->e01 = ATOFF; NEXT
@@ -3324,7 +3453,7 @@ void Packet::parseReferenceFrameRotation(mat3f* c)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	c->e00 = ATOFF; NEXT
 	c->e01 = ATOFF; NEXT
@@ -3341,7 +3470,7 @@ void Packet::parseYawPitchRollMagneticAccelerationAndAngularRates(vec3f* yawPitc
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	yawPitchRoll->x = ATOFF; NEXT
 	yawPitchRoll->y = ATOFF; NEXT
@@ -3361,7 +3490,7 @@ void Packet::parseCommunicationProtocolControl(uint8_t* serialCount, uint8_t* se
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*serialCount = ATOU8; NEXT
 	*serialStatus = ATOU8; NEXT
@@ -3376,7 +3505,7 @@ void Packet::parseSynchronizationControl(uint8_t* syncInMode, uint8_t* syncInEdg
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*syncInMode = ATOU8; NEXT
 	*syncInEdge = ATOU8; NEXT
@@ -3392,7 +3521,7 @@ void Packet::parseSynchronizationStatus(uint32_t* syncInCount, uint32_t* syncInT
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*syncInCount = ATOU32; NEXT
 	*syncInTime = ATOU32; NEXT
@@ -3403,7 +3532,7 @@ void Packet::parseFilterBasicControl(uint8_t* magMode, uint8_t* extMagMode, uint
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*magMode = ATOU8; NEXT
 	*extMagMode = ATOU8; NEXT
@@ -3414,11 +3543,33 @@ void Packet::parseFilterBasicControl(uint8_t* magMode, uint8_t* extMagMode, uint
 	gyroLimit->z = ATOFF;
 }
 
+void Packet::parseHeaveConfiguration(	
+	float* initialWavePeriod, 
+	float* initialWaveAmplitude, 
+	float* maxWavePeriod,
+	float* minWaveAmplitude,	
+	float* delayedHeaveCutoffFreq,
+	float* heaveCutoffFreq,
+	float* heaveRateCutoffFreq)
+{
+	size_t parseIndex;
+
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
+
+	*initialWavePeriod = ATOFF; NEXT
+	*initialWaveAmplitude = ATOFF; NEXT
+	*maxWavePeriod = ATOFF; NEXT
+	*minWaveAmplitude = ATOFF; NEXT
+	*delayedHeaveCutoffFreq = ATOFF; NEXT
+	*heaveCutoffFreq = ATOFF; NEXT
+	*heaveRateCutoffFreq = ATOFF; 
+}
+
 void Packet::parseVpeBasicControl(uint8_t* enable, uint8_t* headingMode, uint8_t* filteringMode, uint8_t* tuningMode)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*enable = ATOU8; NEXT
 	*headingMode = ATOU8; NEXT
@@ -3430,7 +3581,7 @@ void Packet::parseVpeMagnetometerBasicTuning(vec3f* baseTuning, vec3f* adaptiveT
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	baseTuning->x = ATOFF; NEXT
 	baseTuning->y = ATOFF; NEXT
@@ -3447,7 +3598,7 @@ void Packet::parseVpeMagnetometerAdvancedTuning(vec3f* minFiltering, vec3f* maxF
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	minFiltering->x = ATOFF; NEXT
 	minFiltering->y = ATOFF; NEXT
@@ -3464,7 +3615,7 @@ void Packet::parseVpeAccelerometerBasicTuning(vec3f* baseTuning, vec3f* adaptive
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	baseTuning->x = ATOFF; NEXT
 	baseTuning->y = ATOFF; NEXT
@@ -3481,7 +3632,7 @@ void Packet::parseVpeAccelerometerAdvancedTuning(vec3f* minFiltering, vec3f* max
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	minFiltering->x = ATOFF; NEXT
 	minFiltering->y = ATOFF; NEXT
@@ -3498,7 +3649,7 @@ void Packet::parseVpeGyroBasicTuning(vec3f* angularWalkVariance, vec3f* baseTuni
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	angularWalkVariance->x = ATOFF; NEXT
 	angularWalkVariance->y = ATOFF; NEXT
@@ -3515,7 +3666,7 @@ void Packet::parseFilterStartupGyroBias(vec3f* bias)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	bias->x = ATOFF; NEXT
 	bias->y = ATOFF; NEXT
@@ -3526,7 +3677,7 @@ void Packet::parseMagnetometerCalibrationControl(uint8_t* hsiMode, uint8_t* hsiO
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*hsiMode = ATOU8; NEXT
 	*hsiOutput = ATOU8; NEXT
@@ -3537,7 +3688,7 @@ void Packet::parseCalculatedMagnetometerCalibration(mat3f* c, vec3f* b)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	c->e00 = ATOFF; NEXT
 	c->e01 = ATOFF; NEXT
@@ -3557,7 +3708,7 @@ void Packet::parseIndoorHeadingModeControl(float* maxRateError)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*maxRateError = ATOFF; NEXT
 }
@@ -3566,7 +3717,7 @@ void Packet::parseVelocityCompensationMeasurement(vec3f* velocity)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	velocity->x = ATOFF; NEXT
 	velocity->y = ATOFF; NEXT
@@ -3577,7 +3728,7 @@ void Packet::parseVelocityCompensationControl(uint8_t* mode, float* velocityTuni
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*mode = ATOU8; NEXT
 	*velocityTuning = ATOFF; NEXT
@@ -3588,7 +3739,7 @@ void Packet::parseVelocityCompensationStatus(float* x, float* xDot, vec3f* accel
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*x = ATOFF; NEXT
 	*xDot = ATOFF; NEXT
@@ -3604,7 +3755,7 @@ void Packet::parseImuMeasurements(vec3f* mag, vec3f* accel, vec3f* gyro, float* 
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	mag->x = ATOFF; NEXT
 	mag->y = ATOFF; NEXT
@@ -3623,7 +3774,7 @@ void Packet::parseGpsConfiguration(uint8_t* mode, uint8_t* ppsSource)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*mode = ATOU8; NEXT
 	*ppsSource = ATOU8; NEXT
@@ -3631,11 +3782,24 @@ void Packet::parseGpsConfiguration(uint8_t* mode, uint8_t* ppsSource)
 	NEXT
 }
 
+void Packet::parseGpsConfiguration(uint8_t* mode, uint8_t* ppsSource, uint8_t* rate, uint8_t* antPow)
+{
+	size_t parseIndex;
+
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
+
+	*mode = ATOU8; NEXT
+	*ppsSource = ATOU8; NEXT
+	*rate = ATOU8; NEXT
+	NEXT
+	*antPow = ATOU8; 
+}
+
 void Packet::parseGpsAntennaOffset(vec3f* position)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	position->x = ATOFF; NEXT
 	position->y = ATOFF; NEXT
@@ -3646,7 +3810,7 @@ void Packet::parseGpsSolutionLla(double* time, uint16_t* week, uint8_t* gpsFix, 
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*time = ATOFD; NEXT
 	*week = ATOU16; NEXT
@@ -3669,7 +3833,7 @@ void Packet::parseGpsSolutionEcef(double* tow, uint16_t* week, uint8_t* gpsFix, 
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*tow = ATOFD; NEXT
 	*week = ATOU16; NEXT
@@ -3692,7 +3856,7 @@ void Packet::parseInsSolutionLla(double* time, uint16_t* week, uint16_t* status,
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*time = ATOFD; NEXT
 	*week = ATOU16; NEXT
@@ -3715,7 +3879,7 @@ void Packet::parseInsSolutionEcef(double* time, uint16_t* week, uint16_t* status
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*time = ATOFD; NEXT
 	*week = ATOU16; NEXT
@@ -3738,7 +3902,7 @@ void Packet::parseInsBasicConfiguration(uint8_t* scenario, uint8_t* ahrsAiding)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*scenario = ATOU8; NEXT
 	*ahrsAiding = ATOU8; NEXT
@@ -3749,7 +3913,7 @@ void Packet::parseInsBasicConfiguration(uint8_t* scenario, uint8_t* ahrsAiding, 
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*scenario = ATOU8; NEXT
 	*ahrsAiding = ATOU8; NEXT
@@ -3760,7 +3924,7 @@ void Packet::parseInsAdvancedConfiguration(uint8_t* useMag, uint8_t* usePres, ui
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*useMag = ATOU8; NEXT
 	*usePres = ATOU8; NEXT
@@ -3783,7 +3947,7 @@ void Packet::parseInsStateLla(vec3f* yawPitchRoll, vec3d* position, vec3f* veloc
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	yawPitchRoll->x = ATOFF; NEXT
 	yawPitchRoll->y = ATOFF; NEXT
@@ -3806,7 +3970,7 @@ void Packet::parseInsStateEcef(vec3f* yawPitchRoll, vec3d* position, vec3f* velo
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	yawPitchRoll->x = ATOFF; NEXT
 	yawPitchRoll->y = ATOFF; NEXT
@@ -3829,7 +3993,7 @@ void Packet::parseStartupFilterBiasEstimate(vec3f* gyroBias, vec3f* accelBias, f
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	gyroBias->x = ATOFF; NEXT
 	gyroBias->y = ATOFF; NEXT
@@ -3844,7 +4008,7 @@ void Packet::parseDeltaThetaAndDeltaVelocity(float* deltaTime, vec3f* deltaTheta
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*deltaTime = ATOFF; NEXT
 	deltaTheta->x = ATOFF; NEXT
@@ -3857,21 +4021,27 @@ void Packet::parseDeltaThetaAndDeltaVelocity(float* deltaTime, vec3f* deltaTheta
 
 void Packet::parseDeltaThetaAndDeltaVelocityConfiguration(uint8_t* integrationFrame, uint8_t* gyroCompensation, uint8_t* accelCompensation)
 {
+	uint8_t earthRateCorrection;
+	parseDeltaThetaAndDeltaVelocityConfiguration(integrationFrame, gyroCompensation, accelCompensation, &earthRateCorrection);
+}
+
+void Packet::parseDeltaThetaAndDeltaVelocityConfiguration(uint8_t* integrationFrame, uint8_t* gyroCompensation, uint8_t* accelCompensation, uint8_t* earthRateCorrection)
+{
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*integrationFrame = ATOU8; NEXT
 	*gyroCompensation = ATOU8; NEXT
 	*accelCompensation = ATOU8; NEXT
-	NEXT
+	*earthRateCorrection = ATOU8; NEXT
 }
 
 void Packet::parseReferenceVectorConfiguration(uint8_t* useMagModel, uint8_t* useGravityModel, uint32_t* recalcThreshold, float* year, vec3d* position)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*useMagModel = ATOU8; NEXT
 	*useGravityModel = ATOU8; NEXT
@@ -3888,7 +4058,7 @@ void Packet::parseGyroCompensation(mat3f* c, vec3f* b)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	c->e00 = ATOFF; NEXT
 	c->e01 = ATOFF; NEXT
@@ -3908,7 +4078,7 @@ void Packet::parseImuFilteringConfiguration(uint16_t* magWindowSize, uint16_t* a
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*magWindowSize = ATOU16; NEXT
 	*accelWindowSize = ATOU16; NEXT
@@ -3926,7 +4096,7 @@ void Packet::parseGpsCompassBaseline(vec3f* position, vec3f* uncertainty)
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	position->x = ATOFF; NEXT
 	position->y = ATOFF; NEXT
@@ -3940,7 +4110,7 @@ void Packet::parseGpsCompassEstimatedBaseline(uint8_t* estBaselineUsed, uint16_t
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*estBaselineUsed = ATOU8; NEXT
 	NEXT
@@ -3957,7 +4127,7 @@ void Packet::parseImuRateConfiguration(uint16_t* imuRate, uint16_t* navDivisor, 
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	*imuRate = ATOU16; NEXT
 	*navDivisor = ATOU16; NEXT
@@ -3969,7 +4139,7 @@ void Packet::parseYawPitchRollTrueBodyAccelerationAndAngularRates(vec3f* yawPitc
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	yawPitchRoll->x = ATOFF; NEXT
 	yawPitchRoll->y = ATOFF; NEXT
@@ -3986,7 +4156,7 @@ void Packet::parseYawPitchRollTrueInertialAccelerationAndAngularRates(vec3f* yaw
 {
 	size_t parseIndex;
 
-	char *result = startAsciiResponsePacketParse(_data, parseIndex);
+	char *result = startAsciiPacketParse(_data, parseIndex); NEXT
 
 	yawPitchRoll->x = ATOFF; NEXT
 	yawPitchRoll->y = ATOFF; NEXT

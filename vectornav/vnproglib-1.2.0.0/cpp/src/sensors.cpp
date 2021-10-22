@@ -10,6 +10,8 @@
 #include "vn/matrix.h"
 #include "vn/compiler.h"
 #include "vn/util.h"
+#include "vn/thread.h"
+
 
 #include <string>
 #include <queue>
@@ -77,6 +79,7 @@ struct VnSensor::Impl
 	static const uint16_t DefaultRetransmitDelayMs = 200;
 
 	SerialPort *pSerialPort;
+	char readBuffer[DefaultReadBufferSize];
 	IPort* port;
 	bool SimplePortIsOurs;
 	bool DidWeOpenSimplePort;
@@ -93,6 +96,7 @@ struct VnSensor::Impl
 	queue<Packet> _receivedResponses;
 	CriticalSection _transactionCS;
 	bool _waitingForResponse;
+	bool _filteringBootloaderResponses;
 	ErrorPacketReceivedHandler _errorPacketReceivedHandler;
 	void* _errorPacketReceivedUserData;
 	uint16_t _responseTimeoutMs;
@@ -118,6 +122,7 @@ struct VnSensor::Impl
 		_sendErrorDetectionMode(ERRORDETECTIONMODE_CHECKSUM),
 		BackReference(backReference),
 		_waitingForResponse(false),
+		_filteringBootloaderResponses(false),
 		_errorPacketReceivedHandler(NULL),
 		_errorPacketReceivedUserData(NULL),
 		_responseTimeoutMs(DefaultResponseTimeoutMs),
@@ -144,7 +149,6 @@ struct VnSensor::Impl
 
 	void onAsyncPacketReceived(Packet& asciiPacket, size_t runningIndex, TimeStamp timestamp)
 	{
-		//cout << "Made A" << flush << endl;
 
 		if (_asyncPacketReceivedHandler != NULL)
 			_asyncPacketReceivedHandler(_asyncPacketReceivedUserData, asciiPacket, runningIndex);
@@ -176,7 +180,15 @@ struct VnSensor::Impl
 		pThis->onPossiblePacketFound(possiblePacket, packetStartRunningIndex);
 
 		if (!possiblePacket.isValid())
+		{
 			return;
+		}
+
+		if (pThis->_filteringBootloaderResponses && !possiblePacket.isBootloader())
+		{
+			// If anything other than bootloader packets arrive, turn off the bootloader filter
+			pThis->_filteringBootloaderResponses = false;
+		}
 
 		if (possiblePacket.isError())
 		{
@@ -193,12 +205,15 @@ struct VnSensor::Impl
 			return;
 		}
 
-		if (possiblePacket.isResponse() && pThis->_waitingForResponse)
+		if (possiblePacket.isResponse())
 		{
-			pThis->_transactionCS.enter();
-			pThis->_receivedResponses.push(possiblePacket);
-			pThis->_newResponsesEvent.signal();
-			pThis->_transactionCS.leave();
+			if (pThis->_waitingForResponse)
+			{
+				pThis->_transactionCS.enter();
+				pThis->_receivedResponses.push(possiblePacket);
+				pThis->_newResponsesEvent.signal();
+				pThis->_transactionCS.leave();
+			}
 
 			return;
 		}
@@ -209,13 +224,12 @@ struct VnSensor::Impl
 
 	static void dataReceivedHandler(void* userData)
 	{
-		static char readBuffer[DefaultReadBufferSize];
 		Impl *pi = static_cast<Impl*>(userData);
 
 		size_t numOfBytesRead = 0;
 
 		pi->port->read(
-			readBuffer,
+			pi->readBuffer,
 			DefaultReadBufferSize,
 			numOfBytesRead);
 
@@ -225,7 +239,7 @@ struct VnSensor::Impl
 		TimeStamp t = TimeStamp::get();
 
 		if (pi->_rawDataReceivedHandler != NULL)
-			pi->_rawDataReceivedHandler(pi->_rawDataReceivedUserData, reinterpret_cast<char*>(readBuffer), numOfBytesRead, pi->_dataRunningIndex);
+			pi->_rawDataReceivedHandler(pi->_rawDataReceivedUserData, reinterpret_cast<char*>(pi->readBuffer), numOfBytesRead, pi->_dataRunningIndex);
 
 		#if PYTHON
 		if (pi->_rawDataReceivedHandlerPython != NULL)
@@ -238,7 +252,7 @@ struct VnSensor::Impl
 		}
 		#endif
 
-		pi->_packetFinder.processReceivedData(reinterpret_cast<char*>(readBuffer), numOfBytesRead, t);
+		pi->_packetFinder.processReceivedData(reinterpret_cast<char*>(pi->readBuffer), numOfBytesRead, pi->_filteringBootloaderResponses, t);
 
 		pi->_dataRunningIndex += numOfBytesRead;
 	}
@@ -362,6 +376,7 @@ struct VnSensor::Impl
 
 				// We must have a response packet.
 				_waitingForResponse = false;
+				Thread::sleepMs(1);
 				return p;
 			}
 
@@ -552,7 +567,10 @@ vector<uint32_t> VnSensor::supportedBaudrates()
 
 VnSensor::VnSensor() :
 	_pi(new Impl(this))
-{ }
+{ 
+	firmwareUpdateFile = NULL;
+	bootloaderFiltering = false;
+}
 
 #if defined(_MSC_VER) && _MSC_VER <= 1600
 	#pragma warning(pop)
@@ -988,6 +1006,19 @@ void VnSensor::reset(bool waitForReply)
 	// sensor.
 	_pi->transactionNoFinalize(toSend, length, waitForReply, &response, 2500, 1000);
 }
+
+void VnSensor::firmwareUpdateMode(bool waitForReply)
+{
+	char toSend[37];
+
+	size_t length = Packet::genFirmwareUpdate(_pi->_sendErrorDetectionMode, toSend, sizeof(toSend));
+
+	Packet response;
+
+	// Reset sometimes takes a while to do and receive a response from the sensor.
+	_pi->transactionNoFinalize(toSend, length, waitForReply, &response, 3000, 3000);
+}
+
 
 void VnSensor::changeBaudRate(uint32_t baudrate)
 {
@@ -2038,6 +2069,70 @@ void VnSensor::writeFilterBasicControl(
 	_pi->transactionNoFinalize(toSend, length, waitForReply, &response);
 }
 
+HeaveConfigurationRegister VnSensor::readHeaveConfiguration()
+{
+	char toSend[17];
+
+	size_t length = Packet::genReadHeaveConfiguration(_pi->_sendErrorDetectionMode, toSend, sizeof(toSend));
+
+	Packet response;
+	_pi->transactionNoFinalize(toSend, length, true, &response);
+
+	HeaveConfigurationRegister reg;
+	response.parseHeaveConfiguration(
+		&reg.initialWavePeriod,
+		&reg.initialWaveAmplitude,
+		&reg.maxWavePeriod,
+		&reg.minWaveAmplitude,
+		&reg.delayedHeaveCutoffFreq,
+		&reg.heaveCutoffFreq,
+		&reg.heaveRateCutoffFreq);
+
+	return reg;
+}
+
+void VnSensor::writeHeaveConfiguration(HeaveConfigurationRegister &fields, bool waitForReply)
+{
+	char toSend[256];
+
+	size_t length = Packet::genWriteHeaveConfiguration(_pi->_sendErrorDetectionMode, toSend, sizeof(toSend), 
+													fields.initialWavePeriod, 
+													fields.initialWaveAmplitude, 
+													fields.maxWavePeriod,
+													fields.minWaveAmplitude,
+													fields.delayedHeaveCutoffFreq,
+													fields.heaveCutoffFreq,
+													fields.heaveRateCutoffFreq);
+
+	Packet response;
+	_pi->transactionNoFinalize(toSend, length, waitForReply, &response);
+}
+
+void VnSensor::writeHeaveConfiguration(
+	const float &initialWavePeriod,
+	const float &initialWaveAmplitude,
+	const float &maxWavePeriod,
+	const float &minWaveAmplitude,
+	const float &delayedHeaveCutoffFreq,
+	const float &heaveCutoffFreq,
+	const float &heaveRateCutoffFreq,
+	bool waitForReply)
+{
+	char toSend[256];
+
+	size_t length = Packet::genWriteHeaveConfiguration(_pi->_sendErrorDetectionMode, toSend, sizeof(toSend), 
+													initialWavePeriod, 
+													initialWaveAmplitude, 
+													maxWavePeriod,
+													minWaveAmplitude,
+													delayedHeaveCutoffFreq,
+													heaveCutoffFreq,
+													heaveRateCutoffFreq);
+
+	Packet response;
+	_pi->transactionNoFinalize(toSend, length, waitForReply, &response);
+}
+
 VpeBasicControlRegister VnSensor::readVpeBasicControl()
 {
 	char toSend[17];
@@ -2597,12 +2692,18 @@ GpsConfigurationRegister VnSensor::readGpsConfiguration()
 	GpsConfigurationRegister reg;
 	uint8_t mode;
 	uint8_t ppsSource;
+	uint8_t rate;
+	uint8_t antPow;
 	response.parseGpsConfiguration(
 		&mode,
-		&ppsSource);
+		&ppsSource,
+		&rate,
+		&antPow);
 
 	reg.mode = static_cast<GpsMode>(mode);
 	reg.ppsSource = static_cast<PpsSource>(ppsSource);
+	reg.rate = static_cast<GpsRate>(rate);
+	reg.antPow = static_cast<AntPower>(antPow);
 
 	return reg;
 }
@@ -2611,7 +2712,7 @@ void VnSensor::writeGpsConfiguration(GpsConfigurationRegister &fields, bool wait
 {
 	char toSend[256];
 
-	size_t length = Packet::genWriteGpsConfiguration(_pi->_sendErrorDetectionMode, toSend, sizeof(toSend), fields.mode, fields.ppsSource);
+	size_t length = Packet::genWriteGpsConfiguration(_pi->_sendErrorDetectionMode, toSend, sizeof(toSend), fields.mode, fields.ppsSource, fields.rate, fields.antPow);
 
 	Packet response;
 	_pi->transactionNoFinalize(toSend, length, waitForReply, &response);
@@ -2630,6 +2731,28 @@ void VnSensor::writeGpsConfiguration(
 		sizeof(toSend),
 		mode,
 		ppsSource);
+
+	Packet response;
+	_pi->transactionNoFinalize(toSend, length, waitForReply, &response);
+}
+
+void VnSensor::writeGpsConfiguration(
+	GpsMode mode,
+	PpsSource ppsSource,
+	GpsRate rate,
+	AntPower antPow,
+	bool waitForReply)
+{
+	char toSend[256];
+
+	size_t length = Packet::genWriteGpsConfiguration(
+		_pi->_sendErrorDetectionMode,
+		toSend,
+		sizeof(toSend),
+		mode,
+		ppsSource,
+		rate,
+		antPow);
 
 	Packet response;
 	_pi->transactionNoFinalize(toSend, length, waitForReply, &response);
@@ -2978,14 +3101,17 @@ DeltaThetaAndDeltaVelocityConfigurationRegister VnSensor::readDeltaThetaAndDelta
 	uint8_t integrationFrame;
 	uint8_t gyroCompensation;
 	uint8_t accelCompensation;
+	uint8_t earthRateCorrection;
 	response.parseDeltaThetaAndDeltaVelocityConfiguration(
 		&integrationFrame,
 		&gyroCompensation,
-		&accelCompensation);
+		&accelCompensation,
+		&earthRateCorrection);
 
 	reg.integrationFrame = static_cast<IntegrationFrame>(integrationFrame);
 	reg.gyroCompensation = static_cast<CompensationMode>(gyroCompensation);
-	reg.accelCompensation = static_cast<CompensationMode>(accelCompensation);
+	reg.accelCompensation = static_cast<AccCompensationMode>(accelCompensation);
+	reg.earthRateCorrection = static_cast<EarthRateCorrection>(earthRateCorrection);
 
 	return reg;
 }
@@ -2994,7 +3120,7 @@ void VnSensor::writeDeltaThetaAndDeltaVelocityConfiguration(DeltaThetaAndDeltaVe
 {
 	char toSend[256];
 
-	size_t length = Packet::genWriteDeltaThetaAndDeltaVelocityConfiguration(_pi->_sendErrorDetectionMode, toSend, sizeof(toSend), fields.integrationFrame, fields.gyroCompensation, fields.accelCompensation);
+	size_t length = Packet::genWriteDeltaThetaAndDeltaVelocityConfiguration(_pi->_sendErrorDetectionMode, toSend, sizeof(toSend), fields.integrationFrame, fields.gyroCompensation, fields.accelCompensation, fields.earthRateCorrection);
 
 	Packet response;
 	_pi->transactionNoFinalize(toSend, length, waitForReply, &response);
@@ -3003,7 +3129,22 @@ void VnSensor::writeDeltaThetaAndDeltaVelocityConfiguration(DeltaThetaAndDeltaVe
 void VnSensor::writeDeltaThetaAndDeltaVelocityConfiguration(
 	IntegrationFrame integrationFrame,
 	CompensationMode gyroCompensation,
-	CompensationMode accelCompensation,
+	AccCompensationMode accelCompensation,
+	bool waitForReply)
+{
+	writeDeltaThetaAndDeltaVelocityConfiguration(
+		integrationFrame,
+		gyroCompensation,
+		accelCompensation,
+		protocol::uart::EARTHRATECORR_NONE,
+		waitForReply);
+}
+
+void VnSensor::writeDeltaThetaAndDeltaVelocityConfiguration(
+	IntegrationFrame integrationFrame,
+	CompensationMode gyroCompensation,
+	AccCompensationMode accelCompensation,
+	EarthRateCorrection earthRateCorrection,
 	bool waitForReply)
 {
 	char toSend[256];
@@ -3014,7 +3155,8 @@ void VnSensor::writeDeltaThetaAndDeltaVelocityConfiguration(
 		sizeof(toSend),
 		integrationFrame,
 		gyroCompensation,
-		accelCompensation);
+		accelCompensation,
+		earthRateCorrection);
 
 	Packet response;
 	_pi->transactionNoFinalize(toSend, length, waitForReply, &response);
@@ -3357,6 +3499,210 @@ YawPitchRollTrueInertialAccelerationAndAngularRatesRegister VnSensor::readYawPit
 
 	return reg;
 }
+
+void VnSensor::switchProcessors(VnProcessorType processor, std::string model, std::string firmware)
+{
+	std::string switchCmd = "";
+
+	if (model.find("VN-300") != std::string::npos)
+	{
+		switch (processor)
+		{
+		case VNPROCESSOR_GPS:
+			if ((model.find("SMD") != std::string::npos) || (model.find("DEV") != std::string::npos))
+			{
+				switchCmd = "$VNSPS,1,1,115200";
+			}
+			else if (model.find("CR") != std::string::npos)
+			{
+				switchCmd = "$VNDBS,3,1";
+			}
+			break;
+		}
+	} 
+	else if ((model.find("VN-110") != std::string::npos) || (model.find("VN-210") != std::string::npos) || (model.find("VN-310") != std::string::npos))
+	{
+		switch (processor)
+		{
+		case VNPROCESSOR_NAV:
+			switchCmd = "$VNSBL,0";
+			break;
+		case VNPROCESSOR_GPS:
+			if ((model.find("VN-310") != std::string::npos) || (model.find("VN-210E") != std::string::npos))
+			{
+				switchCmd = "$VNSBL,1";
+			}
+			break;
+		case VNPROCESSOR_IMU:
+			switchCmd = "$VNSBL,2";
+			break;
+		}
+	}
+
+	if (switchCmd.empty())
+	{
+		throw invalid_operation();
+	}
+
+	// Send switch command
+	char toSend[256];
+#if VN_HAVE_SECURE_CRT
+	strcpy_s(toSend, 256, switchCmd.c_str());
+#else
+	strcpy(toSend, switchCmd.c_str());
+#endif
+
+	size_t length = Packet::finalizeCommand(ERRORDETECTIONMODE_CRC, toSend, switchCmd.length());
+	Packet response;
+
+	_pi->transactionNoFinalize(toSend, length, true, &response, 6000, 6000);
+
+	// Wait 2 seconds to give the processor time to switch
+	Thread::sleepSec(2);
+}
+
+void VnSensor::firmwareUpdate(int baudRate, std::string fileName)
+{
+	std::string record = "";
+	
+	// Open firmware update file
+	openFirmwareUpdateFile(fileName);
+	
+	// Enter bootloader mode
+	firmwareUpdateMode(true);
+
+	// Give the sensor time to reboot into bootloader mode
+	Thread::sleepSec(1);
+
+	// Configure baudrate for firmware update
+	uint32_t navBaudRate = baudrate();
+	setFirmwareUpdateBaudRate(baudRate);
+
+	// Calibrate the bootloader by letting it calculate the current baudrate.
+	std::string bootloaderVersion = calibrateBootloader();
+	//cout << bootloaderVersion << endl;
+	
+	// Send each record from the firmware update file one at a time
+	do
+	{
+		record = getNextFirwareUpdateRecord();
+		if (!record.empty())
+		{
+			record.erase(0, 1); // Remove the ':' from the beginning of the line.
+			writeFirmwareUpdateRecord(record, true);
+		}
+	} while (!record.empty());
+	
+	// Close firmware update file
+	closeFirmwareUpdateFile();
+	
+	// Reset baudrate
+	setFirmwareUpdateBaudRate(navBaudRate);
+	
+	// Exit bootloader mode. Just sleep for 10 seconds
+	Thread::sleepSec(10);
+
+	// Do a reset
+	reset(true);
+
+	// Give the sensor time to recover after the reset
+	Thread::sleepSec(2);
+}
+
+void VnSensor::setFirmwareUpdateBaudRate(int baudRate)
+{
+	_pi->pSerialPort->changeBaudrate(baudRate);
+}
+
+void VnSensor::writeFirmwareUpdateRecord(const string& record, bool waitForReply)
+{
+	char toSend[MAXFIRMWAREUPDATERECORDSIZE +12];
+
+	size_t length = Packet::genWriteFirmwareUpdateRecord(ERRORDETECTIONMODE_CRC, toSend, sizeof(toSend), record.c_str());
+
+	Packet response;
+RESEND:
+	_pi->_filteringBootloaderResponses = true; /*Enable Bootloader Filtering just before sending the bootloader command */
+	_pi->transactionNoFinalize(toSend, length, waitForReply, &response, 6000, 6000);
+
+	BootloaderError responseCode = (BootloaderError)std::stoi(response.datastr().substr(7,2));
+
+
+	if (responseCode == BLE_COMM_ERROR)
+	{
+		// This is the only case where we will try again
+		goto RESEND;
+	}
+
+	if (responseCode != BLE_NONE)
+	{
+		// Abort
+		cout << vn::protocol::uart::str(responseCode) << endl;
+		throw unknown_error();
+	}
+}
+
+
+std::string VnSensor::calibrateBootloader()
+{
+	char baudratetest[] = "                  "; /* Only need 8, but doubling it just to be safe */
+	char bootloaderVersion[64];
+	memset(bootloaderVersion, 0, 64);
+	uint16_t responseTimeoutMs = 500;
+	uint16_t retransmitDelayMs = 500;
+
+	Packet response;
+	_pi->_filteringBootloaderResponses = true; /*Enable Bootloader Filtering just before sending the bootloader command */
+	_pi->transactionNoFinalize(baudratetest, sizeof(baudratetest)-2, true, &response, 7000, 7000);
+
+	std::string version = response.datastr();
+	return version;
+}
+
+std::string VnSensor::getNextFirwareUpdateRecord()
+{
+	string record = "";
+
+	if (firmwareUpdateFile != NULL)
+	{
+		char buffer[MAXFIRMWAREUPDATERECORDSIZE];
+#if VN_HAVE_SECURE_CRT
+		int result = fscanf_s(firmwareUpdateFile, "%s\n", buffer, MAXFIRMWAREUPDATERECORDSIZE);
+#else
+		int result = fscanf(firmwareUpdateFile, "%s\n", buffer);
+#endif
+
+		if (result != EOF)
+		{
+			record = buffer;
+		}
+	}
+
+	return record;
+}
+
+void VnSensor::openFirmwareUpdateFile(std::string filename)
+{
+#if VN_HAVE_SECURE_CRT
+	errno_t error = fopen_s(&firmwareUpdateFile, filename.c_str(), "r");
+#else
+	firmwareUpdateFile = fopen(filename.c_str(), "r");
+#endif
+
+	if (firmwareUpdateFile == NULL) {
+		throw unknown_error();
+	}
+}
+
+void VnSensor::closeFirmwareUpdateFile()
+{
+	if (firmwareUpdateFile != NULL)
+	{
+		fclose(firmwareUpdateFile);
+		firmwareUpdateFile = NULL;
+	}
+}
+
 
 #if PYTHON && !PL156_ORIGINAL && !PL156_FIX_ATTEMPT_1
 
