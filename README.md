@@ -16,13 +16,18 @@ Build
 2. cd vectornav 
 3. colcon build
 
-Run
+Run with ros2 run
 
 4. (Terminal 1) ros2 run vectornav vectornav
 5. (Terminal 2) ros2 topic echo /vectornav/raw/common
 6. (Terminal 3) ros2 run vectornav vn_sensor_msgs
-6. (Terminal 4) ros2 topic echo /vectornav/imu
+7. (Terminal 4) ros2 topic echo /vectornav/imu
 
+Run with ros2 launch (uses parameters from `vectornav.yaml`)
+
+8. (Terminal 1) ros2 launch vectornav vectornav.launch.py
+9. (Terminal 2) ros2 topic echo /vectornav/raw/common
+10. (Terminal 3) ros2 topic echo /vectornav/imu
 
 ## vectornav node
 
