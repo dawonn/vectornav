@@ -29,8 +29,3 @@ def generate_launch_description():
     ld.add_action(start_vectornav_sensor_msgs_cmd)
 
     return ld
-
-
-    
-
-    
