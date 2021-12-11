@@ -169,10 +169,14 @@ int main(int argc, char *argv[])
     // Run through all of the acceptable baud rates until we are connected
     // Looping in case someone has changed the default
     bool baudSet = false;
+    // Lets add the set baudrate to the top of the list, so that it will try
+    // to connect with that value first (speed initialization up)
+    std::vector<unsigned int> supportedBaudrates = vs.supportedBaudrates();
+    supportedBaudrates.insert(supportedBaudrates.begin(), SensorBaudrate);
     while(!baudSet){
         // Make this variable only accessible in the while loop
         static int i = 0;
-        defaultBaudrate = vs.supportedBaudrates()[i];
+        defaultBaudrate = supportedBaudrates[i];
         ROS_INFO("Connecting with default at %d", defaultBaudrate);
         // Default response was too low and retransmit time was too long by default.
         // They would cause errors
