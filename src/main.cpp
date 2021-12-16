@@ -25,6 +25,7 @@
 
 #include <iostream>
 #include <cmath>
+
 // No need to define PI twice if we already have it included...
 //#define M_PI 3.14159265358979323846  /* M_PI */
 
@@ -40,7 +41,6 @@
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <vectornav/Ins.h>
-
 
 ros::Publisher pubIMU, pubMag, pubGPS, pubOdom, pubTemp, pubPres, pubIns;
 ros::ServiceServer resetOdomSrv;
@@ -105,6 +105,40 @@ bool resetOdom(std_srvs::Empty::Request &req, std_srvs::Empty::Response &resp, U
     return true;
 }
 
+// Assure that the serial port is set to async low latency in order to reduce delays and package pilup.
+// These changes will stay effective until the device is unplugged
+#if __linux__  || __CYGWIN__
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/serial.h>
+bool optimize_serial_communication(std::string portName){
+    int portFd = -1;
+
+    portFd = ::open(
+        portName.c_str(),
+        O_RDWR | O_NOCTTY
+    );
+
+    if (portFd == -1)
+    {
+        ROS_WARN("Can't open port for optimization");
+        return false;
+    }
+
+    ROS_INFO("Set port to ASYNCY_LOW_LATENCY");
+    struct serial_struct serial;
+    ioctl(portFd, TIOCGSERIAL, &serial);
+    serial.flags |= ASYNC_LOW_LATENCY;
+    ioctl(portFd, TIOCSSERIAL, &serial);
+    ::close(portFd);
+    return true;
+}
+#elif
+bool optimize_serial_communication(str::string portName){
+    return true;
+}
+#endif
+
 int main(int argc, char *argv[])
 {
 
@@ -160,6 +194,9 @@ int main(int argc, char *argv[])
     }
 
     ROS_INFO("Connecting to : %s @ %d Baud", SensorPort.c_str(), SensorBaudrate);
+
+    // try to optimize the serial port
+    optimize_serial_communication(SensorPort);
 
     // Create a VnSensor object and connect to sensor
     VnSensor vs;
@@ -259,7 +296,6 @@ int main(int argc, char *argv[])
             ATTITUDEGROUP_YPRU, //<-- returning yaw pitch roll uncertainties
             INSGROUP_INSSTATUS
             | INSGROUP_POSLLA
-            | INSGROUP_POSECEF
             | INSGROUP_VELBODY
             | INSGROUP_ACCELECEF
             | INSGROUP_VELNED
@@ -267,7 +303,21 @@ int main(int argc, char *argv[])
             | INSGROUP_VELU,
             GPSGROUP_NONE);
 
+    // An empty output register for disabling output 2 and 3 if previously set
+    BinaryOutputRegister bor_none(
+        0,
+        1,
+        COMMONGROUP_NONE,
+        TIMEGROUP_NONE,
+        IMUGROUP_NONE,
+        GPSGROUP_NONE,
+        ATTITUDEGROUP_NONE,
+        INSGROUP_NONE,
+        GPSGROUP_NONE);
+
     vs.writeBinaryOutput1(bor);
+    vs.writeBinaryOutput2(bor_none);
+    vs.writeBinaryOutput3(bor_none);
 
     // Register async callback function
     vs.registerAsyncPacketReceivedHandler(&user_data, BinaryAsyncMessageReceived);
