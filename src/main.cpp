@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
             GPSGROUP_NONE,
             ATTITUDEGROUP_YPRU, //<-- returning yaw pitch roll uncertainties
             INSGROUP_INSSTATUS
-            | INSGROUP_POSLLA
+            | INSGROUP_POSECEF
             | INSGROUP_VELBODY
             | INSGROUP_ACCELECEF
             | INSGROUP_VELNED
