@@ -9,6 +9,14 @@ serial_baud: 115200
 # Baud rate must be able to handle the data rate
 async_output_rate: 40
 
+# Only publish every X package for a given topic. The actual publish rate will be
+# async_output_rate / *_stride. If set to 0, no message will be published on that topic.
+imu_stride: 1
+mag_stride: 1
+odom_stride: 1
+pres_stride: 1
+temp_stride: 1
+
 # Device IMU Rate as set by the manufacturer (800Hz unless specified otherwise)
 # This value is used to set the serial data packet rate
 fixed_imu_rate: 800

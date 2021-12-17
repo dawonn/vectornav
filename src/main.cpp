@@ -80,6 +80,15 @@ struct UserData {
     boost::array<double, 9ul> linear_accel_covariance = { };
     boost::array<double, 9ul> angular_vel_covariance = { };
     boost::array<double, 9ul> orientation_covariance = { };
+
+    // Publish some messages at a reduced rate
+    int gps_stride;
+    int imu_stride;
+    int ins_stride;
+    int mag_stride;
+    int odom_stride;
+    int pres_stride;
+    int temp_stride;
 };
 
 // Basic loop so we can initilize our covariance parameters above
@@ -178,6 +187,13 @@ int main(int argc, char *argv[])
     pn.param<std::string>("serial_port", SensorPort, "/dev/ttyUSB0");
     pn.param<int>("serial_baud", SensorBaudrate, 115200);
     pn.param<int>("fixed_imu_rate", SensorImuRate, 800);
+    pn.param<int>("gps_stride", user_data.gps_stride, 1);
+    pn.param<int>("imu_stride", user_data.imu_stride, 1);
+    pn.param<int>("ins_stride", user_data.ins_stride, 1);
+    pn.param<int>("mag_stride", user_data.mag_stride, 1);
+    pn.param<int>("odom_stride", user_data.odom_stride, 1);
+    pn.param<int>("pres_stride", user_data.pres_stride, 1);
+    pn.param<int>("temp_stride", user_data.temp_stride, 1);
 
     //Call to set covariances
     if(pn.getParam("linear_accel_covariance",rpc_temp))
@@ -269,7 +285,14 @@ int main(int argc, char *argv[])
     uint32_t sn = vs.readSerialNumber();
     ROS_INFO("Model Number: %s, Firmware Version: %s", mn.c_str(), fv.c_str());
     ROS_INFO("Hardware Revision : %d, Serial Number : %d", hv, sn);
-    ROS_INFO("Publish Rate: %d Hz", async_output_rate);
+    ROS_INFO("Async Output Rate: %d Hz", async_output_rate);
+    ROS_INFO("Publish Rate GPS: %d Hz", async_output_rate / user_data.gps_stride);
+    ROS_INFO("Publish Rate IMU: %d Hz", async_output_rate / user_data.imu_stride);
+    ROS_INFO("Publish Rate INS: %d Hz", async_output_rate / user_data.ins_stride);
+    ROS_INFO("Publish Rate Mag: %d Hz", async_output_rate / user_data.mag_stride);
+    ROS_INFO("Publish Rate Odom: %d Hz", async_output_rate / user_data.odom_stride);
+    ROS_INFO("Publish Rate Pres: %d Hz", async_output_rate / user_data.pres_stride);
+    ROS_INFO("Publish Rate Temp: %d Hz", async_output_rate / user_data.temp_stride);
 
     // Set the device info for passing to the packet callback function
     user_data.device_family = vs.determineDeviceFamily();
@@ -737,6 +760,9 @@ void fill_ins_message(
 //
 void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
 {
+    // package counter to calculate strides
+    static unsigned long long pkg_count = 0;
+
     // evaluate time first, to have it as close to the measurement time as possible
     ros::Time time = ros::Time::now();
 
@@ -744,7 +770,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     UserData *user_data = static_cast<UserData*>(userData);
 
     // IMU
-    if (pubIMU.getNumSubscribers() > 0)
+    if (user_data->imu_stride > 0 && (pkg_count % user_data->imu_stride) == 0 && pubIMU.getNumSubscribers() > 0)
     {
         sensor_msgs::Imu msgIMU;
         fill_imu_message(msgIMU, cd, time, user_data);
@@ -752,7 +778,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // Magnetic Field
-    if (pubMag.getNumSubscribers() > 0)
+    if (user_data->mag_stride > 0 && (pkg_count % user_data->mag_stride) == 0 && pubMag.getNumSubscribers() > 0)
     {
         sensor_msgs::MagneticField msgMag;
         fill_mag_message(msgMag, cd, time, user_data);
@@ -760,7 +786,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // Temperature
-    if (pubTemp.getNumSubscribers() > 0)
+    if (user_data->temp_stride > 0 && (pkg_count % user_data->temp_stride) == 0 && pubTemp.getNumSubscribers() > 0)
     {
         sensor_msgs::Temperature msgTemp;
         fill_temp_message(msgTemp, cd, time, user_data);
@@ -768,7 +794,7 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // Barometer
-    if (pubPres.getNumSubscribers() > 0)
+    if (user_data->pres_stride > 0 && (pkg_count % user_data->pres_stride) == 0 && pubPres.getNumSubscribers() > 0)
     {
         sensor_msgs::FluidPressure msgPres;
         fill_pres_message(msgPres, cd, time, user_data);
@@ -776,7 +802,8 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // GPS
-    if (user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubGPS.getNumSubscribers() > 0)
+    if (user_data->gps_stride > 0 && (pkg_count % user_data->gps_stride) == 0 &&
+        user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubGPS.getNumSubscribers() > 0)
     {
         sensor_msgs::NavSatFix msgGPS;
         fill_gps_message(msgGPS, cd, time, user_data);
@@ -784,7 +811,8 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // Odometry
-    if (user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubOdom.getNumSubscribers() > 0)
+    if (user_data->odom_stride > 0 && (pkg_count % user_data->odom_stride) == 0 &&
+        user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubOdom.getNumSubscribers() > 0)
     {
         nav_msgs::Odometry msgOdom;
         fill_odom_message(msgOdom, cd, time, user_data);
@@ -792,10 +820,13 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     }
 
     // INS
-    if (user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubIns.getNumSubscribers() > 0)
+    if (user_data->ins_stride > 0 && (pkg_count % user_data->ins_stride) == 0 &&
+        user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubIns.getNumSubscribers() > 0)
     {
         vectornav::Ins msgINS;
         fill_ins_message(msgINS, cd, time, user_data);
         pubIns.publish(msgINS);
     }
+
+    pkg_count += 1;
 }
