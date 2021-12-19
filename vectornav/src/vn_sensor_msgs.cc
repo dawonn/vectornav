@@ -365,7 +365,7 @@ private:
       break;
 
     default:
-      RCLCPP_ERROR(get_logger(), "Parameter '%s' length is %d; expected 1, 3, or 9",
+      RCLCPP_ERROR(get_logger(), "Parameter '%s' length is %zu; expected 1, 3, or 9",
                    param_name.c_str(), length);
     }
   }
