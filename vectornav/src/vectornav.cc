@@ -348,28 +348,32 @@ private:
     configBO3.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO3.gps2Field").as_int();
     vs_.writeBinaryOutput3(configBO3);
 
-    // GPS Configuration
-    // 8.2.1
-    auto gps_config = vs_.readGpsConfiguration();
-    RCLCPP_INFO(get_logger(), "GPS Mode       : %d", gps_config.mode);
-    RCLCPP_INFO(get_logger(), "GPS PPS Source : %d", gps_config.ppsSource);
-    /// TODO(Dereck): VnSensor::readGpsConfiguration() missing fields
+    try {
+      // GPS Configuration
+      // 8.2.1
+      auto gps_config = vs_.readGpsConfiguration();
+      RCLCPP_INFO(get_logger(), "GPS Mode       : %d", gps_config.mode);
+      RCLCPP_INFO(get_logger(), "GPS PPS Source : %d", gps_config.ppsSource);
+      /// TODO(Dereck): VnSensor::readGpsConfiguration() missing fields
 
-    // GPS Offset
-    // 8.2.2
-    auto gps_offset = vs_.readGpsAntennaOffset();
-    RCLCPP_INFO(get_logger(), "GPS Offset     : (%f, %f, %f)", gps_offset[0], gps_offset[1],
-                gps_offset[2]);
+      // GPS Offset
+      // 8.2.2
+      auto gps_offset = vs_.readGpsAntennaOffset();
+      RCLCPP_INFO(get_logger(), "GPS Offset     : (%f, %f, %f)", gps_offset[0], gps_offset[1],
+                  gps_offset[2]);
 
-    // GPS Compass Baseline
-    // 8.2.3
-    // According to dawonn, readGpsCompassBaseline is likely only available 
-    // on the VN-300
-    if (vs_.determineDeviceFamily() == vn::sensors::VnSensor::VnSensor_Family_Vn300) {
-      auto gps_baseline = vs_.readGpsCompassBaseline();
-      RCLCPP_INFO(get_logger(), "GPS Baseline     : (%f, %f, %f), (%f, %f, %f)",
-        gps_baseline.position[0], gps_baseline.position[1], gps_baseline.position[2],
-        gps_baseline.uncertainty[0], gps_baseline.uncertainty[1], gps_baseline.uncertainty[2]);
+      // GPS Compass Baseline
+      // 8.2.3
+      // According to dawonn, readGpsCompassBaseline is likely only available
+      // on the VN-300
+      if (vs_.determineDeviceFamily() == vn::sensors::VnSensor::VnSensor_Family_Vn300) {
+        auto gps_baseline = vs_.readGpsCompassBaseline();
+        RCLCPP_INFO(get_logger(), "GPS Baseline     : (%f, %f, %f), (%f, %f, %f)",
+          gps_baseline.position[0], gps_baseline.position[1], gps_baseline.position[2],
+          gps_baseline.uncertainty[0], gps_baseline.uncertainty[1], gps_baseline.uncertainty[2]);
+      }
+    } catch (const vn::sensors::sensor_error &e) {
+      RCLCPP_WARN(get_logger(), "GPS initialization error (does your sensor have one?)");
     }
     // Register Binary Data Callback
     vs_.registerAsyncPacketReceivedHandler(this, Vectornav::AsyncPacketReceivedHandler);
