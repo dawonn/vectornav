@@ -818,7 +818,7 @@ private:
     // Group Fields
     msg.group_fields = groupFields;
 
-    if (compositeData.hasVpeStatus()) {
+    if (compositeData.hasInsStatus()) {
       msg.insstatus = toMsg(compositeData.insStatus());
     }
 
