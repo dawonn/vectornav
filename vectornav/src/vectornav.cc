@@ -46,6 +46,9 @@ public:
     auto baud = declare_parameter<int>("baud", 115200);
     auto reconnect_ms = std::chrono::milliseconds(declare_parameter<int>("reconnect_ms", 500));
 
+    // Flag to adjust ROS time stamps
+    adjustROSTimeStamp_ = declare_parameter<bool>("adjust_ros_timestamp", false);
+
     // Async Output Type (ASCII)
     // 5.2.7
     declare_parameter<int>("AsyncDataOutputType", vn::protocol::uart::AsciiAsync::VNOFF);
@@ -381,6 +384,36 @@ private:
     return true;
   }
 
+  /**
+   * Adjust ROS header time stamp to match sensor time stamp. An exponential
+   * moving average is kept of the difference between sensor time and system time.
+   * This average can then be used to compute the ROS time from the sensor time.
+   *
+   * \param  sensorTime   time stamp received from the vectornav
+   * \return  adjusted ROS time
+   */
+
+  rclcpp::Time getTimeStamp(vn::sensors::CompositeData &data) {
+    const rclcpp::Time t = now();
+    if (!data.hasTimeStartup() || !adjustROSTimeStamp_) {
+      return (t); // cannot or want not adjust time
+    }
+    const uint64_t sensorTime = data.timeStartup();
+    const double dt = t.seconds() - sensorTime * 1e-9;
+    if (averageTimeDifference_ == 0) { // first call
+      averageTimeDifference_ = dt;
+    }
+
+    // compute exponential moving average
+    const double alpha = 0.001; // average over rougly 1000 samples
+    averageTimeDifference_ = averageTimeDifference_ * (1.0 - alpha) + alpha * dt;
+
+    // adjust sensor time by average difference to ROS time
+    const rclcpp::Time adjustedTime = rclcpp::Time(sensorTime, RCL_SYSTEM_TIME) +
+      rclcpp::Duration::from_seconds(averageTimeDifference_);
+    return (adjustedTime);
+  }
+
   static void ErrorPacketReceivedHandler(void *nodeptr, vn::protocol::uart::Packet &errorPacket,
                                          size_t packetStartRunningIndex) {
     // Get handle to the vectornav class
@@ -441,7 +474,7 @@ private:
     auto msg = vectornav_msgs::msg::CommonGroup();
 
     // Header
-    msg.header.stamp = node->now();
+    msg.header.stamp = node->getTimeStamp(compositeData);
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
@@ -542,7 +575,7 @@ private:
     auto msg = vectornav_msgs::msg::TimeGroup();
 
     // Header
-    msg.header.stamp = node->now();
+    msg.header.stamp = node->getTimeStamp(compositeData);
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
@@ -602,7 +635,7 @@ private:
     // Message to Send
     auto msg = vectornav_msgs::msg::ImuGroup();
     // Header
-    msg.header.stamp = node->now();
+    msg.header.stamp = node->getTimeStamp(compositeData);
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
@@ -673,7 +706,7 @@ private:
     auto msg = vectornav_msgs::msg::GpsGroup();
 
     // Header
-    msg.header.stamp = node->now();
+    msg.header.stamp = node->getTimeStamp(compositeData);
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
@@ -755,7 +788,7 @@ private:
     auto msg = vectornav_msgs::msg::AttitudeGroup();
 
     // Header
-    msg.header.stamp = node->now();
+    msg.header.stamp = node->getTimeStamp(compositeData);
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
@@ -812,7 +845,7 @@ private:
     auto msg = vectornav_msgs::msg::InsGroup();
 
     // Header
-    msg.header.stamp = node->now();
+    msg.header.stamp = node->getTimeStamp(compositeData);
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
@@ -883,7 +916,7 @@ private:
     auto msg = vectornav_msgs::msg::GpsGroup();
 
     // Header
-    msg.header.stamp = node->now();
+    msg.header.stamp = node->getTimeStamp(compositeData);
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
@@ -1097,6 +1130,10 @@ private:
   rclcpp::Publisher<vectornav_msgs::msg::AttitudeGroup>::SharedPtr pub_attitude_;
   rclcpp::Publisher<vectornav_msgs::msg::InsGroup>::SharedPtr pub_ins_;
   rclcpp::Publisher<vectornav_msgs::msg::GpsGroup>::SharedPtr pub_gps2_;
+
+  /// ROS header time stamp adjustments
+  double averageTimeDifference_{0};
+  bool adjustROSTimeStamp_{false};
 };
 
 int main(int argc, char *argv[]) {
