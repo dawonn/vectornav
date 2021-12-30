@@ -31,20 +31,22 @@
 
 using namespace std::chrono_literals;
 
-class VnSensorMsgs : public rclcpp::Node {
+class VnSensorMsgs : public rclcpp::Node
+{
   /// TODO(Dereck): Add _ned topics as an optional feature
   /// TODO(Dereck): Detect when a subscriber is connected but the required data is not provided by
   ///               the sensor.
   /// TODO(Dereck): Improve Multi-message Syncronization
 
 public:
-  VnSensorMsgs() : Node("vn_sensor_msgs") {
+  VnSensorMsgs() : Node("vn_sensor_msgs")
+  {
     // Parameters
     declare_parameter<std::vector<double>>("orientation_covariance", orientation_covariance_);
-    declare_parameter<std::vector<double>>("angular_velocity_covariance",
-                                           angular_velocity_covariance_);
-    declare_parameter<std::vector<double>>("linear_acceleration_covariance",
-                                           linear_acceleration_covariance_);
+    declare_parameter<std::vector<double>>(
+      "angular_velocity_covariance", angular_velocity_covariance_);
+    declare_parameter<std::vector<double>>(
+      "linear_acceleration_covariance", linear_acceleration_covariance_);
     declare_parameter<std::vector<double>>("magnetic_covariance", magnetic_field_covariance_);
 
     //
@@ -52,66 +54,67 @@ public:
     //
     // TODO(Dereck): Only publish if data is available from the sensor?
     pub_time_startup_ =
-        this->create_publisher<sensor_msgs::msg::TimeReference>("vectornav/time_startup", 10);
+      this->create_publisher<sensor_msgs::msg::TimeReference>("vectornav/time_startup", 10);
     pub_time_gps_ =
-        this->create_publisher<sensor_msgs::msg::TimeReference>("vectornav/time_gps", 10);
+      this->create_publisher<sensor_msgs::msg::TimeReference>("vectornav/time_gps", 10);
     pub_time_syncin_ =
-        this->create_publisher<sensor_msgs::msg::TimeReference>("vectornav/time_syncin", 10);
+      this->create_publisher<sensor_msgs::msg::TimeReference>("vectornav/time_syncin", 10);
     pub_time_pps_ =
-        this->create_publisher<sensor_msgs::msg::TimeReference>("vectornav/time_pps", 10);
+      this->create_publisher<sensor_msgs::msg::TimeReference>("vectornav/time_pps", 10);
     pub_imu_ = this->create_publisher<sensor_msgs::msg::Imu>("vectornav/imu", 10);
     pub_gnss_ = this->create_publisher<sensor_msgs::msg::NavSatFix>("vectornav/gnss", 10);
     pub_imu_uncompensated_ =
-        this->create_publisher<sensor_msgs::msg::Imu>("vectornav/imu_uncompensated", 10);
+      this->create_publisher<sensor_msgs::msg::Imu>("vectornav/imu_uncompensated", 10);
     pub_magnetic_ =
-        this->create_publisher<sensor_msgs::msg::MagneticField>("vectornav/magnetic", 10);
+      this->create_publisher<sensor_msgs::msg::MagneticField>("vectornav/magnetic", 10);
     pub_temperature_ =
-        this->create_publisher<sensor_msgs::msg::Temperature>("vectornav/temperature", 10);
+      this->create_publisher<sensor_msgs::msg::Temperature>("vectornav/temperature", 10);
     pub_pressure_ =
-        this->create_publisher<sensor_msgs::msg::FluidPressure>("vectornav/pressure", 10);
+      this->create_publisher<sensor_msgs::msg::FluidPressure>("vectornav/pressure", 10);
     pub_velocity_ = this->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>(
-        "vectornav/velocity_body", 10);
+      "vectornav/velocity_body", 10);
     pub_pose_ =
-        this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("vectornav/pose", 10);
+      this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("vectornav/pose", 10);
 
     //
     // Subscribers
     //
     auto sub_vn_common_cb = std::bind(&VnSensorMsgs::sub_vn_common, this, std::placeholders::_1);
     sub_vn_common_ = this->create_subscription<vectornav_msgs::msg::CommonGroup>(
-        "vectornav/raw/common", 10, sub_vn_common_cb);
+      "vectornav/raw/common", 10, sub_vn_common_cb);
 
     auto sub_vn_time_cb = std::bind(&VnSensorMsgs::sub_vn_time, this, std::placeholders::_1);
-    sub_vn_time_ = this->create_subscription<vectornav_msgs::msg::TimeGroup>("vectornav/raw/time",
-                                                                             10, sub_vn_time_cb);
+    sub_vn_time_ = this->create_subscription<vectornav_msgs::msg::TimeGroup>(
+      "vectornav/raw/time", 10, sub_vn_time_cb);
 
     auto sub_vn_imu_cb = std::bind(&VnSensorMsgs::sub_vn_imu, this, std::placeholders::_1);
-    sub_vn_imu_ = this->create_subscription<vectornav_msgs::msg::ImuGroup>("vectornav/raw/imu", 10,
-                                                                           sub_vn_imu_cb);
+    sub_vn_imu_ = this->create_subscription<vectornav_msgs::msg::ImuGroup>(
+      "vectornav/raw/imu", 10, sub_vn_imu_cb);
 
     auto sub_vn_gps_cb = std::bind(&VnSensorMsgs::sub_vn_gps, this, std::placeholders::_1);
-    sub_vn_gps_ = this->create_subscription<vectornav_msgs::msg::GpsGroup>("vectornav/raw/gps", 10,
-                                                                           sub_vn_gps_cb);
+    sub_vn_gps_ = this->create_subscription<vectornav_msgs::msg::GpsGroup>(
+      "vectornav/raw/gps", 10, sub_vn_gps_cb);
 
     auto sub_vn_attitude_cb =
-        std::bind(&VnSensorMsgs::sub_vn_attitude, this, std::placeholders::_1);
+      std::bind(&VnSensorMsgs::sub_vn_attitude, this, std::placeholders::_1);
     sub_vn_attitude_ = this->create_subscription<vectornav_msgs::msg::AttitudeGroup>(
-        "vectornav/raw/attitude", 10, sub_vn_attitude_cb);
+      "vectornav/raw/attitude", 10, sub_vn_attitude_cb);
 
     auto sub_vn_ins_cb = std::bind(&VnSensorMsgs::sub_vn_ins, this, std::placeholders::_1);
-    sub_vn_ins_ = this->create_subscription<vectornav_msgs::msg::InsGroup>("vectornav/raw/ins", 10,
-                                                                           sub_vn_ins_cb);
+    sub_vn_ins_ = this->create_subscription<vectornav_msgs::msg::InsGroup>(
+      "vectornav/raw/ins", 10, sub_vn_ins_cb);
 
     auto sub_vn_gps2_cb = std::bind(&VnSensorMsgs::sub_vn_gps2, this, std::placeholders::_1);
-    sub_vn_gps2_ = this->create_subscription<vectornav_msgs::msg::GpsGroup>("vectornav/raw/gps2",
-                                                                            10, sub_vn_gps2_cb);
+    sub_vn_gps2_ = this->create_subscription<vectornav_msgs::msg::GpsGroup>(
+      "vectornav/raw/gps2", 10, sub_vn_gps2_cb);
   }
 
 private:
   /** Convert VN common group data to ROS2 standard message types
    *
    */
-  void sub_vn_common(const vectornav_msgs::msg::CommonGroup::SharedPtr msg_in) const {
+  void sub_vn_common(const vectornav_msgs::msg::CommonGroup::SharedPtr msg_in) const
+  {
     // RCLCPP_INFO(get_logger(), "Frame ID: '%s'", msg_in->header.frame_id.c_str());
 
     // Time Reference (Startup)
@@ -182,8 +185,8 @@ private:
 
       fill_covariance_from_param("orientation_covariance", msg.orientation_covariance);
       fill_covariance_from_param("angular_velocity_covariance", msg.angular_velocity_covariance);
-      fill_covariance_from_param("linear_acceleration_covariance",
-                                 msg.linear_acceleration_covariance);
+      fill_covariance_from_param(
+        "linear_acceleration_covariance", msg.linear_acceleration_covariance);
 
       pub_imu_->publish(msg);
     }
@@ -196,8 +199,8 @@ private:
       msg.linear_acceleration = msg_in->imu_accel;
 
       fill_covariance_from_param("angular_velocity_covariance", msg.angular_velocity_covariance);
-      fill_covariance_from_param("linear_acceleration_covariance",
-                                 msg.linear_acceleration_covariance);
+      fill_covariance_from_param(
+        "linear_acceleration_covariance", msg.linear_acceleration_covariance);
 
       pub_imu_uncompensated_->publish(msg);
     }
@@ -253,7 +256,7 @@ private:
       // Covariance (Convert NED to ENU)
       /// TODO(Dereck): Use DOP for better estimate?
       const std::vector<double> orientation_covariance_ = {
-          gps_posu_.y, 0.0000, 0.0000, 0.0000, gps_posu_.x, 0.0000, 0.0000, 0.0000, gps_posu_.z};
+        gps_posu_.y, 0.0000, 0.0000, 0.0000, gps_posu_.x, 0.0000, 0.0000, 0.0000, gps_posu_.z};
 
       msg.position_covariance_type = sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN;
 
@@ -311,7 +314,8 @@ private:
    *
    * TODO(Dereck): Consider alternate sync methods
    */
-  void sub_vn_gps(const vectornav_msgs::msg::GpsGroup::SharedPtr msg_in) {
+  void sub_vn_gps(const vectornav_msgs::msg::GpsGroup::SharedPtr msg_in)
+  {
     gps_fix_ = msg_in->fix;
     gps_posu_ = msg_in->posu;
   }
@@ -324,7 +328,8 @@ private:
   /** Convert VN ins group data to ROS2 standard message types
    *
    */
-  void sub_vn_ins(const vectornav_msgs::msg::InsGroup::SharedPtr msg_in) {
+  void sub_vn_ins(const vectornav_msgs::msg::InsGroup::SharedPtr msg_in)
+  {
     ins_velbody_ = msg_in->velbody;
     ins_posecef_ = msg_in->posecef;
   }
@@ -343,30 +348,32 @@ private:
    * \param param_name Name of the parameter to read
    * \param array Array to fill
    */
-  void fill_covariance_from_param(std::string param_name, std::array<double, 9> &array) const {
+  void fill_covariance_from_param(std::string param_name, std::array<double, 9> & array) const
+  {
     auto covariance = get_parameter(param_name).as_double_array();
 
     auto length = covariance.size();
     switch (length) {
-    case 1:
-      array[0] = covariance[0];
-      array[3] = covariance[0];
-      array[8] = covariance[0];
-      break;
+      case 1:
+        array[0] = covariance[0];
+        array[3] = covariance[0];
+        array[8] = covariance[0];
+        break;
 
-    case 3:
-      array[0] = covariance[0];
-      array[3] = covariance[1];
-      array[8] = covariance[3];
-      break;
+      case 3:
+        array[0] = covariance[0];
+        array[3] = covariance[1];
+        array[8] = covariance[3];
+        break;
 
-    case 9:
-      std::copy(covariance.begin(), covariance.end(), array.begin());
-      break;
+      case 9:
+        std::copy(covariance.begin(), covariance.end(), array.begin());
+        break;
 
-    default:
-      RCLCPP_ERROR(get_logger(), "Parameter '%s' length is %zu; expected 1, 3, or 9",
-                   param_name.c_str(), length);
+      default:
+        RCLCPP_ERROR(
+          get_logger(), "Parameter '%s' length is %zu; expected 1, 3, or 9", param_name.c_str(),
+          length);
     }
   }
 
@@ -410,7 +417,7 @@ private:
 
   /// Default linear_acceleration Covariance
   const std::vector<double> linear_acceleration_covariance_ = {
-      0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000};
+    0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000};
 
   /// Default magnetic field Covariance
   const std::vector<double> magnetic_field_covariance_ = {0.0000, 0.0000, 0.0000, 0.0000, 0.0000,
@@ -426,7 +433,8 @@ private:
 };
 
 /// TODO(Dereck): convert to ros2 component
-int main(int argc, char *argv[]) {
+int main(int argc, char * argv[])
+{
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<VnSensorMsgs>());
   rclcpp::shutdown();
