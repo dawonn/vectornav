@@ -1,0 +1,111 @@
+#
+# example configuration file for VN 100 running at 800Hz via USB link
+#
+
+vectornav:
+  ros__parameters:
+    port: "/dev/ttyUSB0"
+    baud: 921600
+    adjust_ros_timestamp: True
+    reconnect_ms: 500
+    # Reference vnproglib-1.2.0.0 headers for enum definitions
+    # Async Output Type (ASCII)
+    # leave this at zero to select binary format
+    AsyncDataOutputType: 0           # VNOFF
+    # Async output Frequency (Hz)
+    # Not sure why this has to be 1Hz to make it work. Very strange.
+    AsyncDataOutputFrequency: 1
+    # Sync control
+    syncInMode: 3                    # SYNCINMODE_COUNT
+    syncInEdge: 0                    # SYNCINEDGE_RISING
+    syncInSkipFactor: 0
+    syncOutMode: 0                   # SYNCOUTMODE_NONE
+    syncOutPolarity: 0               # SYNCOUTPOLARITY_NEGATIVE
+    syncOutSkipFactor: 0
+    syncOutPulseWidth_ns: 100000000
+    # Communication protocol control
+    serialCount: 0                   # COUNTMODE_NONE
+    serialStatus: 0                  # STATUSMODE_OFF
+    spiCount: 0                      # COUNTMODE_NONE
+    spiStatus: 0                     # STATUSMODE_OFF
+    serialChecksum: 1                # CHECKSUMMODE_CHECKSUM
+    spiChecksum: 0                   # CHECKSUMMODE_OFF
+    errorMode: 1                     # ERRORMODE_SEND
+    # Binary output register 1
+    BO1:
+      asyncMode: 1                   # send only on port 1 to save serial bandwidth
+      rateDivisor: 1                 # 800 Hz
+      #
+      # TimeStartup
+      # bit name         meaning
+      # 0   TimeStartup  Time since startup.
+      # 1   Reserved     Reserved. Not used on this product.
+      # 2   TimeSyncIn   Time since last SyncIn trigger.
+      # 3   Ypr          Estimated attitude as yaw pitch and roll angles.
+      # 4   Qtn          Estimated attitude as a quaternion.
+      # 5   AngularRate  Compensated angular rate.
+      # 6   Reserved     Reserved. Not used on this product.
+      # 7   Reserved     Reserved. Not used on this product.
+      # 8   Accel        Estimated acceleration (compensated). (Body)
+      # 9   Imu          Calibrated uncompensated gyro and accelerometer measurements.
+      # 10  MagPres      Calibrated magnetic (compensated), temperature, and pressure measurements.
+      # 11  DeltaTheta   Delta time, theta, and velocity.
+      # 12  AhrsStatus
+      # 13  SyncInCnt
+      # 14  Reserved
+      # 15  Resv
+      #
+      # To get just the calibrated but otherwise uncompensated imu measurements, use these
+      # flags:
+      # bit: 111
+      #      2109876543210
+      #   s="0001000000001" (switch on bits 0 and 9 only)
+      #
+      # python code: convert to hex via:  hex(int("0001000000001", 2)) -> 0x201
+      #
+      # commonField: 0x7FFF          # cannot request all fields at full frequency
+      commonField: 0x201             # ask for only bare bones IMU data
+      timeField: 0x0000              # TIMEGROUP_NONE
+      imuField: 0x0000               # IMUGROUP_NONE
+      # set gpsField directly in source to enforce or condition
+      attitudeField: 0x0000          # ATTITUDEGROUP_NONE
+      # set insField directly in source to enforce or condition
+      gps2Field: 0x0000              # GPSGROUP_NONE
+    # Binary output register 2
+    BO2:
+      asyncMode: 0                   # ASYNCMODE_NONE
+      rateDivisor: 0
+      commonField: 0x0000            # COMMONGROUP_NONE
+      timeField: 0x0000              # TIMEGROUP_NONE
+      imuField: 0x0000               # IMUGROUP_NONE
+      gpsField: 0x0000               # GPSGROUP_NONE
+      attitudeField: 0x0000          # ATTITUDEGROUP_NONE
+      insField: 0x0000               # INSGROUP_NONE
+      gps2Field: 0x0000              # GPSGROUP_NONE
+    # Binary output register 3
+    BO3:
+      asyncMode: 0                   # ASYNCMODE_NONE
+      rateDivisor: 0
+      commonField: 0x0000            # COMMONGROUP_NONE
+      timeField: 0x0000              # TIMEGROUP_NONE
+      imuField: 0x0000               # IMUGROUP_NONE
+      gpsField: 0x0000               # GPSGROUP_NONE
+      attitudeField: 0x0000          # ATTITUDEGROUP_NONE
+      insField: 0x0000               # INSGROUP_NONE
+      gps2Field: 0x0000              # GPSGROUP_NONE
+    frame_id: "vectornav"
+
+vn_sensor_msgs:
+  ros__parameters:
+    orientation_covariance: [0.01,  0.0,   0.0,
+                            0.0,   0.01,  0.0,
+                            0.0,   0.0,   0.01]
+    angular_velocity_covariance: [0.01,  0.0,   0.0,
+                         0.0,   0.01,  0.0,
+                         0.0,   0.0,   0.01]
+    linear_acceleration_covariance: [0.01,  0.0,   0.0,
+                         0.0,   0.01,  0.0,
+                         0.0,   0.0,   0.01]
+    magnetic_covariance: [0.01,  0.0,   0.0,
+                         0.0,   0.01,  0.0,
+                         0.0,   0.0,   0.01]
