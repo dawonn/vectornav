@@ -28,9 +28,11 @@
 
 using namespace std::chrono_literals;
 
-class Vectornav : public rclcpp::Node {
+class Vectornav : public rclcpp::Node
+{
 public:
-  Vectornav() : Node("vectornav") {
+  Vectornav() : Node("vectornav")
+  {
     //
     // Parameters
     //
@@ -60,12 +62,13 @@ public:
 
     // Sync control
     // 5.2.9
+
     declare_parameter<int>("syncInMode", vn::protocol::uart::SyncInMode::SYNCINMODE_COUNT);
     declare_parameter<int>("syncInEdge", vn::protocol::uart::SyncInEdge::SYNCINEDGE_RISING);
     declare_parameter<int>("syncInSkipFactor", 0);
     declare_parameter<int>("syncOutMode", vn::protocol::uart::SyncOutMode::SYNCOUTMODE_NONE);
-    declare_parameter<int>("syncOutPolarity",
-                           vn::protocol::uart::SyncOutPolarity::SYNCOUTPOLARITY_NEGATIVE);
+    declare_parameter<int>(
+      "syncOutPolarity", vn::protocol::uart::SyncOutPolarity::SYNCOUTPOLARITY_NEGATIVE);
     declare_parameter<int>("syncOutSkipFactor", 0);
     declare_parameter<int>("syncOutPulseWidth_ns", 100000000);
 
@@ -75,24 +78,26 @@ public:
     declare_parameter<int>("serialStatus", vn::protocol::uart::StatusMode::STATUSMODE_OFF);
     declare_parameter<int>("spiCount", vn::protocol::uart::CountMode::COUNTMODE_NONE);
     declare_parameter<int>("spiStatus", vn::protocol::uart::StatusMode::STATUSMODE_OFF);
-    declare_parameter<int>("serialChecksum",
-                           vn::protocol::uart::ChecksumMode::CHECKSUMMODE_CHECKSUM);
+    declare_parameter<int>(
+      "serialChecksum", vn::protocol::uart::ChecksumMode::CHECKSUMMODE_CHECKSUM);
     declare_parameter<int>("spiChecksum", vn::protocol::uart::ChecksumMode::CHECKSUMMODE_OFF);
     declare_parameter<int>("errorMode", vn::protocol::uart::ErrorMode::ERRORMODE_SEND);
 
     // Binary Output Register 1
     // 5.2.11
     declare_parameter<int>("BO1.asyncMode", vn::protocol::uart::AsyncMode::ASYNCMODE_BOTH);
-    declare_parameter<int>("BO1.rateDivisor", 40); // 20Hz
+    declare_parameter<int>("BO1.rateDivisor", 40);  // 20Hz
     declare_parameter<int>("BO1.commonField", 0x7FFF);
     declare_parameter<int>("BO1.timeField", vn::protocol::uart::TimeGroup::TIMEGROUP_NONE);
     declare_parameter<int>("BO1.imuField", vn::protocol::uart::ImuGroup::IMUGROUP_NONE);
-    declare_parameter<int>("BO1.gpsField", vn::protocol::uart::GpsGroup::GPSGROUP_FIX | 
-                                               vn::protocol::uart::GpsGroup::GPSGROUP_POSU);
-    declare_parameter<int>("BO1.attitudeField",
-                           vn::protocol::uart::AttitudeGroup::ATTITUDEGROUP_NONE);
-    declare_parameter<int>("BO1.insField", vn::protocol::uart::InsGroup::INSGROUP_POSECEF | 
-                                               vn::protocol::uart::InsGroup::INSGROUP_VELBODY);
+    declare_parameter<int>(
+      "BO1.gpsField",
+      vn::protocol::uart::GpsGroup::GPSGROUP_FIX | vn::protocol::uart::GpsGroup::GPSGROUP_POSU);
+    declare_parameter<int>(
+      "BO1.attitudeField", vn::protocol::uart::AttitudeGroup::ATTITUDEGROUP_NONE);
+    declare_parameter<int>(
+      "BO1.insField", vn::protocol::uart::InsGroup::INSGROUP_POSECEF |
+                        vn::protocol::uart::InsGroup::INSGROUP_VELBODY);
     declare_parameter<int>("BO1.gps2Field", vn::protocol::uart::GpsGroup::GPSGROUP_NONE);
 
     // Binary Output Register 2
@@ -103,8 +108,8 @@ public:
     declare_parameter<int>("BO2.timeField", vn::protocol::uart::TimeGroup::TIMEGROUP_NONE);
     declare_parameter<int>("BO2.imuField", vn::protocol::uart::ImuGroup::IMUGROUP_NONE);
     declare_parameter<int>("BO2.gpsField", vn::protocol::uart::GpsGroup::GPSGROUP_NONE);
-    declare_parameter<int>("BO2.attitudeField",
-                           vn::protocol::uart::AttitudeGroup::ATTITUDEGROUP_NONE);
+    declare_parameter<int>(
+      "BO2.attitudeField", vn::protocol::uart::AttitudeGroup::ATTITUDEGROUP_NONE);
     declare_parameter<int>("BO2.insField", vn::protocol::uart::InsGroup::INSGROUP_NONE);
     declare_parameter<int>("BO2.gps2Field", vn::protocol::uart::GpsGroup::GPSGROUP_NONE);
 
@@ -116,8 +121,8 @@ public:
     declare_parameter<int>("BO3.timeField", vn::protocol::uart::TimeGroup::TIMEGROUP_NONE);
     declare_parameter<int>("BO3.imuField", vn::protocol::uart::ImuGroup::IMUGROUP_NONE);
     declare_parameter<int>("BO3.gpsField", vn::protocol::uart::GpsGroup::GPSGROUP_NONE);
-    declare_parameter<int>("BO3.attitudeField",
-                           vn::protocol::uart::AttitudeGroup::ATTITUDEGROUP_NONE);
+    declare_parameter<int>(
+      "BO3.attitudeField", vn::protocol::uart::AttitudeGroup::ATTITUDEGROUP_NONE);
     declare_parameter<int>("BO3.insField", vn::protocol::uart::InsGroup::INSGROUP_NONE);
     declare_parameter<int>("BO3.gps2Field", vn::protocol::uart::GpsGroup::GPSGROUP_NONE);
 
@@ -139,12 +144,12 @@ public:
 
     // Composite Data Publisher
     pub_common_ =
-        this->create_publisher<vectornav_msgs::msg::CommonGroup>("vectornav/raw/common", 10);
+      this->create_publisher<vectornav_msgs::msg::CommonGroup>("vectornav/raw/common", 10);
     pub_time_ = this->create_publisher<vectornav_msgs::msg::TimeGroup>("vectornav/raw/time", 10);
     pub_imu_ = this->create_publisher<vectornav_msgs::msg::ImuGroup>("vectornav/raw/imu", 10);
     pub_gps_ = this->create_publisher<vectornav_msgs::msg::GpsGroup>("vectornav/raw/gps", 10);
     pub_attitude_ =
-        this->create_publisher<vectornav_msgs::msg::AttitudeGroup>("vectornav/raw/attitude", 10);
+      this->create_publisher<vectornav_msgs::msg::AttitudeGroup>("vectornav/raw/attitude", 10);
     pub_ins_ = this->create_publisher<vectornav_msgs::msg::InsGroup>("vectornav/raw/ins", 10);
     pub_gps2_ = this->create_publisher<vectornav_msgs::msg::GpsGroup>("vectornav/raw/gps2", 10);
 
@@ -154,7 +159,7 @@ public:
     // Monitor Connection
     if (reconnect_ms > 0ms) {
       reconnect_timer_ =
-          create_wall_timer(reconnect_ms, std::bind(&Vectornav::reconnect_timer, this));
+        create_wall_timer(reconnect_ms, std::bind(&Vectornav::reconnect_timer, this));
     }
   }
 
@@ -164,7 +169,8 @@ private:
    *
    * Monitor rate is configured via the 'reconnect_ms' parameter, Set to zero to disable.
    */
-  void reconnect_timer() {
+  void reconnect_timer()
+  {
     // Check if the sensor is connected
     if (vs_.verifySensorConnectivity()) {
       return;
@@ -191,10 +197,11 @@ private:
    *             the device for the requested baud rate.
    * \return     true: OK, false: FAILURE
    */
-  bool connect(const std::string port, const int baud) {
+  bool connect(const std::string port, const int baud)
+  {
     // Default response was too low and retransmit time was too long by default.
-    vs_.setResponseTimeoutMs(1000); // ms
-    vs_.setRetransmitDelayMs(50);   // ms
+    vs_.setResponseTimeoutMs(1000);  // ms
+    vs_.setRetransmitDelayMs(50);    // ms
 
     // Check if the requested baud rate is supported
     auto baudrates = vs_.supportedBaudrates();
@@ -261,7 +268,7 @@ private:
     // Async Output Type
     // 5.2.7
     auto AsyncDataOutputType =
-        (vn::protocol::uart::AsciiAsync)get_parameter("AsyncDataOutputType").as_int();
+      (vn::protocol::uart::AsciiAsync)get_parameter("AsyncDataOutputType").as_int();
     vs_.writeAsyncDataOutputType(AsyncDataOutputType);
 
     // Async output Frequency (Hz)
@@ -280,7 +287,7 @@ private:
     configSync.syncOutMode = (vn::protocol::uart::SyncOutMode)get_parameter("syncOutMode").as_int();
     ;
     configSync.syncOutPolarity =
-        (vn::protocol::uart::SyncOutPolarity)get_parameter("syncOutPolarity").as_int();
+      (vn::protocol::uart::SyncOutPolarity)get_parameter("syncOutPolarity").as_int();
     ;
     configSync.syncOutSkipFactor = get_parameter("syncOutSkipFactor").as_int();
     ;
@@ -293,13 +300,13 @@ private:
     vn::sensors::CommunicationProtocolControlRegister configComm;
     configComm.serialCount = (vn::protocol::uart::CountMode)get_parameter("serialCount").as_int();
     configComm.serialStatus =
-        (vn::protocol::uart::StatusMode)get_parameter("serialStatus").as_int();
+      (vn::protocol::uart::StatusMode)get_parameter("serialStatus").as_int();
     configComm.spiCount = (vn::protocol::uart::CountMode)get_parameter("spiCount").as_int();
     configComm.spiStatus = (vn::protocol::uart::StatusMode)get_parameter("spiStatus").as_int();
     configComm.serialChecksum =
-        (vn::protocol::uart::ChecksumMode)get_parameter("serialChecksum").as_int();
+      (vn::protocol::uart::ChecksumMode)get_parameter("serialChecksum").as_int();
     configComm.spiChecksum =
-        (vn::protocol::uart::ChecksumMode)get_parameter("spiChecksum").as_int();
+      (vn::protocol::uart::ChecksumMode)get_parameter("spiChecksum").as_int();
     configComm.errorMode = (vn::protocol::uart::ErrorMode)get_parameter("errorMode").as_int();
     vs_.writeCommunicationProtocolControl(configComm);
 
@@ -309,12 +316,12 @@ private:
     configBO1.asyncMode = (vn::protocol::uart::AsyncMode)get_parameter("BO1.asyncMode").as_int();
     configBO1.rateDivisor = get_parameter("BO1.rateDivisor").as_int();
     configBO1.commonField =
-        (vn::protocol::uart::CommonGroup)get_parameter("BO1.commonField").as_int();
+      (vn::protocol::uart::CommonGroup)get_parameter("BO1.commonField").as_int();
     configBO1.timeField = (vn::protocol::uart::TimeGroup)get_parameter("BO1.timeField").as_int();
     configBO1.imuField = (vn::protocol::uart::ImuGroup)get_parameter("BO1.imuField").as_int();
     configBO1.gpsField = (vn::protocol::uart::GpsGroup)get_parameter("BO1.gpsField").as_int();
     configBO1.attitudeField =
-        (vn::protocol::uart::AttitudeGroup)get_parameter("BO1.attitudeField").as_int();
+      (vn::protocol::uart::AttitudeGroup)get_parameter("BO1.attitudeField").as_int();
     configBO1.insField = (vn::protocol::uart::InsGroup)get_parameter("BO1.insField").as_int();
     configBO1.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO1.gps2Field").as_int();
     vs_.writeBinaryOutput1(configBO1);
@@ -325,12 +332,12 @@ private:
     configBO2.asyncMode = (vn::protocol::uart::AsyncMode)get_parameter("BO2.asyncMode").as_int();
     configBO2.rateDivisor = get_parameter("BO2.rateDivisor").as_int();
     configBO2.commonField =
-        (vn::protocol::uart::CommonGroup)get_parameter("BO2.commonField").as_int();
+      (vn::protocol::uart::CommonGroup)get_parameter("BO2.commonField").as_int();
     configBO2.timeField = (vn::protocol::uart::TimeGroup)get_parameter("BO2.timeField").as_int();
     configBO2.imuField = (vn::protocol::uart::ImuGroup)get_parameter("BO2.imuField").as_int();
     configBO2.gpsField = (vn::protocol::uart::GpsGroup)get_parameter("BO2.gpsField").as_int();
     configBO2.attitudeField =
-        (vn::protocol::uart::AttitudeGroup)get_parameter("BO2.attitudeField").as_int();
+      (vn::protocol::uart::AttitudeGroup)get_parameter("BO2.attitudeField").as_int();
     configBO2.insField = (vn::protocol::uart::InsGroup)get_parameter("BO2.insField").as_int();
     configBO2.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO2.gps2Field").as_int();
     vs_.writeBinaryOutput2(configBO2);
@@ -341,12 +348,12 @@ private:
     configBO3.asyncMode = (vn::protocol::uart::AsyncMode)get_parameter("BO3.asyncMode").as_int();
     configBO3.rateDivisor = get_parameter("BO3.rateDivisor").as_int();
     configBO3.commonField =
-        (vn::protocol::uart::CommonGroup)get_parameter("BO3.commonField").as_int();
+      (vn::protocol::uart::CommonGroup)get_parameter("BO3.commonField").as_int();
     configBO3.timeField = (vn::protocol::uart::TimeGroup)get_parameter("BO3.timeField").as_int();
     configBO3.imuField = (vn::protocol::uart::ImuGroup)get_parameter("BO3.imuField").as_int();
     configBO3.gpsField = (vn::protocol::uart::GpsGroup)get_parameter("BO3.gpsField").as_int();
     configBO3.attitudeField =
-        (vn::protocol::uart::AttitudeGroup)get_parameter("BO3.attitudeField").as_int();
+      (vn::protocol::uart::AttitudeGroup)get_parameter("BO3.attitudeField").as_int();
     configBO3.insField = (vn::protocol::uart::InsGroup)get_parameter("BO3.insField").as_int();
     configBO3.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO3.gps2Field").as_int();
     vs_.writeBinaryOutput3(configBO3);
@@ -362,8 +369,8 @@ private:
       // GPS Offset
       // 8.2.2
       auto gps_offset = vs_.readGpsAntennaOffset();
-      RCLCPP_INFO(get_logger(), "GPS Offset     : (%f, %f, %f)", gps_offset[0], gps_offset[1],
-                  gps_offset[2]);
+      RCLCPP_INFO(
+        get_logger(), "GPS Offset     : (%f, %f, %f)", gps_offset[0], gps_offset[1], gps_offset[2]);
 
       // GPS Compass Baseline
       // 8.2.3
@@ -371,11 +378,12 @@ private:
       // on the VN-300
       if (vs_.determineDeviceFamily() == vn::sensors::VnSensor::VnSensor_Family_Vn300) {
         auto gps_baseline = vs_.readGpsCompassBaseline();
-        RCLCPP_INFO(get_logger(), "GPS Baseline     : (%f, %f, %f), (%f, %f, %f)",
-          gps_baseline.position[0], gps_baseline.position[1], gps_baseline.position[2],
-          gps_baseline.uncertainty[0], gps_baseline.uncertainty[1], gps_baseline.uncertainty[2]);
+        RCLCPP_INFO(
+          get_logger(), "GPS Baseline     : (%f, %f, %f), (%f, %f, %f)", gps_baseline.position[0],
+          gps_baseline.position[1], gps_baseline.position[2], gps_baseline.uncertainty[0],
+          gps_baseline.uncertainty[1], gps_baseline.uncertainty[2]);
       }
-    } catch (const vn::sensors::sensor_error &e) {
+    } catch (const vn::sensors::sensor_error & e) {
       RCLCPP_WARN(get_logger(), "GPS initialization error (does your sensor have one?)");
     }
     // Register Binary Data Callback
@@ -393,29 +401,31 @@ private:
    * \return  adjusted ROS time
    */
 
-  rclcpp::Time getTimeStamp(vn::sensors::CompositeData &data) {
+  rclcpp::Time getTimeStamp(vn::sensors::CompositeData & data)
+  {
     const rclcpp::Time t = now();
     if (!data.hasTimeStartup() || !adjustROSTimeStamp_) {
-      return (t); // cannot or want not adjust time
+      return (t);  // cannot or want not adjust time
     }
     const uint64_t sensorTime = data.timeStartup();
     const double dt = t.seconds() - sensorTime * 1e-9;
-    if (averageTimeDifference_ == 0) { // first call
+    if (averageTimeDifference_ == 0) {  // first call
       averageTimeDifference_ = dt;
     }
 
     // compute exponential moving average
-    const double alpha = 0.001; // average over rougly 1000 samples
+    const double alpha = 0.001;  // average over rougly 1000 samples
     averageTimeDifference_ = averageTimeDifference_ * (1.0 - alpha) + alpha * dt;
 
     // adjust sensor time by average difference to ROS time
     const rclcpp::Time adjustedTime = rclcpp::Time(sensorTime, RCL_SYSTEM_TIME) +
-      rclcpp::Duration::from_seconds(averageTimeDifference_);
+                                      rclcpp::Duration::from_seconds(averageTimeDifference_);
     return (adjustedTime);
   }
 
-  static void ErrorPacketReceivedHandler(void *nodeptr, vn::protocol::uart::Packet &errorPacket,
-                                         size_t packetStartRunningIndex) {
+  static void ErrorPacketReceivedHandler(
+    void * nodeptr, vn::protocol::uart::Packet & errorPacket, size_t packetStartRunningIndex)
+  {
     // Get handle to the vectornav class
     auto node = reinterpret_cast<Vectornav *>(nodeptr);
 
@@ -425,8 +435,9 @@ private:
     // TODO(Dereck): Display error text
   }
 
-  static void AsyncPacketReceivedHandler(void *nodeptr, vn::protocol::uart::Packet &asyncPacket,
-                                         size_t packetStartRunningIndex) {
+  static void AsyncPacketReceivedHandler(
+    void * nodeptr, vn::protocol::uart::Packet & asyncPacket, size_t packetStartRunningIndex)
+  {
     // Get handle to the vectornav class
     auto node = reinterpret_cast<Vectornav *>(nodeptr);
 
@@ -468,8 +479,9 @@ private:
    * \param asyncPacket Async Binary Packet
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseCommonGroup(Vectornav *node, vn::sensors::CompositeData &compositeData,
-                               uint16_t groupFields) {
+  static void parseCommonGroup(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+  {
     // Message to Send
     auto msg = vectornav_msgs::msg::CommonGroup();
 
@@ -569,8 +581,9 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseTimeGroup(Vectornav *node, vn::sensors::CompositeData &compositeData,
-                             uint16_t groupFields) {
+  static void parseTimeGroup(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+  {
     // Message to Send
     auto msg = vectornav_msgs::msg::TimeGroup();
 
@@ -630,8 +643,9 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseImuGroup(Vectornav *node, vn::sensors::CompositeData &compositeData,
-                            uint16_t groupFields) {
+  static void parseImuGroup(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+  {
     // Message to Send
     auto msg = vectornav_msgs::msg::ImuGroup();
     // Header
@@ -700,8 +714,9 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseGpsGroup(Vectornav *node, vn::sensors::CompositeData &compositeData,
-                            uint16_t groupFields) {
+  static void parseGpsGroup(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+  {
     // Message to Send
     auto msg = vectornav_msgs::msg::GpsGroup();
 
@@ -782,8 +797,9 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseAttitudeGroup(Vectornav *node, vn::sensors::CompositeData &compositeData,
-                                 uint16_t groupFields) {
+  static void parseAttitudeGroup(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+  {
     // Message to Send
     auto msg = vectornav_msgs::msg::AttitudeGroup();
 
@@ -839,8 +855,9 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseInsGroup(Vectornav *node, vn::sensors::CompositeData &compositeData,
-                            uint16_t groupFields) {
+  static void parseInsGroup(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+  {
     // Message to Send
     auto msg = vectornav_msgs::msg::InsGroup();
 
@@ -910,8 +927,9 @@ private:
    *
    * TODO(Dereck): VNCXX is missing some read functions
    */
-  static void parseGps2Group(Vectornav *node, vn::sensors::CompositeData &compositeData,
-                             uint16_t groupFields) {
+  static void parseGps2Group(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+  {
     // Message to Send
     auto msg = vectornav_msgs::msg::GpsGroup();
 
@@ -994,7 +1012,8 @@ private:
   //
 
   /// Convert from vn::math::vec3f to geometry_msgs::msgs::Vector3
-  static inline geometry_msgs::msg::Vector3 toMsg(const vn::math::vec3f &rhs) {
+  static inline geometry_msgs::msg::Vector3 toMsg(const vn::math::vec3f & rhs)
+  {
     geometry_msgs::msg::Vector3 lhs;
     lhs.x = rhs[0];
     lhs.y = rhs[1];
@@ -1003,7 +1022,8 @@ private:
   }
 
   /// Convert from vn::math::vec4f to geometry_msgs::msgs::Quaternion
-  static inline geometry_msgs::msg::Quaternion toMsg(const vn::math::vec4f &rhs) {
+  static inline geometry_msgs::msg::Quaternion toMsg(const vn::math::vec4f & rhs)
+  {
     geometry_msgs::msg::Quaternion lhs;
     lhs.x = rhs[0];
     lhs.y = rhs[1];
@@ -1013,7 +1033,8 @@ private:
   }
 
   /// Convert from vn::math::vec3d to geometry_msgs::msgs::Point
-  static inline geometry_msgs::msg::Point toMsg(const vn::math::vec3d &rhs) {
+  static inline geometry_msgs::msg::Point toMsg(const vn::math::vec3d & rhs)
+  {
     geometry_msgs::msg::Point lhs;
     lhs.x = rhs[0];
     lhs.y = rhs[1];
@@ -1022,7 +1043,8 @@ private:
   }
 
   /// Convert from vn::protocol::uart::TimeUTC to vectornav_msgs::msg::TimeUTC
-  static inline vectornav_msgs::msg::TimeUTC toMsg(const vn::protocol::uart::TimeUtc &rhs) {
+  static inline vectornav_msgs::msg::TimeUTC toMsg(const vn::protocol::uart::TimeUtc & rhs)
+  {
     vectornav_msgs::msg::TimeUTC lhs;
     lhs.year = rhs.year;
     lhs.month = rhs.month;
@@ -1035,7 +1057,8 @@ private:
   }
 
   /// Convert from vn::protocol::uart::TimeUTC to vectornav_msgs::msg::TimeUTC
-  static inline vectornav_msgs::msg::DOP toMsg(const vn::protocol::uart::GnssDop &rhs) {
+  static inline vectornav_msgs::msg::DOP toMsg(const vn::protocol::uart::GnssDop & rhs)
+  {
     vectornav_msgs::msg::DOP lhs;
     lhs.g = rhs.gDop;
     lhs.p = rhs.pDop;
@@ -1048,7 +1071,8 @@ private:
   }
 
   /// Convert from vn::protocol::uart::VpeStatus to vectornav_msgs::msg::VpeStatus
-  static inline vectornav_msgs::msg::VpeStatus toMsg(const vn::protocol::uart::VpeStatus &rhs) {
+  static inline vectornav_msgs::msg::VpeStatus toMsg(const vn::protocol::uart::VpeStatus & rhs)
+  {
     vectornav_msgs::msg::VpeStatus lhs;
     lhs.attitude_quality = rhs.attitudeQuality;
     lhs.gyro_saturation = rhs.gyroSaturation;
@@ -1063,7 +1087,8 @@ private:
   }
 
   /// Convert from vn::math::mat3f to std::array<float, 9>
-  static inline std::array<float, 9> toMsg(const vn::math::mat3f &rhs) {
+  static inline std::array<float, 9> toMsg(const vn::math::mat3f & rhs)
+  {
     std::array<float, 9> lhs;
     lhs[0] = rhs(0, 0);
     lhs[1] = rhs(0, 1);
@@ -1078,7 +1103,8 @@ private:
   }
 
   /// Convert from vn::math::mat3f to vectornav_msgs::msg::TimeStatus
-  static inline vectornav_msgs::msg::TimeStatus toMsg(const uint8_t rhs) {
+  static inline vectornav_msgs::msg::TimeStatus toMsg(const uint8_t rhs)
+  {
     vectornav_msgs::msg::TimeStatus lhs;
     lhs.time_ok = rhs & 0x01;
     lhs.date_ok = rhs & 0x02;
@@ -1088,7 +1114,8 @@ private:
 
   /// Convert from vn::math::mat3f to vectornav_msgs::msg::TimeStatus
   // TODO(Dereck): vncxx uses an enum to hold a bitfeild, this is likely undefined behavior
-  static inline vectornav_msgs::msg::InsStatus toMsg(const vn::protocol::uart::InsStatus &rhs) {
+  static inline vectornav_msgs::msg::InsStatus toMsg(const vn::protocol::uart::InsStatus & rhs)
+  {
     vectornav_msgs::msg::InsStatus lhs;
     lhs.mode = rhs & 0x0003;
     lhs.gps_fix = rhs & vn::protocol::uart::InsStatus::INSSTATUS_GPS_FIX;
@@ -1103,7 +1130,9 @@ private:
   }
 
   /// Count the number of set bits in a number
-  template <typename T> static uint countSetBits(T n) {
+  template <typename T>
+  static uint countSetBits(T n)
+  {
     T count = 0;
     while (n != 0) {
       n = n & (n - 1);
@@ -1136,7 +1165,8 @@ private:
   bool adjustROSTimeStamp_{false};
 };
 
-int main(int argc, char *argv[]) {
+int main(int argc, char * argv[])
+{
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<Vectornav>());
   rclcpp::shutdown();
