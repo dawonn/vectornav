@@ -89,6 +89,11 @@ struct UserData {
     int odom_stride;
     int pres_stride;
     int temp_stride;
+
+    // ROS header time stamp adjustments
+    double average_time_difference{0};
+    ros::Time ros_start_time;
+    bool adjust_ros_timestamp{false};
 };
 
 // Basic loop so we can initilize our covariance parameters above
@@ -183,6 +188,7 @@ int main(int argc, char *argv[])
     pn.param<std::string>("frame_id", user_data.frame_id, "vectornav");
     pn.param<bool>("tf_ned_to_enu", user_data.tf_ned_to_enu, false);
     pn.param<bool>("frame_based_enu", user_data.frame_based_enu, false);
+    pn.param<bool>("adjust_ros_timestamp", user_data.adjust_ros_timestamp, false);
     pn.param<int>("async_output_rate", async_output_rate, 40);
     pn.param<std::string>("serial_port", SensorPort, "/dev/ttyUSB0");
     pn.param<int>("serial_baud", SensorBaudrate, 115200);
@@ -309,7 +315,8 @@ int main(int argc, char *argv[])
             | COMMONGROUP_ANGULARRATE
             | COMMONGROUP_POSITION
             | COMMONGROUP_ACCEL
-            | COMMONGROUP_MAGPRES,
+            | COMMONGROUP_MAGPRES
+            | (user_data.adjust_ros_timestamp ? COMMONGROUP_TIMESTARTUP : 0),
             TIMEGROUP_NONE
             | TIMEGROUP_GPSTOW
             | TIMEGROUP_GPSWEEK
@@ -755,6 +762,31 @@ void fill_ins_message(
     }
 }
 
+
+static ros::Time get_time_stamp(
+    vn::sensors::CompositeData &cd, UserData *user_data, const ros::Time &ros_time) {
+    if (!cd.hasTimeStartup() || !user_data->adjust_ros_timestamp) {
+        return (ros_time); // don't adjust timestamp
+    }
+    const uint64_t sensor_time = cd.timeStartup() * 1e-9; // time in seconds
+    if (user_data->average_time_difference == 0) { // first call
+        user_data->ros_start_time = ros_time;
+        user_data->average_time_difference = static_cast<double>(sensor_time);
+    }
+    // difference between node startup and current ROS time
+    const double ros_dt = ros_time.toSec() - user_data->ros_start_time.toSec();
+    // difference between elapsed ROS time and time since sensor startup
+    const double dt = ros_dt - sensor_time;
+    // compute exponential moving average
+    const double alpha = 0.001; // average over rougly 1000 samples
+    user_data->average_time_difference =
+        user_data->average_time_difference * (1.0 - alpha) + alpha * dt;
+
+    // adjust sensor time by average difference to ROS time
+    const ros::Time adj_time = user_data->ros_start_time + ros::Duration(dt + sensor_time);
+    return (adj_time);
+}
+
 //
 // Callback function to process data packet from sensor
 //
@@ -764,10 +796,11 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     static unsigned long long pkg_count = 0;
 
     // evaluate time first, to have it as close to the measurement time as possible
-    ros::Time time = ros::Time::now();
+    const ros::Time ros_time = ros::Time::now();
 
     vn::sensors::CompositeData cd = vn::sensors::CompositeData::parse(p);
     UserData *user_data = static_cast<UserData*>(userData);
+    ros::Time time = get_time_stamp(cd, user_data, ros_time);
 
     // IMU
     if (user_data->imu_stride > 0 && (pkg_count % user_data->imu_stride) == 0 && pubIMU.getNumSubscribers() > 0)
