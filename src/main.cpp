@@ -745,13 +745,13 @@ static ros::Time get_time_stamp(
     if (!cd.hasTimeStartup() || !user_data->adjust_ros_timestamp) {
         return (ros_time); // don't adjust timestamp
     }
-    const uint64_t sensor_time = cd.timeStartup() * 1e-9; // time in seconds
+    const double sensor_time = cd.timeStartup() * 1e-9; // time in seconds
     if (user_data->average_time_difference == 0) { // first call
         user_data->ros_start_time = ros_time;
-        user_data->average_time_difference = static_cast<double>(sensor_time);
+        user_data->average_time_difference = static_cast<double>(-sensor_time);
     }
     // difference between node startup and current ROS time
-    const double ros_dt = ros_time.toSec() - user_data->ros_start_time.toSec();
+    const double ros_dt = (ros_time - user_data->ros_start_time).toSec();
     // difference between elapsed ROS time and time since sensor startup
     const double dt = ros_dt - sensor_time;
     // compute exponential moving average
@@ -760,7 +760,8 @@ static ros::Time get_time_stamp(
         user_data->average_time_difference * (1.0 - alpha) + alpha * dt;
 
     // adjust sensor time by average difference to ROS time
-    const ros::Time adj_time = user_data->ros_start_time + ros::Duration(dt + sensor_time);
+    const ros::Time adj_time = user_data->ros_start_time + ros::Duration(
+      user_data->average_time_difference + sensor_time);
     return (adj_time);
 }
 
