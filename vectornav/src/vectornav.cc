@@ -12,6 +12,13 @@
 #include <memory>
 #include <string>
 
+#if __linux__ || __CYGWIN__
+#include <fcntl.h>
+#include <linux/serial.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+#endif
+
 // ROS2
 #include "rclcpp/rclcpp.hpp"
 #include "vectornav_msgs/msg/attitude_group.hpp"
@@ -27,6 +34,9 @@
 #include "vn/util.h"
 
 using namespace std::chrono_literals;
+
+// Assure that the serial port is set to async low latency in order to reduce delays and package pilup.
+// These changes will stay effective until the device is unplugged
 
 class Vectornav : public rclcpp::Node
 {
@@ -153,6 +163,10 @@ public:
     pub_ins_ = this->create_publisher<vectornav_msgs::msg::InsGroup>("vectornav/raw/ins", 10);
     pub_gps2_ = this->create_publisher<vectornav_msgs::msg::GpsGroup>("vectornav/raw/gps2", 10);
 
+    if (!optimize_serial_communication(port)) {
+      RCLCPP_WARN(get_logger(), "time of message delivery may be compromised!");
+    }
+
     // Connect to the sensor
     connect(port, baud);
 
@@ -164,6 +178,38 @@ public:
   }
 
 private:
+  /**
+   * set serial port to low latency async to avoid bunching up of callbacks
+   *
+   * \param port serial port path, eg /dev/ttyUSB0
+   * \return     true: OK, false: FAILURE
+   */
+#if __linux__ || __CYGWIN__
+  bool optimize_serial_communication(const std::string & portName)
+  {
+    const int portFd = open(portName.c_str(), O_RDWR | O_NOCTTY);
+
+    if (portFd == -1) {
+      RCLCPP_WARN(get_logger(), "Can't open port for optimization");
+      return false;
+    }
+
+    struct serial_struct serial;
+    ioctl(portFd, TIOCGSERIAL, &serial);
+    serial.flags |= ASYNC_LOW_LATENCY;
+    ioctl(portFd, TIOCSSERIAL, &serial);
+    close(portFd);
+    RCLCPP_INFO(get_logger(), "Set port to ASYNCY_LOW_LATENCY");
+    return (true);
+  }
+#elif
+  bool optimize_serial_communication(str::string portName)
+  {
+    RCLCPP_WARN(get_logger(), "Cannot set port to ASYNCY_LOW_LATENCY!");
+    return (true);
+  }
+#endif
+
   /**
    * Periodically check for connection drops and try to reconnect
    *
