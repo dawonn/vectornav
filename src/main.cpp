@@ -85,6 +85,10 @@ struct UserData {
     double average_time_difference{0};
     ros::Time ros_start_time;
     bool adjust_ros_timestamp{false};
+
+    // strides
+    unsigned int imu_stride;
+    unsigned int output_stride;
 };
 
 // Basic loop so we can initilize our covariance parameters above
@@ -170,6 +174,7 @@ int main(int argc, char *argv[])
     string SensorPort;
     int SensorBaudrate;
     int async_output_rate;
+    int imu_output_rate;
 
     // Sensor IMURATE (800Hz by default, used to configure device)
     int SensorImuRate;
@@ -181,6 +186,7 @@ int main(int argc, char *argv[])
     pn.param<bool>("frame_based_enu", user_data.frame_based_enu, false);
     pn.param<bool>("adjust_ros_timestamp", user_data.adjust_ros_timestamp, false);
     pn.param<int>("async_output_rate", async_output_rate, 40);
+    pn.param<int>("imu_output_rate", imu_output_rate, async_output_rate);
     pn.param<std::string>("serial_port", SensorPort, "/dev/ttyUSB0");
     pn.param<int>("serial_baud", SensorBaudrate, 115200);
     pn.param<int>("fixed_imu_rate", SensorImuRate, 800);
@@ -275,7 +281,25 @@ int main(int argc, char *argv[])
     uint32_t sn = vs.readSerialNumber();
     ROS_INFO("Model Number: %s, Firmware Version: %s", mn.c_str(), fv.c_str());
     ROS_INFO("Hardware Revision : %d, Serial Number : %d", hv, sn);
-    ROS_INFO("Publish Rate: %d Hz", async_output_rate);
+
+    // calculate the least common multiple of the two rate and assure it is a 
+    // valid package rate, also calculate the imu and output strides
+    int package_rate = 0; 
+    for(int allowed_rate: {1, 2, 4, 5, 10, 20, 25, 40, 50, 100, 200, 0}){
+        package_rate = allowed_rate;
+        if (package_rate % async_output_rate == 0 && package_rate % imu_output_rate == 0) break;
+    }
+    ROS_ASSERT_MSG(
+        package_rate,
+        "imu_output_rate (%d) or async_output_rate (%d) is not in 1, 2, 4, 5, 10, 20, 25, 40, 50, 100, 200 Hz",
+        imu_output_rate,
+        async_output_rate
+    );
+    user_data.imu_stride = package_rate / imu_output_rate;
+    user_data.output_stride = package_rate / async_output_rate;
+    ROS_INFO("Package Receive Rate: %d Hz", package_rate);
+    ROS_INFO("General Publish Rate: %d Hz", async_output_rate);
+    ROS_INFO("IMU Publish Rate: %d Hz", imu_output_rate);
 
     // Set the device info for passing to the packet callback function
     user_data.device_family = vs.determineDeviceFamily();
@@ -286,7 +310,7 @@ int main(int argc, char *argv[])
     // Configure binary output message
     BinaryOutputRegister bor(
             ASYNCMODE_PORT1,
-            SensorImuRate / async_output_rate,  // update rate [ms]
+            SensorImuRate / package_rate,  // update rate [ms]
             COMMONGROUP_QUATERNION
             | COMMONGROUP_YAWPITCHROLL
             | COMMONGROUP_ANGULARRATE
@@ -770,6 +794,9 @@ static ros::Time get_time_stamp(
 //
 void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
 {
+    // package counter to calculate strides
+    static unsigned long long pkg_count = 0;
+
     // evaluate time first, to have it as close to the measurement time as possible
     const ros::Time ros_time = ros::Time::now();
 
@@ -778,58 +805,62 @@ void BinaryAsyncMessageReceived(void* userData, Packet& p, size_t index)
     ros::Time time = get_time_stamp(cd, user_data, ros_time);
 
     // IMU
-    if (pubIMU.getNumSubscribers() > 0)
+    if ((pkg_count % user_data->imu_stride) == 0 && pubIMU.getNumSubscribers() > 0)
     {
         sensor_msgs::Imu msgIMU;
         fill_imu_message(msgIMU, cd, time, user_data);
         pubIMU.publish(msgIMU);
     }
 
-    // Magnetic Field
-    if (pubMag.getNumSubscribers() > 0)
+    if ((pkg_count % user_data->output_stride) == 0)
     {
-        sensor_msgs::MagneticField msgMag;
-        fill_mag_message(msgMag, cd, time, user_data);
-        pubMag.publish(msgMag);
-    }
+        // Magnetic Field
+        if (pubMag.getNumSubscribers() > 0)
+        {
+            sensor_msgs::MagneticField msgMag;
+            fill_mag_message(msgMag, cd, time, user_data);
+            pubMag.publish(msgMag);
+        }
 
-    // Temperature
-    if (pubTemp.getNumSubscribers() > 0)
-    {
-        sensor_msgs::Temperature msgTemp;
-        fill_temp_message(msgTemp, cd, time, user_data);
-        pubTemp.publish(msgTemp);
-    }
+        // Temperature
+        if (pubTemp.getNumSubscribers() > 0)
+        {
+            sensor_msgs::Temperature msgTemp;
+            fill_temp_message(msgTemp, cd, time, user_data);
+            pubTemp.publish(msgTemp);
+        }
 
-    // Barometer
-    if (pubPres.getNumSubscribers() > 0)
-    {
-        sensor_msgs::FluidPressure msgPres;
-        fill_pres_message(msgPres, cd, time, user_data);
-        pubPres.publish(msgPres);
-    }
+        // Barometer
+        if (pubPres.getNumSubscribers() > 0)
+        {
+            sensor_msgs::FluidPressure msgPres;
+            fill_pres_message(msgPres, cd, time, user_data);
+            pubPres.publish(msgPres);
+        }
 
-    // GPS
-    if (user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubGPS.getNumSubscribers() > 0)
-    {
-        sensor_msgs::NavSatFix msgGPS;
-        fill_gps_message(msgGPS, cd, time, user_data);
-        pubGPS.publish(msgGPS);
-    }
+        // GPS
+        if (user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubGPS.getNumSubscribers() > 0)
+        {
+            sensor_msgs::NavSatFix msgGPS;
+            fill_gps_message(msgGPS, cd, time, user_data);
+            pubGPS.publish(msgGPS);
+        }
 
-    // Odometry
-    if (user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubOdom.getNumSubscribers() > 0)
-    {
-        nav_msgs::Odometry msgOdom;
-        fill_odom_message(msgOdom, cd, time, user_data);
-        pubOdom.publish(msgOdom);
-    }
+        // Odometry
+        if (user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubOdom.getNumSubscribers() > 0)
+        {
+            nav_msgs::Odometry msgOdom;
+            fill_odom_message(msgOdom, cd, time, user_data);
+            pubOdom.publish(msgOdom);
+        }
 
-    // INS
-    if (user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubIns.getNumSubscribers() > 0)
-    {
-        vectornav::Ins msgINS;
-        fill_ins_message(msgINS, cd, time, user_data);
-        pubIns.publish(msgINS);
+        // INS
+        if (user_data->device_family != VnSensor::Family::VnSensor_Family_Vn100 && pubIns.getNumSubscribers() > 0)
+        {
+            vectornav::Ins msgINS;
+            fill_ins_message(msgINS, cd, time, user_data);
+            pubIns.publish(msgINS);
+        }
     }
+    pkg_count += 1;
 }
