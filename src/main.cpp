@@ -287,7 +287,7 @@ int main(int argc, char *argv[])
     int package_rate = 0; 
     for(int allowed_rate: {1, 2, 4, 5, 10, 20, 25, 40, 50, 100, 200, 0}){
         package_rate = allowed_rate;
-        if (package_rate % async_output_rate == 0 && package_rate % imu_output_rate == 0) break;
+        if ((package_rate % async_output_rate) == 0 && (package_rate % imu_output_rate) == 0) break;
     }
     ROS_ASSERT_MSG(
         package_rate,
