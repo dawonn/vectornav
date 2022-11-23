@@ -1,0 +1,10 @@
+# request
+
+---
+# result
+float32[12] avg_dev
+
+---
+# feedback
+float32[12] avg_dev
+uint32 samples
