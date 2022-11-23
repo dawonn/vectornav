@@ -11,6 +11,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <queue>
 
 #if __linux__ || __CYGWIN__
 #include <fcntl.h>
@@ -21,12 +22,14 @@
 
 // ROS2
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
 #include "vectornav_msgs/msg/attitude_group.hpp"
 #include "vectornav_msgs/msg/common_group.hpp"
 #include "vectornav_msgs/msg/gps_group.hpp"
 #include "vectornav_msgs/msg/imu_group.hpp"
 #include "vectornav_msgs/msg/ins_group.hpp"
 #include "vectornav_msgs/msg/time_group.hpp"
+#include "vectornav_msgs/action/mag_cal.hpp"
 
 // VectorNav libvncxx
 #include "vn/compositedata.h"
@@ -34,12 +37,16 @@
 #include "vn/util.h"
 
 using namespace std::chrono_literals;
+using namespace std::placeholders;
 
 // Assure that the serial port is set to async low latency in order to reduce delays and package pilup.
 // These changes will stay effective until the device is unplugged
 
 class Vectornav : public rclcpp::Node
 {
+  using MagCal = vectornav_msgs::action::MagCal;
+  using MagCalGH = rclcpp_action::ServerGoalHandle<MagCal>;
+
 public:
   Vectornav() : Node("vectornav")
   {
@@ -153,15 +160,21 @@ public:
     declare_parameter<std::string>("frame_id", "vectornav");
 
     // Composite Data Publisher
-    pub_common_ =
-      this->create_publisher<vectornav_msgs::msg::CommonGroup>("vectornav/raw/common", 10);
+    pub_common_ = this->create_publisher<vectornav_msgs::msg::CommonGroup>("vectornav/raw/common", 10);
     pub_time_ = this->create_publisher<vectornav_msgs::msg::TimeGroup>("vectornav/raw/time", 10);
     pub_imu_ = this->create_publisher<vectornav_msgs::msg::ImuGroup>("vectornav/raw/imu", 10);
     pub_gps_ = this->create_publisher<vectornav_msgs::msg::GpsGroup>("vectornav/raw/gps", 10);
-    pub_attitude_ =
-      this->create_publisher<vectornav_msgs::msg::AttitudeGroup>("vectornav/raw/attitude", 10);
+    pub_attitude_ = this->create_publisher<vectornav_msgs::msg::AttitudeGroup>("vectornav/raw/attitude", 10);
     pub_ins_ = this->create_publisher<vectornav_msgs::msg::InsGroup>("vectornav/raw/ins", 10);
     pub_gps2_ = this->create_publisher<vectornav_msgs::msg::GpsGroup>("vectornav/raw/gps2", 10);
+
+    // magnetic cal action
+    server_mag_cal_ = rclcpp_action::create_server<MagCal>(
+      this, "vectornav/mag_cal",
+      std::bind(&Vectornav::handle_cal_goal, this, _1, _2),
+      std::bind(&Vectornav::handle_cal_cancel, this, _1),
+      std::bind(&Vectornav::handle_cal_accept, this, _1)
+    );
 
     if (!optimize_serial_communication(port)) {
       RCLCPP_WARN(get_logger(), "time of message delivery may be compromised!");
@@ -245,6 +258,182 @@ private:
     }
   }
 
+  rclcpp_action::GoalResponse handle_cal_goal(
+      const rclcpp_action::GoalUUID & uuid,
+      std::shared_ptr<const MagCal::Goal> goal){
+    RCLCPP_INFO(get_logger(), "Temporarily stopping sensor streaming for magnetic calibration");
+    
+    // check and make sure we are not already doing it
+    if(!action_thread_.joinable() && vs_.isConnected()){
+      return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+    }
+    RCLCPP_WARN(get_logger(), "Magnetic calibration already in progress, rejecting request");
+    return rclcpp_action::GoalResponse::REJECT;
+  }
+
+  rclcpp_action::CancelResponse handle_cal_cancel(const std::shared_ptr<MagCalGH> goal_handle){
+    RCLCPP_INFO(get_logger(), "Recieved request to stop magnetic calibration");
+
+    // check and make sure we are already running
+    if(action_thread_.joinable()){
+      return rclcpp_action::CancelResponse::ACCEPT;
+    }
+
+    // not running
+    return rclcpp_action::CancelResponse::REJECT;
+  }
+
+  void handle_cal_accept(const std::shared_ptr<MagCalGH> goal_handle){
+    // send the task execution off to the child thread
+    action_thread_ = std::thread{std::bind(&Vectornav::execute_cal, this, _1), goal_handle};
+    action_thread_.detach();
+  }
+
+  void execute_cal(const std::shared_ptr<MagCalGH> goal_handle){
+    // setup a ros rate timer
+    rclcpp::Rate loopRate(0.5);
+    
+    // disable all async registers
+    vs_.writeAsyncDataOutputFrequency(0);
+    vn::sensors::BinaryOutputRegister configAsyncOff;
+    configAsyncOff.asyncMode = vn::protocol::uart::AsyncMode::ASYNCMODE_NONE;
+    vs_.writeBinaryOutput1(configAsyncOff);
+    vs_.writeBinaryOutput2(configAsyncOff);
+    vs_.writeBinaryOutput3(configAsyncOff);
+
+    // make the result message just in case we have to abort
+    auto result = std::make_shared<vectornav_msgs::action::MagCal::Result>();
+
+    // reset HSI Mode and verify
+    vn::sensors::MagnetometerCalibrationControlRegister magControl;
+    magControl.hsiMode = vn::protocol::uart::HsiMode::HSIMODE_RESET;
+    vs_.writeMagnetometerCalibrationControl(magControl);
+    if(vs_.readMagnetometerCalibrationControl().hsiMode != vn::protocol::uart::HsiMode::HSIMODE_RESET){
+      RCLCPP_ERROR(get_logger(), "Failed to reset magnetometer for calibration");
+      goal_handle->abort(result);
+    }
+
+    // Set VPE basic control to absolute
+    vn::sensors::VpeBasicControlRegister vpeControl;
+    vpeControl.headingMode = vn::protocol::uart::HeadingMode::HEADINGMODE_ABSOLUTE;
+    vs_.writeVpeBasicControl(vpeControl);
+
+    // set HSI Mode to on and verify
+    magControl.hsiMode = vn::protocol::uart::HsiMode::HSIMODE_RUN;
+    vs_.writeMagnetometerCalibrationControl(magControl);
+    if(vs_.readMagnetometerCalibrationControl().hsiMode != vn::protocol::uart::HsiMode::HSIMODE_RUN){
+      RCLCPP_ERROR(get_logger(), "Failed to set HSI mode to RUN for calibration");
+      goal_handle->abort(result);
+    }
+
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Calibration actually starts here
+    RCLCPP_WARN(get_logger(), "Magnetic calibration sampling starting");
+
+    std::deque<vn::math::mat3f> cSamples;
+    std::deque<vn::math::vec3f> bSamples;
+
+    vn::math::mat3f avgMat;
+    vn::math::vec3f avgVec;
+
+    int calSamples = 0;
+
+    // collect samples until converge
+    while(calSamples < 1000 && !goal_handle->is_canceling()){
+      // increment the sample counter
+      calSamples ++;
+
+      // Read HSI calibration
+      auto lastComp = vs_.readMagnetometerCompensation();
+
+      // push the newest samples onto a stack
+      cSamples.push_back(lastComp.c);
+      if(cSamples.size() > 10){
+        cSamples.pop_front();
+      }
+      bSamples.push_back(lastComp.b);
+      if(bSamples.size() > 10){
+        bSamples.pop_front();
+      }
+
+      // create a running average of the difference eover 10 samples
+      for(size_t i = 1; i < cSamples.size(); i++){
+        // diff[i]  = val[i-1] - val[i]
+        auto diffMat = cSamples.at(i-1) - cSamples.at(i);
+        auto diffVec = bSamples.at(i-1) - bSamples.at(i);
+
+        // avg_diff = (avg_diff + diff[i]) / 2.0
+        if(i < 2){
+          avgMat = diffMat;
+          avgVec = diffVec;
+        } else {
+          avgMat = (avgMat + diffMat).div(2);
+          avgVec = (avgVec + diffVec).div(2);
+        }
+      }
+      // make feedback message
+      auto feedbackMsg = std::make_shared<vectornav_msgs::action::MagCal::Feedback>();
+      feedbackMsg->samples = calSamples;
+
+      // populate deviation vector
+      for(size_t i = 0; i < 9; i++){
+        feedbackMsg->avg_dev.at(i) = avgMat.e[i];
+      }
+      feedbackMsg->avg_dev.at(9) = avgVec.x;
+      feedbackMsg->avg_dev.at(10) = avgVec.y;
+      feedbackMsg->avg_dev.at(11) = avgVec.z;
+  
+      // send the feedback
+      goal_handle->publish_feedback(feedbackMsg);
+
+      // check for convergence with the all_of algorithm and bail out if we are there
+      if(std::all_of(feedbackMsg->avg_dev.cbegin(), feedbackMsg->avg_dev.cend(),
+         [](float i){ return i < 0.005; })){
+          RCLCPP_WARN(get_logger(), "Mag cal has converged");
+          break;
+         }
+
+      // wait a bit
+      loopRate.sleep();
+    }
+
+    // if we stopped due to a cancellation
+    if(goal_handle->is_canceling()){
+      // reconfigure IMU but do not save
+      // attempt reconfiguration of the device
+      configure_sensor();
+
+      // Send results
+      for(size_t i = 0; i < 9; i++){
+        result->avg_dev.at(i) = avgMat.e[i];
+      }
+      result->avg_dev.at(9) = avgVec.x;
+      result->avg_dev.at(10) = avgVec.y;
+      result->avg_dev.at(11) = avgVec.z;
+
+      goal_handle->canceled(result);
+
+      return;
+    } else {
+      // at the end, write the settings to NVmemory
+      vs_.writeSettings();
+
+      // attempt reconfiguration of the device
+      configure_sensor();
+
+      // populate deviation vector
+      for(size_t i = 0; i < 9; i++){
+        result->avg_dev.at(i) = avgMat.e[i];
+      }
+      result->avg_dev.at(9) = avgVec.x;
+      result->avg_dev.at(10) = avgVec.y;
+      result->avg_dev.at(11) = avgVec.z;
+
+      // we did it
+      goal_handle->succeed(result);
+    }
+  }
+
   /**
    * Connect to a sensor
    *
@@ -311,10 +500,15 @@ private:
     RCLCPP_INFO(get_logger(), "Serial Number : %d", sn);
     RCLCPP_INFO(get_logger(), "User Tag : \"%s\"", ut.c_str());
 
-    //
-    // Sensor Configuration
-    //
+    return configure_sensor();
+  }
 
+  /**
+   * Configures a sensor based on the parameter configuration loaded by the node
+   * 
+   * \return true for OK configuration, false for an error
+  */
+  bool configure_sensor(){
     // Register Error Callback
     vs_.registerErrorPacketReceivedHandler(this, Vectornav::ErrorPacketReceivedHandler);
 
@@ -415,33 +609,36 @@ private:
     configBO3.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO3.gps2Field").as_int();
     vs_.writeBinaryOutput3(configBO3);
 
-    try {
-      // GPS Configuration
-      // 8.2.1
-      auto gps_config = vs_.readGpsConfiguration();
-      RCLCPP_INFO(get_logger(), "GPS Mode       : %d", gps_config.mode);
-      RCLCPP_INFO(get_logger(), "GPS PPS Source : %d", gps_config.ppsSource);
-      /// TODO(Dereck): VnSensor::readGpsConfiguration() missing fields
+    // Verify that the device family is capable of supporting GPS
+    if(vs_.determineDeviceFamily() != vn::sensors::VnSensor::VnSensor_Family_Vn100){
+      try {
+        // GPS Configuration
+        // 8.2.1
+        auto gps_config = vs_.readGpsConfiguration();
+        RCLCPP_INFO(get_logger(), "GPS Mode       : %d", gps_config.mode);
+        RCLCPP_INFO(get_logger(), "GPS PPS Source : %d", gps_config.ppsSource);
+        /// TODO(Dereck): VnSensor::readGpsConfiguration() missing fields
 
-      // GPS Offset
-      // 8.2.2
-      auto gps_offset = vs_.readGpsAntennaOffset();
-      RCLCPP_INFO(
-        get_logger(), "GPS Offset     : (%f, %f, %f)", gps_offset[0], gps_offset[1], gps_offset[2]);
-
-      // GPS Compass Baseline
-      // 8.2.3
-      // According to dawonn, readGpsCompassBaseline is likely only available
-      // on the VN-300
-      if (vs_.determineDeviceFamily() == vn::sensors::VnSensor::VnSensor_Family_Vn300) {
-        auto gps_baseline = vs_.readGpsCompassBaseline();
+        // GPS Offset
+        // 8.2.2
+        auto gps_offset = vs_.readGpsAntennaOffset();
         RCLCPP_INFO(
-          get_logger(), "GPS Baseline     : (%f, %f, %f), (%f, %f, %f)", gps_baseline.position[0],
-          gps_baseline.position[1], gps_baseline.position[2], gps_baseline.uncertainty[0],
-          gps_baseline.uncertainty[1], gps_baseline.uncertainty[2]);
+          get_logger(), "GPS Offset     : (%f, %f, %f)", gps_offset[0], gps_offset[1], gps_offset[2]);
+
+        // GPS Compass Baseline
+        // 8.2.3
+        // According to dawonn, readGpsCompassBaseline is likely only available
+        // on the VN-300
+        if (vs_.determineDeviceFamily() == vn::sensors::VnSensor::VnSensor_Family_Vn300) {
+          auto gps_baseline = vs_.readGpsCompassBaseline();
+          RCLCPP_INFO(
+            get_logger(), "GPS Baseline     : (%f, %f, %f), (%f, %f, %f)", gps_baseline.position[0],
+            gps_baseline.position[1], gps_baseline.position[2], gps_baseline.uncertainty[0],
+            gps_baseline.uncertainty[1], gps_baseline.uncertainty[2]);
+        }
+      } catch (const vn::sensors::sensor_error & e) {
+        RCLCPP_WARN(get_logger(), "GPS initialization error");
       }
-    } catch (const vn::sensors::sensor_error & e) {
-      RCLCPP_WARN(get_logger(), "GPS initialization error (does your sensor have one?)");
     }
     // Register Binary Data Callback
     vs_.registerAsyncPacketReceivedHandler(this, Vectornav::AsyncPacketReceivedHandler);
@@ -1169,7 +1366,7 @@ private:
     return lhs;
   }
 
-  /// Convert from vn::math::mat3f to vectornav_msgs::msg::TimeStatus
+  /// Convert from vn::protocol::uart::InsStatus to vectornav_msgs::msg::InsStatus
   // TODO(Dereck): vncxx uses an enum to hold a bitfeild, this is likely undefined behavior
   static inline vectornav_msgs::msg::InsStatus toMsg(const vn::protocol::uart::InsStatus & rhs)
   {
@@ -1216,6 +1413,10 @@ private:
   rclcpp::Publisher<vectornav_msgs::msg::AttitudeGroup>::SharedPtr pub_attitude_;
   rclcpp::Publisher<vectornav_msgs::msg::InsGroup>::SharedPtr pub_ins_;
   rclcpp::Publisher<vectornav_msgs::msg::GpsGroup>::SharedPtr pub_gps2_;
+
+  /// Action servers for calibration
+  rclcpp_action::Server<vectornav_msgs::action::MagCal>::SharedPtr server_mag_cal_;
+  std::thread action_thread_;
 
   /// ROS header time stamp adjustments
   double averageTimeDifference_{0};

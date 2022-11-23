@@ -16,24 +16,21 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # find dependencies
-find_package(ament_cmake_auto REQUIRED)
-ament_auto_find_build_dependencies()
+find_package(ament_cmake REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+
+# Grab all message files 
+file(GLOB msg_sources RELATIVE ${PROJECT_SOURCE_DIR} msg/*.msg)
+file(GLOB act_sources RELATIVE ${PROJECT_SOURCE_DIR} action/*.action)
+
+message("Grabbing messages ${act_sources}")
 
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/CommonGroup.msg"
-  "msg/TimeGroup.msg"
-  "msg/ImuGroup.msg"
-  "msg/GpsGroup.msg"
-  "msg/AttitudeGroup.msg"
-  "msg/InsGroup.msg"
-  "msg/TimeUTC.msg"
-  "msg/DOP.msg"
-  "msg/VpeStatus.msg"
-  "msg/TimeStatus.msg"
-  "msg/InsStatus.msg"
+  ${msg_sources}
+  ${act_sources}
   DEPENDENCIES geometry_msgs
-  ADD_LINTER_TESTS
 )
 
 ament_export_dependencies(rosidl_default_runtime)
