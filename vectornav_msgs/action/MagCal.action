@@ -3,8 +3,10 @@
 ---
 # result
 float32[12] avg_dev
+float32[12] calib
 
 ---
 # feedback
-float32[12] avg_dev
+float32[12] curr_avg_dev
+float32[12] curr_calib
 uint32 samples

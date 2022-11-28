@@ -253,7 +253,7 @@ private:
     RCLCPP_INFO(get_logger(), "Temporarily stopping sensor streaming for magnetic calibration");
     
     // check and make sure we are not already doing it
-    if(!action_thread_.joinable() && vs_.isConnected()){
+    if(std::thread::id() == action_thread_.get_id() && vs_.verifySensorConnectivity()){
       return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }
     RCLCPP_WARN(get_logger(), "Magnetic calibration already in progress, rejecting request");
@@ -263,13 +263,7 @@ private:
   rclcpp_action::CancelResponse handle_cal_cancel(const std::shared_ptr<MagCalGH> goal_handle){
     RCLCPP_INFO(get_logger(), "Recieved request to stop magnetic calibration");
 
-    // check and make sure we are already running
-    if(action_thread_.joinable()){
-      return rclcpp_action::CancelResponse::ACCEPT;
-    }
-
-    // not running
-    return rclcpp_action::CancelResponse::REJECT;
+    return rclcpp_action::CancelResponse::ACCEPT;
   }
 
   void handle_cal_accept(const std::shared_ptr<MagCalGH> goal_handle){
@@ -279,40 +273,64 @@ private:
   }
 
   void execute_cal(const std::shared_ptr<MagCalGH> goal_handle){
-    // setup a ros rate timer
-    rclcpp::Rate loopRate(0.5);
-    
-    // disable all async registers
-    vs_.writeAsyncDataOutputFrequency(0);
-    vn::sensors::BinaryOutputRegister configAsyncOff;
-    configAsyncOff.asyncMode = vn::protocol::uart::AsyncMode::ASYNCMODE_NONE;
-    vs_.writeBinaryOutput1(configAsyncOff);
-    vs_.writeBinaryOutput2(configAsyncOff);
-    vs_.writeBinaryOutput3(configAsyncOff);
+    // A note for future developers:
+    // when dealing with GDB on this section of code, beware that 
+    // breakpoints near the vectornav calls seem to cause odd instability
+    // in the device API and may cause calls to return improper values
+
+    // setup a ros rate timer (input is hz)
+    rclcpp::Rate loopRate(4.0);
 
     // make the result message just in case we have to abort
     auto result = std::make_shared<vectornav_msgs::action::MagCal::Result>();
-
-    // reset HSI Mode and verify
-    vn::sensors::MagnetometerCalibrationControlRegister magControl;
-    magControl.hsiMode = vn::protocol::uart::HsiMode::HSIMODE_RESET;
-    vs_.writeMagnetometerCalibrationControl(magControl);
-    if(vs_.readMagnetometerCalibrationControl().hsiMode != vn::protocol::uart::HsiMode::HSIMODE_RESET){
-      RCLCPP_ERROR(get_logger(), "Failed to reset magnetometer for calibration");
+    
+    // disable all async registers
+    try{
+      vs_.writeAsyncDataOutputFrequency(0);
+      vn::sensors::BinaryOutputRegister configAsyncOff;
+      configAsyncOff.asyncMode = vn::protocol::uart::AsyncMode::ASYNCMODE_NONE;
+      vs_.writeBinaryOutput1(configAsyncOff);
+      vs_.writeBinaryOutput2(configAsyncOff);
+      vs_.writeBinaryOutput3(configAsyncOff);
+    } catch (const std::exception & e){
+      RCLCPP_ERROR_STREAM(get_logger(), "Failed to disable async output. error: " << e.what());
       goal_handle->abort(result);
+      return;
+    } catch (...){
+      RCLCPP_ERROR(get_logger(), "Failed to disable async output. error: unknown");
+      goal_handle->abort(result);
+      return;
     }
 
+    // reset HSI Mode and verify
+    vn::sensors::MagnetometerCalibrationControlRegister magControl = {
+      vn::protocol::uart::HsiMode::HSIMODE_RESET,
+      vn::protocol::uart::HsiOutput::HSIOUTPUT_NOONBOARD,
+      1 // set the convergence rate (1 slow - 5 fast)
+    };
+
+    // Cannot test for this mode as it sets, then changes immediately
+    vs_.writeMagnetometerCalibrationControl(magControl);
+
     // Set VPE basic control to absolute
-    vn::sensors::VpeBasicControlRegister vpeControl;
-    vpeControl.headingMode = vn::protocol::uart::HeadingMode::HEADINGMODE_ABSOLUTE;
+    vn::sensors::VpeBasicControlRegister vpeControl = {
+      vn::protocol::uart::VpeEnable::VPEENABLE_ENABLE,
+      vn::protocol::uart::HeadingMode::HEADINGMODE_ABSOLUTE,
+      vn::protocol::uart::VpeMode::VPEMODE_MODE1, // By default these seem to be mode 1 not off
+      vn::protocol::uart::VpeMode::VPEMODE_MODE1  // By default these seem to be mode 1 not off
+    };
     vs_.writeVpeBasicControl(vpeControl);
 
-    // set HSI Mode to on and verify
+    // make sure HSI mode is now set to run as reset returns to the previous state
     magControl.hsiMode = vn::protocol::uart::HsiMode::HSIMODE_RUN;
     vs_.writeMagnetometerCalibrationControl(magControl);
-    if(vs_.readMagnetometerCalibrationControl().hsiMode != vn::protocol::uart::HsiMode::HSIMODE_RUN){
-      RCLCPP_ERROR(get_logger(), "Failed to set HSI mode to RUN for calibration");
+
+    // test HSI Mode is back to on
+    const auto hsiMode = vs_.readMagnetometerCalibrationControl();
+    if(hsiMode.hsiMode != vn::protocol::uart::HsiMode::HSIMODE_RUN){
+      RCLCPP_ERROR_STREAM(get_logger(), "IMU HSI mode did not return to run after reset! returned mode: " << hsiMode.hsiMode);
       goal_handle->abort(result);
+      return;
     }
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -327,15 +345,19 @@ private:
 
     int calSamples = 0;
 
+    // Read HSI calibration
+    auto lastComp = vs_.readCalculatedMagnetometerCalibration();
+
     // collect samples until converge
     while(calSamples < 1000 && !goal_handle->is_canceling()){
       // increment the sample counter
       calSamples ++;
 
       // Read HSI calibration
-      auto lastComp = vs_.readMagnetometerCompensation();
+      lastComp = vs_.readCalculatedMagnetometerCalibration();
 
       // push the newest samples onto a stack
+      // pop the ones at the front of the queue so they fall off
       cSamples.push_back(lastComp.c);
       if(cSamples.size() > 10){
         cSamples.pop_front();
@@ -345,7 +367,7 @@ private:
         bSamples.pop_front();
       }
 
-      // create a running average of the difference eover 10 samples
+      // create a running average of the difference over 10 samples
       for(size_t i = 1; i < cSamples.size(); i++){
         // diff[i]  = val[i-1] - val[i]
         auto diffMat = cSamples.at(i-1) - cSamples.at(i);
@@ -364,60 +386,84 @@ private:
       auto feedbackMsg = std::make_shared<vectornav_msgs::action::MagCal::Feedback>();
       feedbackMsg->samples = calSamples;
 
-      // populate deviation vector
+      // populate calibration vector
       for(size_t i = 0; i < 9; i++){
-        feedbackMsg->avg_dev.at(i) = avgMat.e[i];
+        feedbackMsg->curr_calib.at(i) = lastComp.c.e[i];
       }
-      feedbackMsg->avg_dev.at(9) = avgVec.x;
-      feedbackMsg->avg_dev.at(10) = avgVec.y;
-      feedbackMsg->avg_dev.at(11) = avgVec.z;
+      feedbackMsg->curr_calib.at(9) = lastComp.b.x;
+      feedbackMsg->curr_calib.at(10) = lastComp.b.y;
+      feedbackMsg->curr_calib.at(11) = lastComp.b.z;
+
+      // populate compensation convergence vector
+      for(size_t i = 0; i < 9; i++){
+        feedbackMsg->curr_avg_dev.at(i) = avgMat.e[i];
+      }
+      feedbackMsg->curr_avg_dev.at(9) = avgVec.x;
+      feedbackMsg->curr_avg_dev.at(10) = avgVec.y;
+      feedbackMsg->curr_avg_dev.at(11) = avgVec.z;
   
       // send the feedback
       goal_handle->publish_feedback(feedbackMsg);
 
-      // check for convergence with the all_of algorithm and bail out if we are there
-      if(std::all_of(feedbackMsg->avg_dev.cbegin(), feedbackMsg->avg_dev.cend(),
-         [](float i){ return i < 0.005; })){
-          RCLCPP_WARN(get_logger(), "Mag cal has converged");
-          break;
-         }
+      // if we are in the first few samples, skip this entirely
+      if(calSamples > 20){
+        // check for convergence with the all_of algorithm and bail out if we are there
+        if(std::all_of(feedbackMsg->curr_avg_dev.cbegin(), feedbackMsg->curr_avg_dev.cend(),
+          [](float i){ return std::fabs(i) < 1e-10; })){
+            RCLCPP_WARN(get_logger(), "Mag cal has converged");
+            break;
+          }
+      }
 
       // wait a bit
       loopRate.sleep();
     }
 
+    //if we exited normally and are not cancelling
+    if(!goal_handle->is_canceling()){
+      // turn HSI mode to off to stop sampling
+      // turn HSI output to enabled
+      magControl.hsiMode = vn::protocol::uart::HsiMode::HSIMODE_OFF;
+      magControl.hsiOutput = vn::protocol::uart::HsiOutput::HSIOUTPUT_USEONBOARD;
+      vs_.writeMagnetometerCalibrationControl(magControl);
+
+      // write the settings (new config) to NVmemory
+      vs_.writeSettings();
+    }
+
+    // reconfigure IMU but do not save
+    // attempt reconfiguration of the device
+    // configure_sensor(); // ONLY FOR GDB DEBUGGING! THE BLOCK BELOW WILL HAVE NO EFFECT IF THIS IS LEFT
+    try{
+      // TODO Figure out why this will fail when called a second time
+      configure_sensor();
+    } catch(const std::exception & e){
+      RCLCPP_FATAL_STREAM(get_logger(), "Failed to reset IMU to configuration, DRIVER MUST BE RESTARTED\n ERROR: " << e.what());
+    } catch (...){
+      RCLCPP_FATAL(get_logger(), "Failed to reset IMU to configuration, DRIVER MUST BE RESTARTED\n ERROR: unknown");
+    }
+
+    // Setup final deviation vector
+    for(size_t i = 0; i < 9; i++){
+      result->avg_dev.at(i) = avgMat.e[i];
+    }
+    result->avg_dev.at(9) = avgVec.x;
+    result->avg_dev.at(10) = avgVec.y;
+    result->avg_dev.at(11) = avgVec.z;
+
+    // setup final calibration vector
+    for(size_t i = 0; i < 9; i++){
+      result->calib.at(i) = lastComp.c.e[i];
+    }
+    result->calib.at(9) = lastComp.b.x;
+    result->calib.at(10) = lastComp.b.y;
+    result->calib.at(11) = lastComp.b.z;
+
     // if we stopped due to a cancellation
     if(goal_handle->is_canceling()){
-      // reconfigure IMU but do not save
-      // attempt reconfiguration of the device
-      configure_sensor();
-
-      // Send results
-      for(size_t i = 0; i < 9; i++){
-        result->avg_dev.at(i) = avgMat.e[i];
-      }
-      result->avg_dev.at(9) = avgVec.x;
-      result->avg_dev.at(10) = avgVec.y;
-      result->avg_dev.at(11) = avgVec.z;
-
+      // stooping for cancellation
       goal_handle->canceled(result);
-
-      return;
     } else {
-      // at the end, write the settings to NVmemory
-      vs_.writeSettings();
-
-      // attempt reconfiguration of the device
-      configure_sensor();
-
-      // populate deviation vector
-      for(size_t i = 0; i < 9; i++){
-        result->avg_dev.at(i) = avgMat.e[i];
-      }
-      result->avg_dev.at(9) = avgVec.x;
-      result->avg_dev.at(10) = avgVec.y;
-      result->avg_dev.at(11) = avgVec.z;
-
       // we did it
       goal_handle->succeed(result);
     }
@@ -434,6 +480,11 @@ private:
    */
   bool connect(const std::string port, const int baud)
   {
+    // Register Error Callback
+    // This can only be called once per API instance and cannot
+    // be re-used so it has been placed in the API configuration section
+    vs_.registerErrorPacketReceivedHandler(this, Vectornav::ErrorPacketReceivedHandler);
+
     // Default response was too low and retransmit time was too long by default.
     vs_.setResponseTimeoutMs(1000);  // ms
     vs_.setRetransmitDelayMs(50);    // ms
@@ -458,6 +509,11 @@ private:
       } catch (...) {
         // Don't care...
       }
+    }
+
+    if(! vs_.verifySensorConnectivity()){
+      RCLCPP_FATAL(get_logger(), "Unable to connect to device %s", port.c_str());
+      return false;
     }
 
     // Restore Factory Settings for consistency
@@ -498,9 +554,6 @@ private:
    * \return true for OK configuration, false for an error
   */
   bool configure_sensor(){
-    // Register Error Callback
-    vs_.registerErrorPacketReceivedHandler(this, Vectornav::ErrorPacketReceivedHandler);
-
     // TODO(Dereck): Move writeUserTag to Service Call?
     // 5.2.1
     // vs_.writeUserTag("");
