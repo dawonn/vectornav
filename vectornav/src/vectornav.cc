@@ -496,6 +496,11 @@ private:
     // be re-used so it has been placed in the API configuration section
     vs_.registerErrorPacketReceivedHandler(this, Vectornav::ErrorPacketReceivedHandler);
 
+    // Register Binary Data Callback
+    // This can only be called once per API instance and cannot
+    // be re-used so it has been placed in the API configuration section
+    vs_.registerAsyncPacketReceivedHandler(this, Vectornav::AsyncPacketReceivedHandler);
+
     // Default response was too low and retransmit time was too long by default.
     vs_.setResponseTimeoutMs(1000);  // ms
     vs_.setRetransmitDelayMs(50);    // ms
@@ -582,84 +587,77 @@ private:
 
     // Sync control
     // 5.2.9
-    vn::sensors::SynchronizationControlRegister configSync;
-    configSync.syncInMode = (vn::protocol::uart::SyncInMode)get_parameter("syncInMode").as_int();
-    configSync.syncInEdge = (vn::protocol::uart::SyncInEdge)get_parameter("syncInEdge").as_int();
-    ;
-    configSync.syncInSkipFactor = get_parameter("syncInSkipFactor").as_int();
-    ;
-    configSync.syncOutMode = (vn::protocol::uart::SyncOutMode)get_parameter("syncOutMode").as_int();
-    ;
-    configSync.syncOutPolarity =
-      (vn::protocol::uart::SyncOutPolarity)get_parameter("syncOutPolarity").as_int();
-    ;
-    configSync.syncOutSkipFactor = get_parameter("syncOutSkipFactor").as_int();
-    ;
-    configSync.syncOutPulseWidth = get_parameter("syncOutPulseWidth_ns").as_int();
-    ;
+    vn::sensors::SynchronizationControlRegister configSync = {
+      (vn::protocol::uart::SyncInMode)get_parameter("syncInMode").as_int(),
+      (vn::protocol::uart::SyncInEdge)get_parameter("syncInEdge").as_int(),
+      get_parameter("syncInSkipFactor").as_int(),
+      (vn::protocol::uart::SyncOutMode)get_parameter("syncOutMode").as_int(),
+      (vn::protocol::uart::SyncOutPolarity)get_parameter("syncOutPolarity").as_int(),
+      get_parameter("syncOutSkipFactor").as_int(),
+      get_parameter("syncOutPulseWidth_ns").as_int()
+    };
     vs_.writeSynchronizationControl(configSync);
 
     // Communication Protocol Control
     // 5.2.10
-    vn::sensors::CommunicationProtocolControlRegister configComm;
-    configComm.serialCount = (vn::protocol::uart::CountMode)get_parameter("serialCount").as_int();
-    configComm.serialStatus =
-      (vn::protocol::uart::StatusMode)get_parameter("serialStatus").as_int();
-    configComm.spiCount = (vn::protocol::uart::CountMode)get_parameter("spiCount").as_int();
-    configComm.spiStatus = (vn::protocol::uart::StatusMode)get_parameter("spiStatus").as_int();
-    configComm.serialChecksum =
-      (vn::protocol::uart::ChecksumMode)get_parameter("serialChecksum").as_int();
-    configComm.spiChecksum =
-      (vn::protocol::uart::ChecksumMode)get_parameter("spiChecksum").as_int();
-    configComm.errorMode = (vn::protocol::uart::ErrorMode)get_parameter("errorMode").as_int();
+    vn::sensors::CommunicationProtocolControlRegister configComm = {
+      (vn::protocol::uart::CountMode)get_parameter("serialCount").as_int(),
+      (vn::protocol::uart::StatusMode)get_parameter("serialStatus").as_int(),
+      (vn::protocol::uart::CountMode)get_parameter("spiCount").as_int(),
+      (vn::protocol::uart::StatusMode)get_parameter("spiStatus").as_int(),
+      (vn::protocol::uart::ChecksumMode)get_parameter("serialChecksum").as_int(),
+      (vn::protocol::uart::ChecksumMode)get_parameter("spiChecksum").as_int(),
+      (vn::protocol::uart::ErrorMode)get_parameter("errorMode").as_int()
+    };
+
     vs_.writeCommunicationProtocolControl(configComm);
 
     // Binary Output Register 1
     // 5.2.11
-    vn::sensors::BinaryOutputRegister configBO1;
-    configBO1.asyncMode = (vn::protocol::uart::AsyncMode)get_parameter("BO1.asyncMode").as_int();
-    configBO1.rateDivisor = get_parameter("BO1.rateDivisor").as_int();
-    configBO1.commonField =
-      (vn::protocol::uart::CommonGroup)get_parameter("BO1.commonField").as_int();
-    configBO1.timeField = (vn::protocol::uart::TimeGroup)get_parameter("BO1.timeField").as_int();
-    configBO1.imuField = (vn::protocol::uart::ImuGroup)get_parameter("BO1.imuField").as_int();
-    configBO1.gpsField = (vn::protocol::uart::GpsGroup)get_parameter("BO1.gpsField").as_int();
-    configBO1.attitudeField =
-      (vn::protocol::uart::AttitudeGroup)get_parameter("BO1.attitudeField").as_int();
-    configBO1.insField = (vn::protocol::uart::InsGroup)get_parameter("BO1.insField").as_int();
-    configBO1.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO1.gps2Field").as_int();
+    vn::sensors::BinaryOutputRegister configBO1 = {
+      (vn::protocol::uart::AsyncMode)get_parameter("BO1.asyncMode").as_int(),
+      get_parameter("BO1.rateDivisor").as_int(),
+      (vn::protocol::uart::CommonGroup)get_parameter("BO1.commonField").as_int(),
+      (vn::protocol::uart::TimeGroup)get_parameter("BO1.timeField").as_int(),
+      (vn::protocol::uart::ImuGroup)get_parameter("BO1.imuField").as_int(),
+      (vn::protocol::uart::GpsGroup)get_parameter("BO1.gpsField").as_int(),
+      (vn::protocol::uart::AttitudeGroup)get_parameter("BO1.attitudeField").as_int(),
+      (vn::protocol::uart::InsGroup)get_parameter("BO1.insField").as_int(),
+      (vn::protocol::uart::GpsGroup)get_parameter("BO1.gps2Field").as_int()
+    };
+
     vs_.writeBinaryOutput1(configBO1);
 
     // Binary Output Register 2
     // 5.2.12
-    vn::sensors::BinaryOutputRegister configBO2;
-    configBO2.asyncMode = (vn::protocol::uart::AsyncMode)get_parameter("BO2.asyncMode").as_int();
-    configBO2.rateDivisor = get_parameter("BO2.rateDivisor").as_int();
-    configBO2.commonField =
-      (vn::protocol::uart::CommonGroup)get_parameter("BO2.commonField").as_int();
-    configBO2.timeField = (vn::protocol::uart::TimeGroup)get_parameter("BO2.timeField").as_int();
-    configBO2.imuField = (vn::protocol::uart::ImuGroup)get_parameter("BO2.imuField").as_int();
-    configBO2.gpsField = (vn::protocol::uart::GpsGroup)get_parameter("BO2.gpsField").as_int();
-    configBO2.attitudeField =
-      (vn::protocol::uart::AttitudeGroup)get_parameter("BO2.attitudeField").as_int();
-    configBO2.insField = (vn::protocol::uart::InsGroup)get_parameter("BO2.insField").as_int();
-    configBO2.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO2.gps2Field").as_int();
+    vn::sensors::BinaryOutputRegister configBO2 = {
+      (vn::protocol::uart::AsyncMode)get_parameter("BO2.asyncMode").as_int(),
+      get_parameter("BO2.rateDivisor").as_int(),
+      (vn::protocol::uart::CommonGroup)get_parameter("BO2.commonField").as_int(),
+      (vn::protocol::uart::TimeGroup)get_parameter("BO2.timeField").as_int(),
+      (vn::protocol::uart::ImuGroup)get_parameter("BO2.imuField").as_int(),
+      (vn::protocol::uart::GpsGroup)get_parameter("BO2.gpsField").as_int(),
+      (vn::protocol::uart::AttitudeGroup)get_parameter("BO2.attitudeField").as_int(),
+      (vn::protocol::uart::InsGroup)get_parameter("BO2.insField").as_int(),
+      (vn::protocol::uart::GpsGroup)get_parameter("BO2.gps2Field").as_int()
+    };
+
     vs_.writeBinaryOutput2(configBO2);
 
     // Binary Output Register 3
     // 5.2.13
-    vn::sensors::BinaryOutputRegister configBO3;
-    configBO3.asyncMode = (vn::protocol::uart::AsyncMode)get_parameter("BO3.asyncMode").as_int();
-    configBO3.rateDivisor = get_parameter("BO3.rateDivisor").as_int();
-    configBO3.commonField =
-      (vn::protocol::uart::CommonGroup)get_parameter("BO3.commonField").as_int();
-    configBO3.timeField = (vn::protocol::uart::TimeGroup)get_parameter("BO3.timeField").as_int();
-    configBO3.imuField = (vn::protocol::uart::ImuGroup)get_parameter("BO3.imuField").as_int();
-    configBO3.gpsField = (vn::protocol::uart::GpsGroup)get_parameter("BO3.gpsField").as_int();
-    configBO3.attitudeField =
-      (vn::protocol::uart::AttitudeGroup)get_parameter("BO3.attitudeField").as_int();
-    configBO3.insField = (vn::protocol::uart::InsGroup)get_parameter("BO3.insField").as_int();
-    configBO3.gps2Field = (vn::protocol::uart::GpsGroup)get_parameter("BO3.gps2Field").as_int();
+    vn::sensors::BinaryOutputRegister configBO3 = {
+      (vn::protocol::uart::AsyncMode)get_parameter("BO3.asyncMode").as_int(),
+      get_parameter("BO3.rateDivisor").as_int(),
+      (vn::protocol::uart::CommonGroup)get_parameter("BO3.commonField").as_int(),
+      (vn::protocol::uart::TimeGroup)get_parameter("BO3.timeField").as_int(),
+      (vn::protocol::uart::ImuGroup)get_parameter("BO3.imuField").as_int(),
+      (vn::protocol::uart::GpsGroup)get_parameter("BO3.gpsField").as_int(),
+      (vn::protocol::uart::AttitudeGroup)get_parameter("BO3.attitudeField").as_int(),
+      (vn::protocol::uart::InsGroup)get_parameter("BO3.insField").as_int(),
+      (vn::protocol::uart::GpsGroup)get_parameter("BO3.gps2Field").as_int()
+    };
+
     vs_.writeBinaryOutput3(configBO3);
 
     // Verify that the device family is capable of supporting GPS
@@ -693,8 +691,7 @@ private:
         RCLCPP_WARN(get_logger(), "GPS initialization error");
       }
     }
-    // Register Binary Data Callback
-    vs_.registerAsyncPacketReceivedHandler(this, Vectornav::AsyncPacketReceivedHandler);
+    
     // Connection Successful
     return true;
   }
