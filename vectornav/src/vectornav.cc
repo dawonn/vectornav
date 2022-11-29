@@ -601,53 +601,37 @@ private:
 
     vs_.writeCommunicationProtocolControl(configComm);
 
+    auto boRegs = std::vector<std::string>{"BO1", "BO2", "BO3"};
+    auto boConfigs = std::vector<vn::sensors::BinaryOutputRegister>();
+
+    // build each of the configs since they have the same layout
+    for(auto name : boRegs){
+      vn::sensors::BinaryOutputRegister configBO = {
+        (vn::protocol::uart::AsyncMode)get_parameter(name + ".asyncMode").as_int(),
+        get_parameter(name + ".rateDivisor").as_int(),
+        (vn::protocol::uart::CommonGroup)get_parameter(name + ".commonField").as_int(),
+        (vn::protocol::uart::TimeGroup)get_parameter(name + ".timeField").as_int(),
+        (vn::protocol::uart::ImuGroup)get_parameter(name + ".imuField").as_int(),
+        (vn::protocol::uart::GpsGroup)get_parameter(name + ".gpsField").as_int(),
+        (vn::protocol::uart::AttitudeGroup)get_parameter(name + ".attitudeField").as_int(),
+        (vn::protocol::uart::InsGroup)get_parameter(name + ".insField").as_int(),
+        (vn::protocol::uart::GpsGroup)get_parameter(name + ".gps2Field").as_int()
+      };
+
+      boConfigs.push_back(configBO);
+    }
+
     // Binary Output Register 1
     // 5.2.11
-    vn::sensors::BinaryOutputRegister configBO1 = {
-      (vn::protocol::uart::AsyncMode)get_parameter("BO1.asyncMode").as_int(),
-      get_parameter("BO1.rateDivisor").as_int(),
-      (vn::protocol::uart::CommonGroup)get_parameter("BO1.commonField").as_int(),
-      (vn::protocol::uart::TimeGroup)get_parameter("BO1.timeField").as_int(),
-      (vn::protocol::uart::ImuGroup)get_parameter("BO1.imuField").as_int(),
-      (vn::protocol::uart::GpsGroup)get_parameter("BO1.gpsField").as_int(),
-      (vn::protocol::uart::AttitudeGroup)get_parameter("BO1.attitudeField").as_int(),
-      (vn::protocol::uart::InsGroup)get_parameter("BO1.insField").as_int(),
-      (vn::protocol::uart::GpsGroup)get_parameter("BO1.gps2Field").as_int()
-    };
-
-    vs_.writeBinaryOutput1(configBO1);
+    vs_.writeBinaryOutput1(boConfigs.at(0));
 
     // Binary Output Register 2
     // 5.2.12
-    vn::sensors::BinaryOutputRegister configBO2 = {
-      (vn::protocol::uart::AsyncMode)get_parameter("BO2.asyncMode").as_int(),
-      get_parameter("BO2.rateDivisor").as_int(),
-      (vn::protocol::uart::CommonGroup)get_parameter("BO2.commonField").as_int(),
-      (vn::protocol::uart::TimeGroup)get_parameter("BO2.timeField").as_int(),
-      (vn::protocol::uart::ImuGroup)get_parameter("BO2.imuField").as_int(),
-      (vn::protocol::uart::GpsGroup)get_parameter("BO2.gpsField").as_int(),
-      (vn::protocol::uart::AttitudeGroup)get_parameter("BO2.attitudeField").as_int(),
-      (vn::protocol::uart::InsGroup)get_parameter("BO2.insField").as_int(),
-      (vn::protocol::uart::GpsGroup)get_parameter("BO2.gps2Field").as_int()
-    };
-
-    vs_.writeBinaryOutput2(configBO2);
+    vs_.writeBinaryOutput2(boConfigs.at(1));
 
     // Binary Output Register 3
     // 5.2.13
-    vn::sensors::BinaryOutputRegister configBO3 = {
-      (vn::protocol::uart::AsyncMode)get_parameter("BO3.asyncMode").as_int(),
-      get_parameter("BO3.rateDivisor").as_int(),
-      (vn::protocol::uart::CommonGroup)get_parameter("BO3.commonField").as_int(),
-      (vn::protocol::uart::TimeGroup)get_parameter("BO3.timeField").as_int(),
-      (vn::protocol::uart::ImuGroup)get_parameter("BO3.imuField").as_int(),
-      (vn::protocol::uart::GpsGroup)get_parameter("BO3.gpsField").as_int(),
-      (vn::protocol::uart::AttitudeGroup)get_parameter("BO3.attitudeField").as_int(),
-      (vn::protocol::uart::InsGroup)get_parameter("BO3.insField").as_int(),
-      (vn::protocol::uart::GpsGroup)get_parameter("BO3.gps2Field").as_int()
-    };
-
-    vs_.writeBinaryOutput3(configBO3);
+    vs_.writeBinaryOutput3(boConfigs.at(2));
 
     // Verify that the device family is capable of supporting GPS
     if(vs_.determineDeviceFamily() != vn::sensors::VnSensor::VnSensor_Family_Vn100){
