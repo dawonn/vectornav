@@ -1,0 +1,58 @@
+port: "/dev/ttyUSB0"
+baud: 115200
+reconnect_ms: 500
+# Reference vnproglib-1.2.0.0 headers for enum definitions
+# Async Output Type (ASCII)
+AsyncDataOutputType: 0           # VNOFF
+# Async output Frequency (Hz)
+AsyncDataOutputFrequency: 20
+# Sync control
+syncInMode: 3                    # SYNCINMODE_COUNT
+syncInEdge: 0                    # SYNCINEDGE_RISING
+syncInSkipFactor: 0
+syncOutMode: 0                   # SYNCOUTMODE_NONE
+syncOutPolarity: 0               # SYNCOUTPOLARITY_NEGATIVE
+syncOutSkipFactor: 0
+syncOutPulseWidth_ns: 100000000
+# Communication protocol control
+serialCount: 0                   # COUNTMODE_NONE
+serialStatus: 0                  # STATUSMODE_OFF
+spiCount: 0                      # COUNTMODE_NONE
+spiStatus: 0                     # STATUSMODE_OFF
+serialChecksum: 1                # CHECKSUMMODE_CHECKSUM
+spiChecksum: 0                   # CHECKSUMMODE_OFF
+errorMode: 1                     # ERRORMODE_SEND
+# Binary output register 1
+BO1:
+  asyncMode: 3                   # ASYNCMODE_BOTH
+  rateDivisor: 40                # 20 Hz
+  commonField: 0x7FFF
+  timeField: 0x0000              # TIMEGROUP_NONE
+  imuField: 0x0000               # IMUGROUP_NONE
+  # set gpsField directly in source to enforce or condition
+  attitudeField: 0x0000          # ATTITUDEGROUP_NONE
+  # set insField directly in source to enforce or condition
+  gps2Field: 0x0000              # GPSGROUP_NONE
+# Binary output register 2
+BO2:
+  asyncMode: 0                   # ASYNCMODE_NONE
+  rateDivisor: 0
+  commonField: 0x0000            # COMMONGROUP_NONE
+  timeField: 0x0000              # TIMEGROUP_NONE
+  imuField: 0x0000               # IMUGROUP_NONE
+  gpsField: 0x0000               # GPSGROUP_NONE
+  attitudeField: 0x0000          # ATTITUDEGROUP_NONE
+  insField: 0x0000               # INSGROUP_NONE
+  gps2Field: 0x0000              # GPSGROUP_NONE
+# Binary output register 3
+BO3:
+  asyncMode: 0                   # ASYNCMODE_NONE
+  rateDivisor: 0
+  commonField: 0x0000            # COMMONGROUP_NONE
+  timeField: 0x0000              # TIMEGROUP_NONE
+  imuField: 0x0000               # IMUGROUP_NONE
+  gpsField: 0x0000               # GPSGROUP_NONE
+  attitudeField: 0x0000          # ATTITUDEGROUP_NONE
+  insField: 0x0000               # INSGROUP_NONE
+  gps2Field: 0x0000              # GPSGROUP_NONE
+frame_id: "vectornav"
