@@ -213,9 +213,9 @@ private:
    * \param port serial port path, eg /dev/ttyUSB0
    * \return     true: OK, false: FAILURE
    */
-#if __linux__ || __CYGWIN__
   bool optimize_serial_communication(const std::string & portName)
   {
+#if __linux__ || __CYGWIN__
     const int portFd = open(portName.c_str(), O_RDWR | O_NOCTTY);
 
     if (portFd == -1) {
@@ -229,15 +229,11 @@ private:
     ioctl(portFd, TIOCSSERIAL, &serial);
     close(portFd);
     RCLCPP_INFO(get_logger(), "Set port to ASYNCY_LOW_LATENCY");
-    return (true);
-  }
 #elif
-  bool optimize_serial_communication(str::string portName)
-  {
     RCLCPP_WARN(get_logger(), "Cannot set port to ASYNCY_LOW_LATENCY!");
+#endif
     return (true);
   }
-#endif
 
   /**
    * Periodically check for connection drops and try to reconnect
