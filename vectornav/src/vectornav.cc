@@ -19,29 +19,20 @@
 #include <unistd.h>
 #endif
 
-// ROS2
-#include "rclcpp/rclcpp.hpp"
-#include "vectornav_msgs/msg/attitude_group.hpp"
-#include "vectornav_msgs/msg/common_group.hpp"
-#include "vectornav_msgs/msg/gps_group.hpp"
-#include "vectornav_msgs/msg/imu_group.hpp"
-#include "vectornav_msgs/msg/ins_group.hpp"
-#include "vectornav_msgs/msg/time_group.hpp"
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_components/register_node_macro.hpp>
 
 // VectorNav libvncxx
-#include "vn/compositedata.h"
-#include "vn/sensors.h"
 #include "vn/util.h"
+#include "vectornav.hpp"
 
 using namespace std::chrono_literals;
 
 // Assure that the serial port is set to async low latency in order to reduce delays and package pilup.
 // These changes will stay effective until the device is unplugged
 
-class Vectornav : public rclcpp::Node
-{
-public:
-  Vectornav() : Node("vectornav")
+namespace vectornav {
+Vectornav::Vectornav(const rclcpp::NodeOptions &options) : Node("vectornav", options)
   {
     //
     // Parameters
@@ -177,7 +168,7 @@ public:
     }
   }
 
-  ~Vectornav()
+Vectornav::~Vectornav()
   {
     if (reconnect_timer_) {
       reconnect_timer_->cancel();
@@ -187,15 +178,7 @@ public:
     vs_.unregisterAsyncPacketReceivedHandler();
     vs_.disconnect();
   }
-
-private:
-  /**
-   * set serial port to low latency async to avoid bunching up of callbacks
-   *
-   * \param port serial port path, eg /dev/ttyUSB0
-   * \return     true: OK, false: FAILURE
-   */
-  bool optimize_serial_communication(const std::string & portName)
+  bool Vectornav::optimize_serial_communication(const std::string & portName)
   {
 #if __linux__ || __CYGWIN__
     const int portFd = open(portName.c_str(), O_RDWR | O_NOCTTY);
@@ -211,10 +194,11 @@ private:
     ioctl(portFd, TIOCSSERIAL, &serial);
     close(portFd);
     RCLCPP_INFO(get_logger(), "Set port to ASYNCY_LOW_LATENCY");
+    return (true);
 #elif
     RCLCPP_WARN(get_logger(), "Cannot set port to ASYNCY_LOW_LATENCY!");
-#endif
     return (true);
+#endif
   }
 
   /**
@@ -222,7 +206,7 @@ private:
    *
    * Monitor rate is configured via the 'reconnect_ms' parameter, Set to zero to disable.
    */
-  void reconnect_timer()
+  void Vectornav::reconnect_timer()
   {
     // Check if the sensor is connected
     if (vs_.verifySensorConnectivity()) {
@@ -250,7 +234,7 @@ private:
    *             the device for the requested baud rate.
    * \return     true: OK, false: FAILURE
    */
-  bool connect(const std::string port, const int baud)
+  bool Vectornav::connect(const std::string port, const int baud)
   {
     // Default response was too low and retransmit time was too long by default.
     vs_.setResponseTimeoutMs(1000);  // ms
@@ -454,7 +438,7 @@ private:
    * \return  adjusted ROS time
    */
 
-  rclcpp::Time getTimeStamp(vn::sensors::CompositeData & data)
+  rclcpp::Time Vectornav::getTimeStamp(vn::sensors::CompositeData & data)
   {
     const rclcpp::Time t = now();
     if (!data.hasTimeStartup() || !adjustROSTimeStamp_) {
@@ -476,7 +460,7 @@ private:
     return (adjustedTime);
   }
 
-  static void ErrorPacketReceivedHandler(
+  void Vectornav::ErrorPacketReceivedHandler(
     void * nodeptr, vn::protocol::uart::Packet & errorPacket, size_t packetStartRunningIndex)
   {
     // Get handle to the vectornav class
@@ -488,7 +472,7 @@ private:
     // TODO(Dereck): Display error text
   }
 
-  static void AsyncPacketReceivedHandler(
+  void Vectornav::AsyncPacketReceivedHandler(
     void * nodeptr, vn::protocol::uart::Packet & asyncPacket, size_t packetStartRunningIndex)
   {
     // Get handle to the vectornav class
@@ -532,7 +516,7 @@ private:
    * \param asyncPacket Async Binary Packet
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseCommonGroup(
+  void Vectornav::parseCommonGroup(
     Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
@@ -634,7 +618,7 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseTimeGroup(
+  void Vectornav::parseTimeGroup(
     Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
@@ -696,7 +680,7 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseImuGroup(
+  void Vectornav::parseImuGroup(
     Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
@@ -767,7 +751,7 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseGpsGroup(
+  void Vectornav::parseGpsGroup(
     Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
@@ -850,7 +834,7 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseAttitudeGroup(
+  void Vectornav::parseAttitudeGroup(
     Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
@@ -908,7 +892,7 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseInsGroup(
+  void Vectornav::parseInsGroup(
     Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
@@ -980,7 +964,7 @@ private:
    *
    * TODO(Dereck): VNCXX is missing some read functions
    */
-  static void parseGps2Group(
+  void Vectornav::parseGps2Group(
     Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
@@ -1065,7 +1049,7 @@ private:
   //
 
   /// Convert from vn::math::vec3f to geometry_msgs::msgs::Vector3
-  static inline geometry_msgs::msg::Vector3 toMsg(const vn::math::vec3f & rhs)
+  geometry_msgs::msg::Vector3 Vectornav::toMsg(const vn::math::vec3f & rhs)
   {
     geometry_msgs::msg::Vector3 lhs;
     lhs.x = rhs[0];
@@ -1075,7 +1059,7 @@ private:
   }
 
   /// Convert from vn::math::vec4f to geometry_msgs::msgs::Quaternion
-  static inline geometry_msgs::msg::Quaternion toMsg(const vn::math::vec4f & rhs)
+  geometry_msgs::msg::Quaternion Vectornav::toMsg(const vn::math::vec4f & rhs)
   {
     geometry_msgs::msg::Quaternion lhs;
     lhs.x = rhs[0];
@@ -1086,7 +1070,7 @@ private:
   }
 
   /// Convert from vn::math::vec3d to geometry_msgs::msgs::Point
-  static inline geometry_msgs::msg::Point toMsg(const vn::math::vec3d & rhs)
+  geometry_msgs::msg::Point Vectornav::toMsg(const vn::math::vec3d & rhs)
   {
     geometry_msgs::msg::Point lhs;
     lhs.x = rhs[0];
@@ -1096,7 +1080,7 @@ private:
   }
 
   /// Convert from vn::protocol::uart::TimeUTC to vectornav_msgs::msg::TimeUTC
-  static inline vectornav_msgs::msg::TimeUTC toMsg(const vn::protocol::uart::TimeUtc & rhs)
+  vectornav_msgs::msg::TimeUTC Vectornav::toMsg(const vn::protocol::uart::TimeUtc & rhs)
   {
     vectornav_msgs::msg::TimeUTC lhs;
     lhs.year = rhs.year;
@@ -1110,7 +1094,7 @@ private:
   }
 
   /// Convert from vn::protocol::uart::TimeUTC to vectornav_msgs::msg::TimeUTC
-  static inline vectornav_msgs::msg::DOP toMsg(const vn::protocol::uart::GnssDop & rhs)
+  vectornav_msgs::msg::DOP Vectornav::toMsg(const vn::protocol::uart::GnssDop & rhs)
   {
     vectornav_msgs::msg::DOP lhs;
     lhs.g = rhs.gDop;
@@ -1124,7 +1108,7 @@ private:
   }
 
   /// Convert from vn::protocol::uart::VpeStatus to vectornav_msgs::msg::VpeStatus
-  static inline vectornav_msgs::msg::VpeStatus toMsg(const vn::protocol::uart::VpeStatus & rhs)
+  vectornav_msgs::msg::VpeStatus Vectornav::toMsg(const vn::protocol::uart::VpeStatus & rhs)
   {
     vectornav_msgs::msg::VpeStatus lhs;
     lhs.attitude_quality = rhs.attitudeQuality;
@@ -1140,7 +1124,7 @@ private:
   }
 
   /// Convert from vn::math::mat3f to std::array<float, 9>
-  static inline std::array<float, 9> toMsg(const vn::math::mat3f & rhs)
+  std::array<float, 9> Vectornav::toMsg(const vn::math::mat3f & rhs)
   {
     std::array<float, 9> lhs;
     lhs[0] = rhs(0, 0);
@@ -1156,7 +1140,7 @@ private:
   }
 
   /// Convert from vn::math::mat3f to vectornav_msgs::msg::TimeStatus
-  static inline vectornav_msgs::msg::TimeStatus toMsg(const uint8_t rhs)
+  vectornav_msgs::msg::TimeStatus Vectornav::toMsg(const uint8_t rhs)
   {
     vectornav_msgs::msg::TimeStatus lhs;
     lhs.time_ok = rhs & 0x01;
@@ -1167,7 +1151,7 @@ private:
 
   /// Convert from vn::math::mat3f to vectornav_msgs::msg::TimeStatus
   // TODO(Dereck): vncxx uses an enum to hold a bitfeild, this is likely undefined behavior
-  static inline vectornav_msgs::msg::InsStatus toMsg(const vn::protocol::uart::InsStatus & rhs)
+  vectornav_msgs::msg::InsStatus Vectornav::toMsg(const vn::protocol::uart::InsStatus & rhs)
   {
     vectornav_msgs::msg::InsStatus lhs;
     lhs.mode = rhs & 0x0003;
@@ -1181,47 +1165,5 @@ private:
     lhs.gps_compass = rhs & 0x0100;
     return lhs;
   }
-
-  /// Count the number of set bits in a number
-  template <typename T>
-  static uint countSetBits(T n)
-  {
-    T count = 0;
-    while (n != 0) {
-      n = n & (n - 1);
-      count++;
-    }
-    return count;
-  }
-
-  //
-  // Member Variables
-  //
-
-  /// VectorNav Sensor Handle
-  vn::sensors::VnSensor vs_;
-
-  /// Reconnection Timer
-  rclcpp::TimerBase::SharedPtr reconnect_timer_;
-
-  /// Publishers
-  rclcpp::Publisher<vectornav_msgs::msg::CommonGroup>::SharedPtr pub_common_;
-  rclcpp::Publisher<vectornav_msgs::msg::TimeGroup>::SharedPtr pub_time_;
-  rclcpp::Publisher<vectornav_msgs::msg::ImuGroup>::SharedPtr pub_imu_;
-  rclcpp::Publisher<vectornav_msgs::msg::GpsGroup>::SharedPtr pub_gps_;
-  rclcpp::Publisher<vectornav_msgs::msg::AttitudeGroup>::SharedPtr pub_attitude_;
-  rclcpp::Publisher<vectornav_msgs::msg::InsGroup>::SharedPtr pub_ins_;
-  rclcpp::Publisher<vectornav_msgs::msg::GpsGroup>::SharedPtr pub_gps2_;
-
-  /// ROS header time stamp adjustments
-  double averageTimeDifference_{0};
-  bool adjustROSTimeStamp_{false};
-};
-
-int main(int argc, char * argv[])
-{
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<Vectornav>());
-  rclcpp::shutdown();
-  return 0;
 }
+RCLCPP_COMPONENTS_REGISTER_NODE(vectornav::Vectornav)
