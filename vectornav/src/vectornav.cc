@@ -190,6 +190,17 @@ public:
     }
   }
 
+  ~Vectornav()
+  {
+    if (reconnect_timer_) {
+      reconnect_timer_->cancel();
+      reconnect_timer_.reset();
+    }
+    vs_.unregisterErrorPacketReceivedHandler();
+    vs_.unregisterAsyncPacketReceivedHandler();
+    vs_.disconnect();
+  }
+
 private:
   /**
    * set serial port to low latency async to avoid bunching up of callbacks
