@@ -82,7 +82,7 @@ public:
 
     declare_parameter<int>("syncInMode", vn::protocol::uart::SyncInMode::SYNCINMODE_COUNT);
     declare_parameter<int>("syncInEdge", vn::protocol::uart::SyncInEdge::SYNCINEDGE_RISING);
-    declare_parameter<int>("syncInSkipFactor", 0);
+    declare_parameter<uint16_t>("syncInSkipFactor", 0);
     declare_parameter<int>("syncOutMode", vn::protocol::uart::SyncOutMode::SYNCOUTMODE_NONE);
     declare_parameter<int>(
       "syncOutPolarity", vn::protocol::uart::SyncOutPolarity::SYNCOUTPOLARITY_NEGATIVE);
@@ -185,6 +185,7 @@ public:
 
     // Monitor Connection
     if (reconnect_ms > 0ms) {
+      RCLCPP_INFO(get_logger(), "Reconnect Timeout : %ld", reconnect_ms.count());
       reconnect_timer_ =
         create_wall_timer(reconnect_ms, std::bind(&Vectornav::reconnect_timer, this));
     }
@@ -196,9 +197,13 @@ public:
       reconnect_timer_->cancel();
       reconnect_timer_.reset();
     }
-    vs_.unregisterErrorPacketReceivedHandler();
-    vs_.unregisterAsyncPacketReceivedHandler();
-    vs_.disconnect();
+    if (vs_){
+      vs_->unregisterErrorPacketReceivedHandler();
+      vs_->unregisterAsyncPacketReceivedHandler();
+      if (vs_->isConnected())
+        vs_->disconnect();
+      vs_.reset();
+    }
   }
 
 private:
@@ -242,19 +247,21 @@ private:
   void reconnect_timer()
   {
     // Check if the sensor is connected
-    if (vs_.verifySensorConnectivity()) {
+    if (vs_ && vs_->verifySensorConnectivity()) {
       return;
     }
-
     // Try to reconnect
     try {
+      if (vs_->isConnected())
+        vs_->disconnect();
       std::string port = get_parameter("port").as_string();
       int baud = get_parameter("baud").as_int();
       if (!connect(port, baud)) {
-        vs_.disconnect();
+        RCLCPP_WARN(get_logger(), "Failed to reconnect to sensor");
       }
-    } catch (...) {
-      // Don't care
+    } catch (std::exception & e) {
+      // It's helpful to have some logging when the sensor can't reconnect
+      RCLCPP_ERROR(get_logger(), "Error connecting to sensor: %s", e.what());
     }
   }
 
@@ -262,9 +269,9 @@ private:
       const rclcpp_action::GoalUUID & uuid,
       std::shared_ptr<const MagCal::Goal> goal){
     RCLCPP_INFO(get_logger(), "Temporarily stopping sensor streaming for magnetic calibration");
-    
+
     // check and make sure we are not already doing it
-    if(std::thread::id() == action_thread_.get_id() && vs_.verifySensorConnectivity()){
+    if(std::thread::id() == action_thread_.get_id() && vs_->verifySensorConnectivity()){
       return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }
     RCLCPP_WARN(get_logger(), "Magnetic calibration already in progress, rejecting request");
@@ -285,7 +292,7 @@ private:
 
   void execute_cal(const std::shared_ptr<MagCalGH> goal_handle){
     // A note for future developers:
-    // when dealing with GDB on this section of code, beware that 
+    // when dealing with GDB on this section of code, beware that
     // breakpoints near the vectornav calls seem to cause odd instability
     // in the device API and may cause calls to return improper values
 
@@ -294,15 +301,15 @@ private:
 
     // make the result message just in case we have to abort
     auto result = std::make_shared<vectornav_msgs::action::MagCal::Result>();
-    
+
     // disable all async registers
     try{
-      vs_.writeAsyncDataOutputFrequency(0);
+      vs_->writeAsyncDataOutputFrequency(0);
       vn::sensors::BinaryOutputRegister configAsyncOff;
       configAsyncOff.asyncMode = vn::protocol::uart::AsyncMode::ASYNCMODE_NONE;
-      vs_.writeBinaryOutput1(configAsyncOff);
-      vs_.writeBinaryOutput2(configAsyncOff);
-      vs_.writeBinaryOutput3(configAsyncOff);
+      vs_->writeBinaryOutput1(configAsyncOff);
+      vs_->writeBinaryOutput2(configAsyncOff);
+      vs_->writeBinaryOutput3(configAsyncOff);
     } catch (const std::exception & e){
       RCLCPP_ERROR_STREAM(get_logger(), "Failed to disable async output. error: " << e.what());
       goal_handle->abort(result);
@@ -321,7 +328,7 @@ private:
     };
 
     // Cannot test for this mode as it sets, then changes immediately
-    vs_.writeMagnetometerCalibrationControl(magControl);
+    vs_->writeMagnetometerCalibrationControl(magControl);
 
     // Set VPE basic control to absolute
     vn::sensors::VpeBasicControlRegister vpeControl = {
@@ -330,14 +337,14 @@ private:
       vn::protocol::uart::VpeMode::VPEMODE_MODE1, // By default these seem to be mode 1 not off
       vn::protocol::uart::VpeMode::VPEMODE_MODE1  // By default these seem to be mode 1 not off
     };
-    vs_.writeVpeBasicControl(vpeControl);
+    vs_->writeVpeBasicControl(vpeControl);
 
     // make sure HSI mode is now set to run as reset returns to the previous state
     magControl.hsiMode = vn::protocol::uart::HsiMode::HSIMODE_RUN;
-    vs_.writeMagnetometerCalibrationControl(magControl);
+    vs_->writeMagnetometerCalibrationControl(magControl);
 
     // test HSI Mode is back to on
-    const auto hsiMode = vs_.readMagnetometerCalibrationControl();
+    const auto hsiMode = vs_->readMagnetometerCalibrationControl();
     if(hsiMode.hsiMode != vn::protocol::uart::HsiMode::HSIMODE_RUN){
       RCLCPP_ERROR_STREAM(get_logger(), "IMU HSI mode did not return to run after reset! returned mode: " << hsiMode.hsiMode);
       goal_handle->abort(result);
@@ -357,7 +364,7 @@ private:
     int calSamples = 0;
 
     // Read HSI calibration
-    auto lastComp = vs_.readCalculatedMagnetometerCalibration();
+    auto lastComp = vs_->readCalculatedMagnetometerCalibration();
 
     // collect samples until converge
     while(calSamples < 1000 && !goal_handle->is_canceling()){
@@ -365,7 +372,7 @@ private:
       calSamples ++;
 
       // Read HSI calibration
-      lastComp = vs_.readCalculatedMagnetometerCalibration();
+      lastComp = vs_->readCalculatedMagnetometerCalibration();
 
       // push the newest samples onto a stack
       // pop the ones at the front of the queue so they fall off
@@ -412,7 +419,7 @@ private:
       feedbackMsg->curr_avg_dev.at(9) = avgVec.x;
       feedbackMsg->curr_avg_dev.at(10) = avgVec.y;
       feedbackMsg->curr_avg_dev.at(11) = avgVec.z;
-  
+
       // send the feedback
       goal_handle->publish_feedback(feedbackMsg);
 
@@ -436,10 +443,10 @@ private:
       // turn HSI output to enabled
       magControl.hsiMode = vn::protocol::uart::HsiMode::HSIMODE_OFF;
       magControl.hsiOutput = vn::protocol::uart::HsiOutput::HSIOUTPUT_USEONBOARD;
-      vs_.writeMagnetometerCalibrationControl(magControl);
+      vs_->writeMagnetometerCalibrationControl(magControl);
 
       // write the settings (new config) to NVmemory
-      vs_.writeSettings();
+      vs_->writeSettings();
     }
 
     // reconfigure IMU but do not save
@@ -491,22 +498,28 @@ private:
    */
   bool connect(const std::string port, const int baud)
   {
+    // Check if there's an existing instance of the sensor
+    // and clean it up if there is so we can start fresh
+    if(vs_)
+      vs_.reset();
+    vs_ = std::make_shared<vn::sensors::VnSensor>();
+
     // Register Error Callback
     // This can only be called once per API instance and cannot
     // be re-used so it has been placed in the API configuration section
-    vs_.registerErrorPacketReceivedHandler(this, Vectornav::ErrorPacketReceivedHandler);
+    vs_->registerErrorPacketReceivedHandler(this, Vectornav::ErrorPacketReceivedHandler);
 
     // Register Binary Data Callback
     // This can only be called once per API instance and cannot
     // be re-used so it has been placed in the API configuration section
-    vs_.registerAsyncPacketReceivedHandler(this, Vectornav::AsyncPacketReceivedHandler);
+    vs_->registerAsyncPacketReceivedHandler(this, Vectornav::AsyncPacketReceivedHandler);
 
     // Default response was too low and retransmit time was too long by default.
-    vs_.setResponseTimeoutMs(1000);  // ms
-    vs_.setRetransmitDelayMs(50);    // ms
+    vs_->setResponseTimeoutMs(1000);  // ms
+    vs_->setRetransmitDelayMs(50);    // ms
 
     // Check if the requested baud rate is supported
-    auto baudrates = vs_.supportedBaudrates();
+    auto baudrates = vs_->supportedBaudrates();
     if (baud > 0 && std::find(baudrates.begin(), baudrates.end(), baud) == baudrates.end()) {
       RCLCPP_FATAL(get_logger(), "Baudrate Not Supported: %d", baud);
       return false;
@@ -517,44 +530,44 @@ private:
     baudrates.insert(baudrates.begin(), baud);
     for (auto b : baudrates) {
       try {
-        vs_.connect(port, b);
-
-        if (vs_.verifySensorConnectivity()) {
+        vs_->connect(port, b);
+        if (vs_->verifySensorConnectivity()) {
           break;
         }
+        vs_->disconnect();
       } catch (...) {
         // Don't care...
       }
     }
 
-    if(! vs_.verifySensorConnectivity()){
+    if(! vs_->verifySensorConnectivity()){
       RCLCPP_FATAL(get_logger(), "Unable to connect to device %s", port.c_str());
       return false;
     }
 
     // Restore Factory Settings for consistency
     // TODO(Dereck): Move factoryReset to Service Call?
-    // vs_.restoreFactorySettings();
+    // vs_->restoreFactorySettings();
 
     // Configure the sensor to the requested baudrate
-    if (baud > 0 && baud != vs_.baudrate()) {
-      vs_.changeBaudRate(baud);
+    if (baud > 0 && baud != vs_->baudrate()) {
+      vs_->changeBaudRate(baud);
     }
 
     // Verify connection one more time
-    if (!vs_.verifySensorConnectivity()) {
+    if (!vs_->verifySensorConnectivity()) {
       RCLCPP_ERROR(get_logger(), "Unable to connect via %s", port.c_str());
       return false;
     }
 
     // Query the sensor's model number.
-    std::string mn = vs_.readModelNumber();
-    std::string fv = vs_.readFirmwareVersion();
-    uint32_t hv = vs_.readHardwareRevision();
-    uint32_t sn = vs_.readSerialNumber();
-    std::string ut = vs_.readUserTag();
+    std::string mn = vs_->readModelNumber();
+    std::string fv = vs_->readFirmwareVersion();
+    uint32_t hv = vs_->readHardwareRevision();
+    uint32_t sn = vs_->readSerialNumber();
+    std::string ut = vs_->readUserTag();
 
-    RCLCPP_INFO(get_logger(), "Connected to %s @ %d baud", port.c_str(), vs_.baudrate());
+    RCLCPP_INFO(get_logger(), "Connected to %s @ %d baud", port.c_str(), vs_->baudrate());
     RCLCPP_INFO(get_logger(), "Model: %s", mn.c_str());
     RCLCPP_INFO(get_logger(), "Firmware Version: %s", fv.c_str());
     RCLCPP_INFO(get_logger(), "Hardware Version : %d", hv);
@@ -572,31 +585,31 @@ private:
   bool configure_sensor(){
     // TODO(Dereck): Move writeUserTag to Service Call?
     // 5.2.1
-    // vs_.writeUserTag("");
+    // vs_->writeUserTag("");
 
     // Async Output Type
     // 5.2.7
     auto AsyncDataOutputType =
       (vn::protocol::uart::AsciiAsync)get_parameter("AsyncDataOutputType").as_int();
-    vs_.writeAsyncDataOutputType(AsyncDataOutputType);
+    vs_->writeAsyncDataOutputType(AsyncDataOutputType);
 
     // Async output Frequency (Hz)
     // 5.2.8
     int AsyncDataOutputFreq = get_parameter("AsyncDataOutputFrequency").as_int();
-    vs_.writeAsyncDataOutputFrequency(AsyncDataOutputFreq);
+    vs_->writeAsyncDataOutputFrequency(AsyncDataOutputFreq);
 
     // Sync control
     // 5.2.9
     vn::sensors::SynchronizationControlRegister configSync = {
       (vn::protocol::uart::SyncInMode)get_parameter("syncInMode").as_int(),
       (vn::protocol::uart::SyncInEdge)get_parameter("syncInEdge").as_int(),
-      get_parameter("syncInSkipFactor").as_int(),
+      static_cast<uint16_t>(get_parameter("syncInSkipFactor").as_int()),
       (vn::protocol::uart::SyncOutMode)get_parameter("syncOutMode").as_int(),
       (vn::protocol::uart::SyncOutPolarity)get_parameter("syncOutPolarity").as_int(),
-      get_parameter("syncOutSkipFactor").as_int(),
-      get_parameter("syncOutPulseWidth_ns").as_int()
+      static_cast<uint16_t>(get_parameter("syncOutSkipFactor").as_int()),
+      static_cast<uint32_t>(get_parameter("syncOutPulseWidth_ns").as_int())
     };
-    vs_.writeSynchronizationControl(configSync);
+    vs_->writeSynchronizationControl(configSync);
 
     // Communication Protocol Control
     // 5.2.10
@@ -610,7 +623,7 @@ private:
       (vn::protocol::uart::ErrorMode)get_parameter("errorMode").as_int()
     };
 
-    vs_.writeCommunicationProtocolControl(configComm);
+    vs_->writeCommunicationProtocolControl(configComm);
 
     auto boRegs = std::vector<std::string>{"BO1", "BO2", "BO3"};
     auto boConfigs = std::vector<vn::sensors::BinaryOutputRegister>();
@@ -619,7 +632,7 @@ private:
     for(auto name : boRegs){
       vn::sensors::BinaryOutputRegister configBO = {
         (vn::protocol::uart::AsyncMode)get_parameter(name + ".asyncMode").as_int(),
-        get_parameter(name + ".rateDivisor").as_int(),
+        static_cast<uint16_t>(get_parameter(name + ".rateDivisor").as_int()),
         (vn::protocol::uart::CommonGroup)get_parameter(name + ".commonField").as_int(),
         (vn::protocol::uart::TimeGroup)get_parameter(name + ".timeField").as_int(),
         (vn::protocol::uart::ImuGroup)get_parameter(name + ".imuField").as_int(),
@@ -634,29 +647,29 @@ private:
 
     // Binary Output Register 1
     // 5.2.11
-    vs_.writeBinaryOutput1(boConfigs.at(0));
+    vs_->writeBinaryOutput1(boConfigs.at(0));
 
     // Binary Output Register 2
     // 5.2.12
-    vs_.writeBinaryOutput2(boConfigs.at(1));
+    vs_->writeBinaryOutput2(boConfigs.at(1));
 
     // Binary Output Register 3
     // 5.2.13
-    vs_.writeBinaryOutput3(boConfigs.at(2));
+    vs_->writeBinaryOutput3(boConfigs.at(2));
 
     // Verify that the device family is capable of supporting GPS
-    if(vs_.determineDeviceFamily() != vn::sensors::VnSensor::VnSensor_Family_Vn100){
+    if(vs_->determineDeviceFamily() != vn::sensors::VnSensor::VnSensor_Family_Vn100){
       try {
         // GPS Configuration
         // 8.2.1
-        auto gps_config = vs_.readGpsConfiguration();
+        auto gps_config = vs_->readGpsConfiguration();
         RCLCPP_INFO(get_logger(), "GPS Mode       : %d", gps_config.mode);
         RCLCPP_INFO(get_logger(), "GPS PPS Source : %d", gps_config.ppsSource);
         /// TODO(Dereck): VnSensor::readGpsConfiguration() missing fields
 
         // GPS Offset
         // 8.2.2
-        auto gps_offset = vs_.readGpsAntennaOffset();
+        auto gps_offset = vs_->readGpsAntennaOffset();
         RCLCPP_INFO(
           get_logger(), "GPS Offset     : (%f, %f, %f)", gps_offset[0], gps_offset[1], gps_offset[2]);
 
@@ -664,8 +677,8 @@ private:
         // 8.2.3
         // According to dawonn, readGpsCompassBaseline is likely only available
         // on the VN-300
-        if (vs_.determineDeviceFamily() == vn::sensors::VnSensor::VnSensor_Family_Vn300) {
-          auto gps_baseline = vs_.readGpsCompassBaseline();
+        if (vs_->determineDeviceFamily() == vn::sensors::VnSensor::VnSensor_Family_Vn300) {
+          auto gps_baseline = vs_->readGpsCompassBaseline();
           RCLCPP_INFO(
             get_logger(), "GPS Baseline     : (%f, %f, %f), (%f, %f, %f)", gps_baseline.position[0],
             gps_baseline.position[1], gps_baseline.position[2], gps_baseline.uncertainty[0],
@@ -1434,7 +1447,7 @@ private:
   //
 
   /// VectorNav Sensor Handle
-  vn::sensors::VnSensor vs_;
+  std::shared_ptr<vn::sensors::VnSensor> vs_;
 
   /// Reconnection Timer
   rclcpp::TimerBase::SharedPtr reconnect_timer_;
