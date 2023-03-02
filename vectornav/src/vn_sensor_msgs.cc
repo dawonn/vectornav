@@ -21,7 +21,7 @@
 #include "sensor_msgs/msg/nav_sat_fix.hpp"
 #include "sensor_msgs/msg/temperature.hpp"
 #include "sensor_msgs/msg/time_reference.hpp"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp
 #include "vectornav_msgs/msg/attitude_group.hpp"
 #include "vectornav_msgs/msg/common_group.hpp"
 #include "vectornav_msgs/msg/gps_group.hpp"
@@ -189,7 +189,6 @@ private:
       msg.linear_acceleration.x = msg_in->accel.y;
       msg.linear_acceleration.y = msg_in->accel.x;
       msg.linear_acceleration.z = -msg_in->accel.z;
-
 
       fill_covariance_from_param("orientation_covariance", msg.orientation_covariance);
       fill_covariance_from_param("angular_velocity_covariance", msg.angular_velocity_covariance);
