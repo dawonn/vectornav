@@ -180,7 +180,7 @@ int main(int argc, char * argv[])
   // Load all params
   pn.param<std::string>("map_frame_id", user_data.map_frame_id, "map");
   pn.param<std::string>("frame_id", user_data.frame_id, "vectornav");
-  pn.param<bool>("tf_ned_to_enu", user_data.tf_ned_to_enu, false);
+  pn.param<bool>("tf_ned_to_enu", user_data.tf_ned_to_enu, true);
   pn.param<bool>("frame_based_enu", user_data.frame_based_enu, false);
   pn.param<bool>("adjust_ros_timestamp", user_data.adjust_ros_timestamp, false);
   pn.param<int>("async_output_rate", async_output_rate, 40);
