@@ -61,6 +61,7 @@ vectornav:
 
 vn_sensor_msgs:
   ros__parameters:
+    use_enu: true
     orientation_covariance: [0.01,  0.0,   0.0,
                             0.0,   0.01,  0.0,
                             0.0,   0.0,   0.01]

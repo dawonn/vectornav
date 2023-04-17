@@ -42,6 +42,7 @@ public:
   VnSensorMsgs() : Node("vn_sensor_msgs")
   {
     // Parameters
+    declare_parameter<bool>("use_enu", true);
     declare_parameter<std::vector<double>>("orientation_covariance", orientation_covariance_);
     declare_parameter<std::vector<double>>(
       "angular_velocity_covariance", angular_velocity_covariance_);
@@ -107,6 +108,9 @@ public:
     auto sub_vn_gps2_cb = std::bind(&VnSensorMsgs::sub_vn_gps2, this, std::placeholders::_1);
     sub_vn_gps2_ = this->create_subscription<vectornav_msgs::msg::GpsGroup>(
       "vectornav/raw/gps2", 10, sub_vn_gps2_cb);
+
+    //enu frame option
+    use_enu = get_parameter("use_enu").as_bool();
   }
 
 private:
@@ -180,15 +184,20 @@ private:
       q_ned2enu.setRPY(M_PI, 0.0, M_PI / 2);
       msg.orientation = toMsg(q_ned2enu * q);
 
-      // NED to ENU conversion
-      // swap x and y and negate z
-      msg.angular_velocity.x = msg_in->angularrate.y;
-      msg.angular_velocity.y = msg_in->angularrate.x;
-      msg.angular_velocity.z = -msg_in->angularrate.z;
+      if(use_enu) {
+        // NED to ENU conversion
+        // swap x and y and negate z
+        msg.angular_velocity.x = msg_in->angularrate.y;
+        msg.angular_velocity.y = msg_in->angularrate.x;
+        msg.angular_velocity.z = -msg_in->angularrate.z;
 
-      msg.linear_acceleration.x = msg_in->accel.y;
-      msg.linear_acceleration.y = msg_in->accel.x;
-      msg.linear_acceleration.z = -msg_in->accel.z;
+        msg.linear_acceleration.x = msg_in->accel.y;
+        msg.linear_acceleration.y = msg_in->accel.x;
+        msg.linear_acceleration.z = -msg_in->accel.z;
+      } else {
+        msg.angular_velocity = msg_in->angularrate;
+        msg.linear_acceleration = msg_in->accel;
+      }
 
       fill_covariance_from_param("orientation_covariance", msg.orientation_covariance);
       fill_covariance_from_param("angular_velocity_covariance", msg.angular_velocity_covariance);
@@ -421,6 +430,8 @@ private:
   rclcpp::Subscription<vectornav_msgs::msg::AttitudeGroup>::SharedPtr sub_vn_attitude_;
   rclcpp::Subscription<vectornav_msgs::msg::InsGroup>::SharedPtr sub_vn_ins_;
   rclcpp::Subscription<vectornav_msgs::msg::GpsGroup>::SharedPtr sub_vn_gps2_;
+
+  bool use_enu = true;
 
   /// Default orientation Covariance
   const std::vector<double> orientation_covariance_ = {0.0000, 0.0000, 0.0000, 0.0000, 0.0000,
