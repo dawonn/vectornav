@@ -212,15 +212,20 @@ private:
       sensor_msgs::msg::Imu msg;
       msg.header = msg_in->header;
 
-      // NED to ENU conversion
-      // swap x and y and negate z
-      msg.angular_velocity.x = msg_in->imu_rate.y;
-      msg.angular_velocity.y = msg_in->imu_rate.x;
-      msg.angular_velocity.z = -msg_in->imu_rate.z;
+      if(use_enu) {
+        // NED to ENU conversion
+        // swap x and y and negate z
+        msg.angular_velocity.x = msg_in->angularrate.y;
+        msg.angular_velocity.y = msg_in->angularrate.x;
+        msg.angular_velocity.z = -msg_in->angularrate.z;
 
-      msg.linear_acceleration.x = msg_in->imu_accel.y;
-      msg.linear_acceleration.y = msg_in->imu_accel.x;
-      msg.linear_acceleration.z = -msg_in->imu_accel.z;
+        msg.linear_acceleration.x = msg_in->accel.y;
+        msg.linear_acceleration.y = msg_in->accel.x;
+        msg.linear_acceleration.z = -msg_in->accel.z;
+      } else {
+        msg.angular_velocity = msg_in->angularrate;
+        msg.linear_acceleration = msg_in->accel;
+      }
 
       fill_covariance_from_param("angular_velocity_covariance", msg.angular_velocity_covariance);
       fill_covariance_from_param(
