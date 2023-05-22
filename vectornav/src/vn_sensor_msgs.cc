@@ -177,13 +177,7 @@ private:
     {
       sensor_msgs::msg::Imu msg;
       msg.header = msg_in->header;
-
-      // Quaternion NED -> ENU
-      tf2::Quaternion q, q_ned2enu;
-      fromMsg(msg_in->quaternion, q);
-      q_ned2enu.setRPY(M_PI, 0.0, M_PI / 2);
-      msg.orientation = toMsg(q_ned2enu * q);
-
+      
       if(use_enu) {
         // NED to ENU conversion
         // swap x and y and negate z
@@ -194,9 +188,17 @@ private:
         msg.linear_acceleration.x = msg_in->accel.y;
         msg.linear_acceleration.y = msg_in->accel.x;
         msg.linear_acceleration.z = -msg_in->accel.z;
+
+        msg.orientation = msg_in->quaternion;
       } else {
         msg.angular_velocity = msg_in->angularrate;
         msg.linear_acceleration = msg_in->accel;
+
+        // Quaternion ENU -> NED
+        tf2::Quaternion q, q_ned2enu;
+        fromMsg(msg_in->quaternion, q);
+        q_ned2enu.setRPY(M_PI, 0.0, -M_PI / 2);
+        msg.orientation = toMsg(q_ned2enu * q);
       }
 
       fill_covariance_from_param("orientation_covariance", msg.orientation_covariance);
@@ -311,17 +313,20 @@ private:
       msg.header.frame_id = "earth";
       msg.pose.pose.position = ins_posecef_;
 
-      // Converts Quaternion in NED to ECEF
-      tf2::Quaternion q, q_enu2ecef, q_ned2enu;
-      q_ned2enu.setRPY(M_PI, 0.0, M_PI / 2);
+      if (use_enu) {
+        msg.pose.pose.orientation = msg_in->quaternion;
+      } else {
+        // Converts Quaternion in ENU to ECEF
+        tf2::Quaternion q, q_enu2ecef;
 
-      auto latitude = deg2rad(msg_in->position.x);
-      auto longitude = deg2rad(msg_in->position.y);
-      q_enu2ecef.setRPY(0.0, latitude, longitude);
+        auto latitude = deg2rad(msg_in->position.x);
+        auto longitude = deg2rad(msg_in->position.y);
+        q_enu2ecef.setRPY(0.0, latitude, longitude);
 
-      fromMsg(msg_in->quaternion, q);
+        fromMsg(msg_in->quaternion, q);
 
-      msg.pose.pose.orientation = toMsg(q_ned2enu * q_enu2ecef * q);
+        msg.pose.pose.orientation = toMsg(q_enu2ecef * q);
+      }
 
       /// TODO(Dereck): Pose Covariance
 
