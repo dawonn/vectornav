@@ -114,6 +114,22 @@ public:
   }
 
 private:
+  void convert_to_enu(const vectornav_msgs::msg::CommonGroup::SharedPtr msg_in, sensor_msgs::msg::Imu msg_out) const
+  {
+    // NED to ENU conversion
+    // swap x and y and negate z
+    msg_out.angular_velocity.x = msg_in->angularrate.y;
+    msg_out.angular_velocity.y = msg_in->angularrate.x;
+    msg_out.angular_velocity.z = -msg_in->angularrate.z;
+
+    msg_out.linear_acceleration.x = msg_in->accel.y;
+    msg_out.linear_acceleration.y = msg_in->accel.x;
+    msg_out.linear_acceleration.z = -msg_in->accel.z;
+
+    msg_out.orientation = msg_in->quaternion;
+    msg_out.orientation.z = -msg_in->quaternion.z;
+  }
+
   /** Convert VN common group data to ROS2 standard message types
    *
    */
@@ -179,17 +195,7 @@ private:
       msg.header = msg_in->header;
       
       if(use_enu) {
-        // NED to ENU conversion
-        // swap x and y and negate z
-        msg.angular_velocity.x = msg_in->angularrate.y;
-        msg.angular_velocity.y = msg_in->angularrate.x;
-        msg.angular_velocity.z = -msg_in->angularrate.z;
-
-        msg.linear_acceleration.x = msg_in->accel.y;
-        msg.linear_acceleration.y = msg_in->accel.x;
-        msg.linear_acceleration.z = -msg_in->accel.z;
-
-        msg.orientation = msg_in->quaternion;
+        convert_to_enu(msg_in, msg);
       } else {
         msg.angular_velocity = msg_in->angularrate;
         msg.linear_acceleration = msg_in->accel;
@@ -215,15 +221,7 @@ private:
       msg.header = msg_in->header;
 
       if(use_enu) {
-        // NED to ENU conversion
-        // swap x and y and negate z
-        msg.angular_velocity.x = msg_in->angularrate.y;
-        msg.angular_velocity.y = msg_in->angularrate.x;
-        msg.angular_velocity.z = -msg_in->angularrate.z;
-
-        msg.linear_acceleration.x = msg_in->accel.y;
-        msg.linear_acceleration.y = msg_in->accel.x;
-        msg.linear_acceleration.z = -msg_in->accel.z;
+        convert_to_enu(msg_in, msg);
       } else {
         msg.angular_velocity = msg_in->angularrate;
         msg.linear_acceleration = msg_in->accel;
@@ -306,7 +304,7 @@ private:
       pub_velocity_->publish(msg);
     }
 
-    // Pose (ECEF)
+    // Pose
     {
       geometry_msgs::msg::PoseWithCovarianceStamped msg;
       msg.header = msg_in->header;
@@ -315,6 +313,7 @@ private:
 
       if (use_enu) {
         msg.pose.pose.orientation = msg_in->quaternion;
+        msg.pose.pose.orientation.z = -msg_in->quaternion.z;
       } else {
         // Converts Quaternion in ENU to ECEF
         tf2::Quaternion q, q_enu2ecef;
