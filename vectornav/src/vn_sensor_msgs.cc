@@ -114,7 +114,7 @@ public:
   }
 
 private:
-  void convert_to_enu(const vectornav_msgs::msg::CommonGroup::SharedPtr msg_in, sensor_msgs::msg::Imu msg_out) const
+  void convert_to_enu(const vectornav_msgs::msg::CommonGroup::SharedPtr msg_in, sensor_msgs::msg::Imu& msg_out) const
   {
     // NED to ENU conversion
     // swap x and y and negate z
@@ -127,7 +127,7 @@ private:
     msg_out.linear_acceleration.z = -msg_in->accel.z;
 
     msg_out.orientation = msg_in->quaternion;
-    // msg_out.orientation.z = -msg_in->quaternion.z;
+    msg_out.orientation.z = -msg_in->quaternion.z;
   }
 
   /** Convert VN common group data to ROS2 standard message types
@@ -313,6 +313,7 @@ private:
 
       if (use_enu) {
         msg.pose.pose.orientation = msg_in->quaternion;
+        msg.pose.pose.orientation.z = -msg_in->quaternion.z;
       } else {
         // Converts Quaternion in ENU to ECEF
         tf2::Quaternion q, q_enu2ecef;
