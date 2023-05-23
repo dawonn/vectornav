@@ -25,13 +25,14 @@ find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(vectornav_msgs REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 
 # vncxx
 add_subdirectory(vnproglib-1.2.0.0/cpp)
 
 # vectornav
 add_executable(${PROJECT_NAME} src/vectornav.cc)
-ament_target_dependencies(${PROJECT_NAME} rclcpp geometry_msgs vectornav_msgs rclcpp_action)
+ament_target_dependencies(${PROJECT_NAME} rclcpp geometry_msgs vectornav_msgs rclcpp_action std_srvs)
 target_link_libraries(${PROJECT_NAME} vncxx )
 
 # vn_sensor_msgs

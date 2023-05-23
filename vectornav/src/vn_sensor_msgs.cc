@@ -114,6 +114,22 @@ public:
   }
 
 private:
+  void convert_to_enu(const vectornav_msgs::msg::CommonGroup::SharedPtr msg_in, sensor_msgs::msg::Imu msg_out) const
+  {
+    // NED to ENU conversion
+    // swap x and y and negate z
+    msg_out.angular_velocity.x = msg_in->angularrate.y;
+    msg_out.angular_velocity.y = msg_in->angularrate.x;
+    msg_out.angular_velocity.z = -msg_in->angularrate.z;
+
+    msg_out.linear_acceleration.x = msg_in->accel.y;
+    msg_out.linear_acceleration.y = msg_in->accel.x;
+    msg_out.linear_acceleration.z = -msg_in->accel.z;
+
+    msg_out.orientation = msg_in->quaternion;
+    // msg_out.orientation.z = -msg_in->quaternion.z;
+  }
+
   /** Convert VN common group data to ROS2 standard message types
    *
    */
@@ -177,26 +193,18 @@ private:
     {
       sensor_msgs::msg::Imu msg;
       msg.header = msg_in->header;
-
-      // Quaternion NED -> ENU
-      tf2::Quaternion q, q_ned2enu;
-      fromMsg(msg_in->quaternion, q);
-      q_ned2enu.setRPY(M_PI, 0.0, M_PI / 2);
-      msg.orientation = toMsg(q_ned2enu * q);
-
+      
       if(use_enu) {
-        // NED to ENU conversion
-        // swap x and y and negate z
-        msg.angular_velocity.x = msg_in->angularrate.y;
-        msg.angular_velocity.y = msg_in->angularrate.x;
-        msg.angular_velocity.z = -msg_in->angularrate.z;
-
-        msg.linear_acceleration.x = msg_in->accel.y;
-        msg.linear_acceleration.y = msg_in->accel.x;
-        msg.linear_acceleration.z = -msg_in->accel.z;
+        convert_to_enu(msg_in, msg);
       } else {
         msg.angular_velocity = msg_in->angularrate;
         msg.linear_acceleration = msg_in->accel;
+
+        // Quaternion ENU -> NED
+        tf2::Quaternion q, q_ned2enu;
+        fromMsg(msg_in->quaternion, q);
+        q_ned2enu.setRPY(M_PI, 0.0, -M_PI / 2);
+        msg.orientation = toMsg(q_ned2enu * q);
       }
 
       fill_covariance_from_param("orientation_covariance", msg.orientation_covariance);
@@ -213,15 +221,7 @@ private:
       msg.header = msg_in->header;
 
       if(use_enu) {
-        // NED to ENU conversion
-        // swap x and y and negate z
-        msg.angular_velocity.x = msg_in->angularrate.y;
-        msg.angular_velocity.y = msg_in->angularrate.x;
-        msg.angular_velocity.z = -msg_in->angularrate.z;
-
-        msg.linear_acceleration.x = msg_in->accel.y;
-        msg.linear_acceleration.y = msg_in->accel.x;
-        msg.linear_acceleration.z = -msg_in->accel.z;
+        convert_to_enu(msg_in, msg);
       } else {
         msg.angular_velocity = msg_in->angularrate;
         msg.linear_acceleration = msg_in->accel;
@@ -304,24 +304,27 @@ private:
       pub_velocity_->publish(msg);
     }
 
-    // Pose (ECEF)
+    // Pose
     {
       geometry_msgs::msg::PoseWithCovarianceStamped msg;
       msg.header = msg_in->header;
       msg.header.frame_id = "earth";
       msg.pose.pose.position = ins_posecef_;
 
-      // Converts Quaternion in NED to ECEF
-      tf2::Quaternion q, q_enu2ecef, q_ned2enu;
-      q_ned2enu.setRPY(M_PI, 0.0, M_PI / 2);
+      if (use_enu) {
+        msg.pose.pose.orientation = msg_in->quaternion;
+      } else {
+        // Converts Quaternion in ENU to ECEF
+        tf2::Quaternion q, q_enu2ecef;
 
-      auto latitude = deg2rad(msg_in->position.x);
-      auto longitude = deg2rad(msg_in->position.y);
-      q_enu2ecef.setRPY(0.0, latitude, longitude);
+        auto latitude = deg2rad(msg_in->position.x);
+        auto longitude = deg2rad(msg_in->position.y);
+        q_enu2ecef.setRPY(0.0, latitude, longitude);
 
-      fromMsg(msg_in->quaternion, q);
+        fromMsg(msg_in->quaternion, q);
 
-      msg.pose.pose.orientation = toMsg(q_ned2enu * q_enu2ecef * q);
+        msg.pose.pose.orientation = toMsg(q_enu2ecef * q);
+      }
 
       /// TODO(Dereck): Pose Covariance
 

@@ -23,6 +23,7 @@
 // ROS2
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
+#include "std_srvs/srv/empty.hpp"
 #include "vectornav_msgs/msg/attitude_group.hpp"
 #include "vectornav_msgs/msg/common_group.hpp"
 #include "vectornav_msgs/msg/gps_group.hpp"
@@ -168,6 +169,10 @@ public:
     pub_ins_ = this->create_publisher<vectornav_msgs::msg::InsGroup>("vectornav/raw/ins", 10);
     pub_gps2_ = this->create_publisher<vectornav_msgs::msg::GpsGroup>("vectornav/raw/gps2", 10);
 
+    // Connect to the sensor, keep above server and service creation to make sure
+    // they aren't called before sensor is initialized
+    connect(port, baud);
+
     // magnetic cal action
     server_mag_cal_ = rclcpp_action::create_server<MagCal>(
       this, "vectornav/mag_cal",
@@ -176,13 +181,15 @@ public:
       std::bind(&Vectornav::handle_cal_accept, this, _1)
     );
 
+    // Tare service initialization
+    service_tare_ = create_service<std_srvs::srv::Empty>(
+      "vectornav/tare", 
+      std::bind(&Vectornav::handle_tare_request, this, _1, _2, _3));
+
     if (!optimize_serial_communication(port)) {
       RCLCPP_WARN(get_logger(), "time of message delivery may be compromised!");
     }
-
-    // Connect to the sensor
-    connect(port, baud);
-
+    
     // Monitor Connection
     if (reconnect_ms > 0ms) {
       RCLCPP_INFO(get_logger(), "Reconnect Timeout : %ld", reconnect_ms.count());
@@ -484,6 +491,27 @@ private:
     } else {
       // we did it
       goal_handle->succeed(result);
+    }
+  }
+
+  void handle_tare_request(
+    const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+    std::shared_ptr<std_srvs::srv::Empty::Response> response) {
+    RCLCPP_INFO(get_logger(), "Recieved tare request");
+
+    // Shouldn't happen as connect runs before this, but just in case someone might change
+    // it in the future
+    if (!vs_) {
+      RCLCPP_ERROR(get_logger(), "Tare requested before sensor has been initialized");
+    }
+
+    try {
+      vs_->tare();
+    } catch (const std::exception & e) {
+      RCLCPP_ERROR_STREAM(get_logger(), "Failed to tare. error: " << e.what());
+    } catch (...) {
+      RCLCPP_ERROR(get_logger(), "Failed to disable async output. error: unknown");
     }
   }
 
@@ -1464,6 +1492,9 @@ private:
   /// Action servers for calibration
   rclcpp_action::Server<vectornav_msgs::action::MagCal>::SharedPtr server_mag_cal_;
   std::thread action_thread_;
+
+  // Service for tare
+  rclcpp::Service<std_srvs::srv::Empty>::SharedPtr service_tare_;
 
   /// ROS header time stamp adjustments
   double averageTimeDifference_{0};
