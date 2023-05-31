@@ -511,7 +511,7 @@ private:
     } catch (const std::exception & e) {
       RCLCPP_ERROR_STREAM(get_logger(), "Failed to tare. error: " << e.what());
     } catch (...) {
-      RCLCPP_ERROR(get_logger(), "Failed to disable async output. error: unknown");
+      RCLCPP_ERROR(get_logger(), "Failed to perform tare. error: unknown");
     }
   }
 
