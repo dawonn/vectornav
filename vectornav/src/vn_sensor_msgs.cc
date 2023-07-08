@@ -114,17 +114,27 @@ public:
   }
 
 private:
-  void convert_to_enu(const vectornav_msgs::msg::CommonGroup::SharedPtr msg_in, sensor_msgs::msg::Imu &msg_out) const
+  void convert_to_enu(const vectornav_msgs::msg::CommonGroup::SharedPtr msg_in, sensor_msgs::msg::Imu &msg_out, const bool &use_compensated_measurements=true) const
   {
     // NED to ENU conversion
     // swap x and y and negate z
-    msg_out.angular_velocity.x = msg_in->angularrate.y;
-    msg_out.angular_velocity.y = msg_in->angularrate.x;
-    msg_out.angular_velocity.z = -msg_in->angularrate.z;
+    if(use_compensated_measurements) {
+      msg_out.angular_velocity.x = msg_in->angularrate.y;
+      msg_out.angular_velocity.y = msg_in->angularrate.x;
+      msg_out.angular_velocity.z = -msg_in->angularrate.z;
 
-    msg_out.linear_acceleration.x = msg_in->accel.y;
-    msg_out.linear_acceleration.y = msg_in->accel.x;
-    msg_out.linear_acceleration.z = -msg_in->accel.z;
+      msg_out.linear_acceleration.x = msg_in->accel.y;
+      msg_out.linear_acceleration.y = msg_in->accel.x;
+      msg_out.linear_acceleration.z = -msg_in->accel.z;
+    } else {
+      msg_out.angular_velocity.x = msg_in->imu_rate.y;
+      msg_out.angular_velocity.y = msg_in->imu_rate.x;
+      msg_out.angular_velocity.z = -msg_in->imu_rate.z;
+
+      msg_out.linear_acceleration.x = msg_in->imu_accel.y;
+      msg_out.linear_acceleration.y = msg_in->imu_accel.x;
+      msg_out.linear_acceleration.z = -msg_in->imu_accel.z;
+    }
 
     msg_out.orientation = msg_in->quaternion;
     msg_out.orientation.z = -msg_in->quaternion.z;
@@ -221,10 +231,10 @@ private:
       msg.header = msg_in->header;
 
       if(use_enu) {
-        convert_to_enu(msg_in, msg);
+        convert_to_enu(msg_in, msg, false);
       } else {
-        msg.angular_velocity = msg_in->angularrate;
-        msg.linear_acceleration = msg_in->accel;
+        msg.angular_velocity = msg_in->imu_rate;
+        msg.linear_acceleration = msg_in->imu_accel;
       }
 
       fill_covariance_from_param("angular_velocity_covariance", msg.angular_velocity_covariance);
