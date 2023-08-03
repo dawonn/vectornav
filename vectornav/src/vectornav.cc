@@ -21,6 +21,7 @@
 #endif
 
 // ROS2
+#include "geometry_msgs/msg/twist.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "vectornav_msgs/msg/attitude_group.hpp"
@@ -35,6 +36,7 @@
 #include "vn/compositedata.h"
 #include "vn/sensors.h"
 #include "vn/util.h"
+#include "vn/vector.h"
 
 using namespace std::chrono_literals;
 using namespace std::placeholders;
@@ -167,6 +169,9 @@ public:
     pub_attitude_ = this->create_publisher<vectornav_msgs::msg::AttitudeGroup>("vectornav/raw/attitude", 10);
     pub_ins_ = this->create_publisher<vectornav_msgs::msg::InsGroup>("vectornav/raw/ins", 10);
     pub_gps2_ = this->create_publisher<vectornav_msgs::msg::GpsGroup>("vectornav/raw/gps2", 10);
+
+    sub_vel_aiding_ = this->create_subscription<geometry_msgs::msg::Twist>(
+      "vectornav/velocity_aiding", 1, std::bind(&Vectornav::vel_aiding_cb, this, _1));
 
     // magnetic cal action
     server_mag_cal_ = rclcpp_action::create_server<MagCal>(
@@ -481,6 +486,16 @@ private:
       // we did it
       goal_handle->succeed(result);
     }
+  }
+
+  void vel_aiding_cb(const geometry_msgs::msg::Twist::SharedPtr msg)
+  {
+    // Take a ROS Twist message, and use it to send a velocity aiding message to the VectorNav
+    const auto waitForReply = false;
+    const vn::math::vec3f velocity{
+      static_cast<float>(msg->linear.x), static_cast<float>(msg->linear.y),
+      static_cast<float>(msg->linear.z)};
+    vs_->writeVelocityCompensationMeasurement(velocity, waitForReply);
   }
 
   /**
@@ -1456,6 +1471,9 @@ private:
   rclcpp::Publisher<vectornav_msgs::msg::AttitudeGroup>::SharedPtr pub_attitude_;
   rclcpp::Publisher<vectornav_msgs::msg::InsGroup>::SharedPtr pub_ins_;
   rclcpp::Publisher<vectornav_msgs::msg::GpsGroup>::SharedPtr pub_gps2_;
+
+  // Subscriptions
+  rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_vel_aiding_;
 
   /// Action servers for calibration
   rclcpp_action::Server<vectornav_msgs::action::MagCal>::SharedPtr server_mag_cal_;
