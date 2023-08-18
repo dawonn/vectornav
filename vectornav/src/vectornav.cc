@@ -1032,11 +1032,10 @@ private:
       msg.tow = compositeData.gpsTow();
     }
 
-    // TODO(Dereck): VNCXX is missing the read function for this field
-    // if(compositeData.hasGpsWeek())
-    // {
-    //   msg.week = compositeData.gpsWeek();
-    // }
+    if(compositeData.hasWeek())
+    {
+      msg.week = compositeData.week();
+    }
 
     if (compositeData.hasNumSats()) {
       msg.numsats = compositeData.numSats();
@@ -1050,11 +1049,10 @@ private:
       msg.poslla = toMsg(compositeData.positionGpsLla());
     }
 
-    // TODO(Dereck): VNCXX is missing the read function for this field
-    // if(compositeData.hasPositionGpsEcef())
-    // {
-    //   msg.posecef = toMsg(compositeData.positionGpsEcef());
-    // }
+    if(compositeData.hasPositionGpsEcef())
+    {
+      msg.posecef = toMsg(compositeData.positionGpsEcef());
+    }
 
     if (compositeData.hasVelocityGpsNed()) {
       msg.velned = toMsg(compositeData.velocityGpsNed());
