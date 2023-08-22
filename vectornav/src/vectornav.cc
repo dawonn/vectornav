@@ -488,6 +488,11 @@ private:
     }
   }
 
+  /**
+   * Callback to take twist message and pass it to VN as velocity aiding 
+   *
+   * \param msg Shared pointer to ROS2 geometry_msgs/Twist message containing velocity information
+   */
   void vel_aiding_cb(const geometry_msgs::msg::Twist::SharedPtr msg)
   {
     // Take a ROS Twist message, and use it to send a velocity aiding message to the VectorNav
