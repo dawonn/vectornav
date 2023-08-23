@@ -765,30 +765,31 @@ private:
 
     // Parse data into CompositeData container
     vn::sensors::CompositeData cd = cd.parse(asyncPacket);
+    auto timestamp = node->getTimeStamp(cd);
 
     // Groups
     auto i = 0;
 
     if (asyncPacket.groups() & vn::protocol::uart::BinaryGroup::BINARYGROUP_COMMON)
-      parseCommonGroup(node, cd, asyncPacket.groupField(i++));
+      parseCommonGroup(node, cd, asyncPacket.groupField(i++), timestamp);
 
     if (asyncPacket.groups() & vn::protocol::uart::BinaryGroup::BINARYGROUP_TIME)
-      parseTimeGroup(node, cd, asyncPacket.groupField(i++));
+      parseTimeGroup(node, cd, asyncPacket.groupField(i++), timestamp);
 
     if (asyncPacket.groups() & vn::protocol::uart::BinaryGroup::BINARYGROUP_IMU)
-      parseImuGroup(node, cd, asyncPacket.groupField(i++));
+      parseImuGroup(node, cd, asyncPacket.groupField(i++), timestamp);
 
     if (asyncPacket.groups() & vn::protocol::uart::BinaryGroup::BINARYGROUP_GPS)
-      parseGpsGroup(node, cd, asyncPacket.groupField(i++));
+      parseGpsGroup(node, cd, asyncPacket.groupField(i++), timestamp);
 
     if (asyncPacket.groups() & vn::protocol::uart::BinaryGroup::BINARYGROUP_ATTITUDE)
-      parseAttitudeGroup(node, cd, asyncPacket.groupField(i++));
+      parseAttitudeGroup(node, cd, asyncPacket.groupField(i++), timestamp);
 
     if (asyncPacket.groups() & vn::protocol::uart::BinaryGroup::BINARYGROUP_INS)
-      parseInsGroup(node, cd, asyncPacket.groupField(i++));
+      parseInsGroup(node, cd, asyncPacket.groupField(i++), timestamp);
 
     if (asyncPacket.groups() & vn::protocol::uart::BinaryGroup::BINARYGROUP_GPS2)
-      parseGps2Group(node, cd, asyncPacket.groupField(i++));
+      parseGps2Group(node, cd, asyncPacket.groupField(i++), timestamp);
   }
 
   /** Copy Common Group fields in binary packet to a CompositeData message
@@ -797,13 +798,13 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseCommonGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::CommonGroup();
 
     // Header
-    msg.header.stamp = node->getTimeStamp(compositeData);
+    msg.header.stamp = timestamp;
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
@@ -899,13 +900,13 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseTimeGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::TimeGroup();
 
     // Header
-    msg.header.stamp = node->getTimeStamp(compositeData);
+    msg.header.stamp = timestamp;
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
@@ -961,12 +962,12 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseImuGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::ImuGroup();
     // Header
-    msg.header.stamp = node->getTimeStamp(compositeData);
+    msg.header.stamp = timestamp;
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
@@ -1032,13 +1033,13 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseGpsGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::GpsGroup();
 
     // Header
-    msg.header.stamp = node->getTimeStamp(compositeData);
+    msg.header.stamp = timestamp;
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
@@ -1113,13 +1114,13 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseAttitudeGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::AttitudeGroup();
 
     // Header
-    msg.header.stamp = node->getTimeStamp(compositeData);
+    msg.header.stamp = timestamp;
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
@@ -1171,13 +1172,13 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseInsGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::InsGroup();
 
     // Header
-    msg.header.stamp = node->getTimeStamp(compositeData);
+    msg.header.stamp = timestamp;
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
@@ -1243,13 +1244,13 @@ private:
    * TODO(Dereck): VNCXX is missing some read functions
    */
   static void parseGps2Group(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::GpsGroup();
 
     // Header
-    msg.header.stamp = node->getTimeStamp(compositeData);
+    msg.header.stamp = timestamp;
     msg.header.frame_id = node->get_parameter("frame_id").as_string();
 
     // Group Fields
