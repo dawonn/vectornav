@@ -798,7 +798,7 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseCommonGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::CommonGroup();
@@ -900,7 +900,7 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseTimeGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::TimeGroup();
@@ -962,7 +962,7 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseImuGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::ImuGroup();
@@ -1033,7 +1033,7 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseGpsGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::GpsGroup();
@@ -1114,7 +1114,7 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseAttitudeGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::AttitudeGroup();
@@ -1172,7 +1172,7 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseInsGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::InsGroup();
@@ -1244,7 +1244,7 @@ private:
    * TODO(Dereck): VNCXX is missing some read functions
    */
   static void parseGps2Group(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time& timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::GpsGroup();
