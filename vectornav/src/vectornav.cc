@@ -1436,11 +1436,10 @@ private:
     lhs.gps_fix = rhs & vn::protocol::uart::InsStatus::INSSTATUS_GPS_FIX;
     lhs.time_error = rhs & vn::protocol::uart::InsStatus::INSSTATUS_TIME_ERROR;
     lhs.imu_error = rhs & vn::protocol::uart::InsStatus::INSSTATUS_IMU_ERROR;
-    lhs.time_error = rhs & vn::protocol::uart::InsStatus::INSSTATUS_GPS_FIX;
     lhs.mag_pres_error = rhs & vn::protocol::uart::InsStatus::INSSTATUS_MAG_PRES_ERROR;
     lhs.gps_error = rhs & vn::protocol::uart::InsStatus::INSSTATUS_GPS_ERROR;
-    lhs.gps_heading_ins = rhs & 0x0080;
-    lhs.gps_compass = rhs & 0x0100;
+    lhs.gps_heading_ins = rhs & 0x0100;
+    lhs.gps_compass = rhs & 0x0200;
     return lhs;
   }
 
