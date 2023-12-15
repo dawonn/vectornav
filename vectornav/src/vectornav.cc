@@ -21,22 +21,16 @@
 #endif
 
 // ROS2
-#include "geometry_msgs/msg/twist.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
 #include "vectornav_msgs/msg/attitude_group.hpp"
 #include "vectornav_msgs/msg/common_group.hpp"
 #include "vectornav_msgs/msg/gps_group.hpp"
 #include "vectornav_msgs/msg/imu_group.hpp"
 #include "vectornav_msgs/msg/ins_group.hpp"
 #include "vectornav_msgs/msg/time_group.hpp"
-#include "vectornav_msgs/action/mag_cal.hpp"
 
 // VectorNav libvncxx
-#include "vn/compositedata.h"
-#include "vn/sensors.h"
 #include "vn/util.h"
-#include "vn/vector.h"
 
 using namespace std::chrono_literals;
 using namespace std::placeholders;
@@ -46,9 +40,6 @@ using namespace std::placeholders;
 
 class Vectornav : public rclcpp::Node
 {
-  using MagCal = vectornav_msgs::action::MagCal;
-  using MagCalGH = rclcpp_action::ServerGoalHandle<MagCal>;
-
 public:
   Vectornav() : Node("vectornav")
   {
@@ -196,7 +187,7 @@ public:
     }
   }
 
-  ~Vectornav()
+Vectornav::~Vectornav()
   {
     if (reconnect_timer_) {
       reconnect_timer_->cancel();
@@ -218,6 +209,7 @@ private:
    * \param port serial port path, eg /dev/ttyUSB0
    * \return     true: OK, false: FAILURE
    */
+#if __linux__ || __CYGWIN__
   bool optimize_serial_communication(const std::string & portName)
   {
 #if __linux__ || __CYGWIN__
@@ -234,18 +226,21 @@ private:
     ioctl(portFd, TIOCSSERIAL, &serial);
     close(portFd);
     RCLCPP_INFO(get_logger(), "Set port to ASYNCY_LOW_LATENCY");
+    return (true);
+  }
 #elif
     RCLCPP_WARN(get_logger(), "Cannot set port to ASYNCY_LOW_LATENCY!");
 #endif
     return (true);
   }
+#endif
 
   /**
    * Periodically check for connection drops and try to reconnect
    *
    * Monitor rate is configured via the 'reconnect_ms' parameter, Set to zero to disable.
    */
-  void reconnect_timer()
+  void Vectornav::reconnect_timer()
   {
     // Check if the sensor is connected
     if (vs_ && vs_->verifySensorConnectivity()) {
@@ -512,7 +507,7 @@ private:
    *             the device for the requested baud rate.
    * \return     true: OK, false: FAILURE
    */
-  bool connect(const std::string port, const int baud)
+  bool Vectornav::connect(const std::string port, const int baud)
   {
     // Check if there's an existing instance of the sensor
     // and clean it up if there is so we can start fresh
@@ -718,7 +713,7 @@ private:
    * \return  adjusted ROS time
    */
 
-  rclcpp::Time getTimeStamp(vn::sensors::CompositeData & data)
+  rclcpp::Time Vectornav::getTimeStamp(vn::sensors::CompositeData & data)
   {
     const rclcpp::Time t = now();
     if (!data.hasTimeStartup() || !adjustROSTimeStamp_) {
@@ -740,7 +735,7 @@ private:
     return (adjustedTime);
   }
 
-  static void ErrorPacketReceivedHandler(
+  void Vectornav::ErrorPacketReceivedHandler(
     void * nodeptr, vn::protocol::uart::Packet & errorPacket, size_t packetStartRunningIndex)
   {
     // Get handle to the vectornav class
@@ -752,7 +747,7 @@ private:
     // TODO(Dereck): Display error text
   }
 
-  static void AsyncPacketReceivedHandler(
+  void Vectornav::AsyncPacketReceivedHandler(
     void * nodeptr, vn::protocol::uart::Packet & asyncPacket, size_t packetStartRunningIndex)
   {
     // Get handle to the vectornav class
@@ -798,7 +793,7 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseCommonGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::CommonGroup();
@@ -900,7 +895,7 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseTimeGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::TimeGroup();
@@ -962,7 +957,7 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseImuGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::ImuGroup();
@@ -1033,7 +1028,7 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseGpsGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::GpsGroup();
@@ -1114,7 +1109,7 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseAttitudeGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::AttitudeGroup();
@@ -1172,7 +1167,7 @@ private:
    * \param msg Vectornav CompositeData ROS Message
    */
   static void parseInsGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::InsGroup();
@@ -1244,7 +1239,7 @@ private:
    * TODO(Dereck): VNCXX is missing some read functions
    */
   static void parseGps2Group(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::GpsGroup();
@@ -1328,7 +1323,7 @@ private:
   //
 
   /// Convert from vn::math::vec3f to geometry_msgs::msgs::Vector3
-  static inline geometry_msgs::msg::Vector3 toMsg(const vn::math::vec3f & rhs)
+  geometry_msgs::msg::Vector3 Vectornav::toMsg(const vn::math::vec3f & rhs)
   {
     geometry_msgs::msg::Vector3 lhs;
     lhs.x = rhs[0];
@@ -1338,7 +1333,7 @@ private:
   }
 
   /// Convert from vn::math::vec4f to geometry_msgs::msgs::Quaternion
-  static inline geometry_msgs::msg::Quaternion toMsg(const vn::math::vec4f & rhs)
+  geometry_msgs::msg::Quaternion Vectornav::toMsg(const vn::math::vec4f & rhs)
   {
     geometry_msgs::msg::Quaternion lhs;
     lhs.x = rhs[0];
@@ -1349,7 +1344,7 @@ private:
   }
 
   /// Convert from vn::math::vec3d to geometry_msgs::msgs::Point
-  static inline geometry_msgs::msg::Point toMsg(const vn::math::vec3d & rhs)
+  geometry_msgs::msg::Point Vectornav::toMsg(const vn::math::vec3d & rhs)
   {
     geometry_msgs::msg::Point lhs;
     lhs.x = rhs[0];
@@ -1359,7 +1354,7 @@ private:
   }
 
   /// Convert from vn::protocol::uart::TimeUTC to vectornav_msgs::msg::TimeUTC
-  static inline vectornav_msgs::msg::TimeUTC toMsg(const vn::protocol::uart::TimeUtc & rhs)
+  vectornav_msgs::msg::TimeUTC Vectornav::toMsg(const vn::protocol::uart::TimeUtc & rhs)
   {
     vectornav_msgs::msg::TimeUTC lhs;
     lhs.year = rhs.year;
@@ -1373,7 +1368,7 @@ private:
   }
 
   /// Convert from vn::protocol::uart::TimeUTC to vectornav_msgs::msg::TimeUTC
-  static inline vectornav_msgs::msg::DOP toMsg(const vn::protocol::uart::GnssDop & rhs)
+  vectornav_msgs::msg::DOP Vectornav::toMsg(const vn::protocol::uart::GnssDop & rhs)
   {
     vectornav_msgs::msg::DOP lhs;
     lhs.g = rhs.gDop;
@@ -1387,7 +1382,7 @@ private:
   }
 
   /// Convert from vn::protocol::uart::VpeStatus to vectornav_msgs::msg::VpeStatus
-  static inline vectornav_msgs::msg::VpeStatus toMsg(const vn::protocol::uart::VpeStatus & rhs)
+  vectornav_msgs::msg::VpeStatus Vectornav::toMsg(const vn::protocol::uart::VpeStatus & rhs)
   {
     vectornav_msgs::msg::VpeStatus lhs;
     lhs.attitude_quality = rhs.attitudeQuality;
@@ -1403,7 +1398,7 @@ private:
   }
 
   /// Convert from vn::math::mat3f to std::array<float, 9>
-  static inline std::array<float, 9> toMsg(const vn::math::mat3f & rhs)
+  std::array<float, 9> Vectornav::toMsg(const vn::math::mat3f & rhs)
   {
     std::array<float, 9> lhs;
     lhs[0] = rhs(0, 0);
@@ -1419,7 +1414,7 @@ private:
   }
 
   /// Convert from vn::math::mat3f to vectornav_msgs::msg::TimeStatus
-  static inline vectornav_msgs::msg::TimeStatus toMsg(const uint8_t rhs)
+  vectornav_msgs::msg::TimeStatus Vectornav::toMsg(const uint8_t rhs)
   {
     vectornav_msgs::msg::TimeStatus lhs;
     lhs.time_ok = rhs & 0x01;
@@ -1430,7 +1425,7 @@ private:
 
   /// Convert from vn::protocol::uart::InsStatus to vectornav_msgs::msg::InsStatus
   // TODO(Dereck): vncxx uses an enum to hold a bitfeild, this is likely undefined behavior
-  static inline vectornav_msgs::msg::InsStatus toMsg(const vn::protocol::uart::InsStatus & rhs)
+  vectornav_msgs::msg::InsStatus Vectornav::toMsg(const vn::protocol::uart::InsStatus & rhs)
   {
     vectornav_msgs::msg::InsStatus lhs;
     lhs.mode = rhs & 0x0003;
@@ -1461,7 +1456,7 @@ private:
   //
 
   /// VectorNav Sensor Handle
-  std::shared_ptr<vn::sensors::VnSensor> vs_;
+  vn::sensors::VnSensor vs_;
 
   /// Reconnection Timer
   rclcpp::TimerBase::SharedPtr reconnect_timer_;
@@ -1474,13 +1469,6 @@ private:
   rclcpp::Publisher<vectornav_msgs::msg::AttitudeGroup>::SharedPtr pub_attitude_;
   rclcpp::Publisher<vectornav_msgs::msg::InsGroup>::SharedPtr pub_ins_;
   rclcpp::Publisher<vectornav_msgs::msg::GpsGroup>::SharedPtr pub_gps2_;
-
-  // Subscriptions
-  rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_vel_aiding_;
-
-  /// Action servers for calibration
-  rclcpp_action::Server<vectornav_msgs::action::MagCal>::SharedPtr server_mag_cal_;
-  std::thread action_thread_;
 
   /// ROS header time stamp adjustments
   double averageTimeDifference_{0};
