@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.py": "python",
         "atomic": "cpp",
         "*.tcc": "cpp",
         "fstream": "cpp",
@@ -61,7 +62,18 @@
         "cinttypes": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "forward_list": "cpp",
+        "unordered_set": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "shared_mutex": "cpp",
+        "stop_token": "cpp",
+        "valarray": "cpp"
     },
     "cSpell.words": [
         "VNOFF",

@@ -20,23 +20,12 @@
 #include <unistd.h>
 #endif
 
-// ROS2
-#include "geometry_msgs/msg/twist.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
-#include "vectornav_msgs/msg/attitude_group.hpp"
-#include "vectornav_msgs/msg/common_group.hpp"
-#include "vectornav_msgs/msg/gps_group.hpp"
-#include "vectornav_msgs/msg/imu_group.hpp"
-#include "vectornav_msgs/msg/ins_group.hpp"
-#include "vectornav_msgs/msg/time_group.hpp"
-#include "vectornav_msgs/action/mag_cal.hpp"
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_components/register_node_macro.hpp>
 
 // VectorNav libvncxx
-#include "vn/compositedata.h"
-#include "vn/sensors.h"
 #include "vn/util.h"
-#include "vn/vector.h"
+#include "vectornav.hpp"
 
 using namespace std::chrono_literals;
 using namespace std::placeholders;
@@ -44,13 +33,8 @@ using namespace std::placeholders;
 // Assure that the serial port is set to async low latency in order to reduce delays and package pilup.
 // These changes will stay effective until the device is unplugged
 
-class Vectornav : public rclcpp::Node
-{
-  using MagCal = vectornav_msgs::action::MagCal;
-  using MagCalGH = rclcpp_action::ServerGoalHandle<MagCal>;
-
-public:
-  Vectornav() : Node("vectornav")
+namespace vectornav {
+Vectornav::Vectornav(const rclcpp::NodeOptions &options) : Node("vectornav", options)
   {
     //
     // Parameters
@@ -174,12 +158,12 @@ public:
       "vectornav/velocity_aiding", 1, std::bind(&Vectornav::vel_aiding_cb, this, _1));
 
     // magnetic cal action
-    server_mag_cal_ = rclcpp_action::create_server<MagCal>(
-      this, "vectornav/mag_cal",
-      std::bind(&Vectornav::handle_cal_goal, this, _1, _2),
-      std::bind(&Vectornav::handle_cal_cancel, this, _1),
-      std::bind(&Vectornav::handle_cal_accept, this, _1)
-    );
+    // server_mag_cal_ = rclcpp_action::create_server<MagCal>(
+    //   this, "vectornav/mag_cal",
+    //   std::bind(&Vectornav::handle_cal_goal, this, _1, _2),
+    //   std::bind(&Vectornav::handle_cal_cancel, this, _1),
+    //   std::bind(&Vectornav::handle_cal_accept, this, _1)
+    // );
 
     if (!optimize_serial_communication(port)) {
       RCLCPP_WARN(get_logger(), "time of message delivery may be compromised!");
@@ -196,7 +180,7 @@ public:
     }
   }
 
-  ~Vectornav()
+Vectornav::~Vectornav()
   {
     if (reconnect_timer_) {
       reconnect_timer_->cancel();
@@ -210,15 +194,7 @@ public:
       vs_.reset();
     }
   }
-
-private:
-  /**
-   * set serial port to low latency async to avoid bunching up of callbacks
-   *
-   * \param port serial port path, eg /dev/ttyUSB0
-   * \return     true: OK, false: FAILURE
-   */
-  bool optimize_serial_communication(const std::string & portName)
+  bool Vectornav::optimize_serial_communication(const std::string & portName)
   {
 #if __linux__ || __CYGWIN__
     const int portFd = open(portName.c_str(), O_RDWR | O_NOCTTY);
@@ -234,6 +210,7 @@ private:
     ioctl(portFd, TIOCSSERIAL, &serial);
     close(portFd);
     RCLCPP_INFO(get_logger(), "Set port to ASYNCY_LOW_LATENCY");
+    return (true);
 #elif
     RCLCPP_WARN(get_logger(), "Cannot set port to ASYNCY_LOW_LATENCY!");
 #endif
@@ -245,7 +222,7 @@ private:
    *
    * Monitor rate is configured via the 'reconnect_ms' parameter, Set to zero to disable.
    */
-  void reconnect_timer()
+  void Vectornav::reconnect_timer()
   {
     // Check if the sensor is connected
     if (vs_ && vs_->verifySensorConnectivity()) {
@@ -266,234 +243,234 @@ private:
     }
   }
 
-  rclcpp_action::GoalResponse handle_cal_goal(
-      const rclcpp_action::GoalUUID & uuid,
-      std::shared_ptr<const MagCal::Goal> goal){
-    RCLCPP_INFO(get_logger(), "Temporarily stopping sensor streaming for magnetic calibration");
+  // rclcpp_action::GoalResponse Vectornav::handle_cal_goal(
+  //     const rclcpp_action::GoalUUID & uuid,
+  //     std::shared_ptr<const MagCal::Goal> goal){
+  //   RCLCPP_INFO(get_logger(), "Temporarily stopping sensor streaming for magnetic calibration");
 
-    // check and make sure we are not already doing it
-    if(std::thread::id() == action_thread_.get_id() && vs_->verifySensorConnectivity()){
-      return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
-    }
-    RCLCPP_WARN(get_logger(), "Magnetic calibration already in progress, rejecting request");
-    return rclcpp_action::GoalResponse::REJECT;
-  }
+  //   // check and make sure we are not already doing it
+  //   if(std::thread::id() == action_thread_.get_id() && vs_->verifySensorConnectivity()){
+  //     return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+  //   }
+  //   RCLCPP_WARN(get_logger(), "Magnetic calibration already in progress, rejecting request");
+  //   return rclcpp_action::GoalResponse::REJECT;
+  // }
 
-  rclcpp_action::CancelResponse handle_cal_cancel(const std::shared_ptr<MagCalGH> goal_handle){
-    RCLCPP_INFO(get_logger(), "Recieved request to stop magnetic calibration");
+  // rclcpp_action::CancelResponse Vectornav::handle_cal_cancel(const std::shared_ptr<MagCalGH> goal_handle){
+  //   RCLCPP_INFO(get_logger(), "Recieved request to stop magnetic calibration");
 
-    return rclcpp_action::CancelResponse::ACCEPT;
-  }
+  //   return rclcpp_action::CancelResponse::ACCEPT;
+  // }
 
-  void handle_cal_accept(const std::shared_ptr<MagCalGH> goal_handle){
-    // send the task execution off to the child thread
-    action_thread_ = std::thread{std::bind(&Vectornav::execute_cal, this, _1), goal_handle};
-    action_thread_.detach();
-  }
+  // void Vectornav::handle_cal_accept(const std::shared_ptr<MagCalGH> goal_handle){
+  //   // send the task execution off to the child thread
+  //   action_thread_ = std::thread{std::bind(&Vectornav::execute_cal, this, _1), goal_handle};
+  //   action_thread_.detach();
+  // }
 
-  void execute_cal(const std::shared_ptr<MagCalGH> goal_handle){
-    // A note for future developers:
-    // when dealing with GDB on this section of code, beware that
-    // breakpoints near the vectornav calls seem to cause odd instability
-    // in the device API and may cause calls to return improper values
+  // void Vectornav::execute_cal(const std::shared_ptr<MagCalGH> goal_handle){
+  //   // A note for future developers:
+  //   // when dealing with GDB on this section of code, beware that
+  //   // breakpoints near the vectornav calls seem to cause odd instability
+  //   // in the device API and may cause calls to return improper values
 
-    // setup a ros rate timer (input is hz)
-    rclcpp::Rate loopRate(4.0);
+  //   // setup a ros rate timer (input is hz)
+  //   rclcpp::Rate loopRate(4.0);
 
-    // make the result message just in case we have to abort
-    auto result = std::make_shared<vectornav_msgs::action::MagCal::Result>();
+  //   // make the result message just in case we have to abort
+  //   auto result = std::make_shared<vectornav_msgs::action::MagCal::Result>();
 
-    // disable all async registers
-    try{
-      vs_->writeAsyncDataOutputFrequency(0);
-      vn::sensors::BinaryOutputRegister configAsyncOff;
-      configAsyncOff.asyncMode = vn::protocol::uart::AsyncMode::ASYNCMODE_NONE;
-      vs_->writeBinaryOutput1(configAsyncOff);
-      vs_->writeBinaryOutput2(configAsyncOff);
-      vs_->writeBinaryOutput3(configAsyncOff);
-    } catch (const std::exception & e){
-      RCLCPP_ERROR_STREAM(get_logger(), "Failed to disable async output. error: " << e.what());
-      goal_handle->abort(result);
-      return;
-    } catch (...){
-      RCLCPP_ERROR(get_logger(), "Failed to disable async output. error: unknown");
-      goal_handle->abort(result);
-      return;
-    }
+  //   // disable all async registers
+  //   try{
+  //     vs_->writeAsyncDataOutputFrequency(0);
+  //     vn::sensors::BinaryOutputRegister configAsyncOff;
+  //     configAsyncOff.asyncMode = vn::protocol::uart::AsyncMode::ASYNCMODE_NONE;
+  //     vs_->writeBinaryOutput1(configAsyncOff);
+  //     vs_->writeBinaryOutput2(configAsyncOff);
+  //     vs_->writeBinaryOutput3(configAsyncOff);
+  //   } catch (const std::exception & e){
+  //     RCLCPP_ERROR_STREAM(get_logger(), "Failed to disable async output. error: " << e.what());
+  //     goal_handle->abort(result);
+  //     return;
+  //   } catch (...){
+  //     RCLCPP_ERROR(get_logger(), "Failed to disable async output. error: unknown");
+  //     goal_handle->abort(result);
+  //     return;
+  //   }
 
-    // reset HSI Mode and verify
-    vn::sensors::MagnetometerCalibrationControlRegister magControl = {
-      vn::protocol::uart::HsiMode::HSIMODE_RESET,
-      vn::protocol::uart::HsiOutput::HSIOUTPUT_NOONBOARD,
-      1 // set the convergence rate (1 slow - 5 fast)
-    };
+  //   // reset HSI Mode and verify
+  //   vn::sensors::MagnetometerCalibrationControlRegister magControl = {
+  //     vn::protocol::uart::HsiMode::HSIMODE_RESET,
+  //     vn::protocol::uart::HsiOutput::HSIOUTPUT_NOONBOARD,
+  //     1 // set the convergence rate (1 slow - 5 fast)
+  //   };
 
-    // Cannot test for this mode as it sets, then changes immediately
-    vs_->writeMagnetometerCalibrationControl(magControl);
+  //   // Cannot test for this mode as it sets, then changes immediately
+  //   vs_->writeMagnetometerCalibrationControl(magControl);
 
-    // Set VPE basic control to absolute
-    vn::sensors::VpeBasicControlRegister vpeControl = {
-      vn::protocol::uart::VpeEnable::VPEENABLE_ENABLE,
-      vn::protocol::uart::HeadingMode::HEADINGMODE_ABSOLUTE,
-      vn::protocol::uart::VpeMode::VPEMODE_MODE1, // By default these seem to be mode 1 not off
-      vn::protocol::uart::VpeMode::VPEMODE_MODE1  // By default these seem to be mode 1 not off
-    };
-    vs_->writeVpeBasicControl(vpeControl);
+  //   // Set VPE basic control to absolute
+  //   vn::sensors::VpeBasicControlRegister vpeControl = {
+  //     vn::protocol::uart::VpeEnable::VPEENABLE_ENABLE,
+  //     vn::protocol::uart::HeadingMode::HEADINGMODE_ABSOLUTE,
+  //     vn::protocol::uart::VpeMode::VPEMODE_MODE1, // By default these seem to be mode 1 not off
+  //     vn::protocol::uart::VpeMode::VPEMODE_MODE1  // By default these seem to be mode 1 not off
+  //   };
+  //   vs_->writeVpeBasicControl(vpeControl);
 
-    // make sure HSI mode is now set to run as reset returns to the previous state
-    magControl.hsiMode = vn::protocol::uart::HsiMode::HSIMODE_RUN;
-    vs_->writeMagnetometerCalibrationControl(magControl);
+  //   // make sure HSI mode is now set to run as reset returns to the previous state
+  //   magControl.hsiMode = vn::protocol::uart::HsiMode::HSIMODE_RUN;
+  //   vs_->writeMagnetometerCalibrationControl(magControl);
 
-    // test HSI Mode is back to on
-    const auto hsiMode = vs_->readMagnetometerCalibrationControl();
-    if(hsiMode.hsiMode != vn::protocol::uart::HsiMode::HSIMODE_RUN){
-      RCLCPP_ERROR_STREAM(get_logger(), "IMU HSI mode did not return to run after reset! returned mode: " << hsiMode.hsiMode);
-      goal_handle->abort(result);
-      return;
-    }
+  //   // test HSI Mode is back to on
+  //   const auto hsiMode = vs_->readMagnetometerCalibrationControl();
+  //   if(hsiMode.hsiMode != vn::protocol::uart::HsiMode::HSIMODE_RUN){
+  //     RCLCPP_ERROR_STREAM(get_logger(), "IMU HSI mode did not return to run after reset! returned mode: " << hsiMode.hsiMode);
+  //     goal_handle->abort(result);
+  //     return;
+  //   }
 
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Calibration actually starts here
-    RCLCPP_WARN(get_logger(), "Magnetic calibration sampling starting");
+  //   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //   // Calibration actually starts here
+  //   RCLCPP_WARN(get_logger(), "Magnetic calibration sampling starting");
 
-    std::deque<vn::math::mat3f> cSamples;
-    std::deque<vn::math::vec3f> bSamples;
+  //   std::deque<vn::math::mat3f> cSamples;
+  //   std::deque<vn::math::vec3f> bSamples;
 
-    vn::math::mat3f avgMat;
-    vn::math::vec3f avgVec;
+  //   vn::math::mat3f avgMat;
+  //   vn::math::vec3f avgVec;
 
-    int calSamples = 0;
+  //   int calSamples = 0;
 
-    // Read HSI calibration
-    auto lastComp = vs_->readCalculatedMagnetometerCalibration();
+  //   // Read HSI calibration
+  //   auto lastComp = vs_->readCalculatedMagnetometerCalibration();
 
-    // collect samples until converge
-    while(calSamples < 1000 && !goal_handle->is_canceling()){
-      // increment the sample counter
-      calSamples ++;
+  //   // collect samples until converge
+  //   while(calSamples < 1000 && !goal_handle->is_canceling()){
+  //     // increment the sample counter
+  //     calSamples ++;
 
-      // Read HSI calibration
-      lastComp = vs_->readCalculatedMagnetometerCalibration();
+  //     // Read HSI calibration
+  //     lastComp = vs_->readCalculatedMagnetometerCalibration();
 
-      // push the newest samples onto a stack
-      // pop the ones at the front of the queue so they fall off
-      cSamples.push_back(lastComp.c);
-      if(cSamples.size() > 10){
-        cSamples.pop_front();
-      }
-      bSamples.push_back(lastComp.b);
-      if(bSamples.size() > 10){
-        bSamples.pop_front();
-      }
+  //     // push the newest samples onto a stack
+  //     // pop the ones at the front of the queue so they fall off
+  //     cSamples.push_back(lastComp.c);
+  //     if(cSamples.size() > 10){
+  //       cSamples.pop_front();
+  //     }
+  //     bSamples.push_back(lastComp.b);
+  //     if(bSamples.size() > 10){
+  //       bSamples.pop_front();
+  //     }
 
-      // create a running average of the difference over 10 samples
-      for(size_t i = 1; i < cSamples.size(); i++){
-        // diff[i]  = val[i-1] - val[i]
-        auto diffMat = cSamples.at(i-1) - cSamples.at(i);
-        auto diffVec = bSamples.at(i-1) - bSamples.at(i);
+  //     // create a running average of the difference over 10 samples
+  //     for(size_t i = 1; i < cSamples.size(); i++){
+  //       // diff[i]  = val[i-1] - val[i]
+  //       auto diffMat = cSamples.at(i-1) - cSamples.at(i);
+  //       auto diffVec = bSamples.at(i-1) - bSamples.at(i);
 
-        // avg_diff = (avg_diff + diff[i]) / 2.0
-        if(i < 2){
-          avgMat = diffMat;
-          avgVec = diffVec;
-        } else {
-          avgMat = (avgMat + diffMat).div(2);
-          avgVec = (avgVec + diffVec).div(2);
-        }
-      }
-      // make feedback message
-      auto feedbackMsg = std::make_shared<vectornav_msgs::action::MagCal::Feedback>();
-      feedbackMsg->samples = calSamples;
+  //       // avg_diff = (avg_diff + diff[i]) / 2.0
+  //       if(i < 2){
+  //         avgMat = diffMat;
+  //         avgVec = diffVec;
+  //       } else {
+  //         avgMat = (avgMat + diffMat).div(2);
+  //         avgVec = (avgVec + diffVec).div(2);
+  //       }
+  //     }
+  //     // make feedback message
+  //     auto feedbackMsg = std::make_shared<vectornav_msgs::action::MagCal::Feedback>();
+  //     feedbackMsg->samples = calSamples;
 
-      // populate calibration vector
-      for(size_t i = 0; i < 9; i++){
-        feedbackMsg->curr_calib.at(i) = lastComp.c.e[i];
-      }
-      feedbackMsg->curr_calib.at(9) = lastComp.b.x;
-      feedbackMsg->curr_calib.at(10) = lastComp.b.y;
-      feedbackMsg->curr_calib.at(11) = lastComp.b.z;
+  //     // populate calibration vector
+  //     for(size_t i = 0; i < 9; i++){
+  //       feedbackMsg->curr_calib.at(i) = lastComp.c.e[i];
+  //     }
+  //     feedbackMsg->curr_calib.at(9) = lastComp.b.x;
+  //     feedbackMsg->curr_calib.at(10) = lastComp.b.y;
+  //     feedbackMsg->curr_calib.at(11) = lastComp.b.z;
 
-      // populate compensation convergence vector
-      for(size_t i = 0; i < 9; i++){
-        feedbackMsg->curr_avg_dev.at(i) = avgMat.e[i];
-      }
-      feedbackMsg->curr_avg_dev.at(9) = avgVec.x;
-      feedbackMsg->curr_avg_dev.at(10) = avgVec.y;
-      feedbackMsg->curr_avg_dev.at(11) = avgVec.z;
+  //     // populate compensation convergence vector
+  //     for(size_t i = 0; i < 9; i++){
+  //       feedbackMsg->curr_avg_dev.at(i) = avgMat.e[i];
+  //     }
+  //     feedbackMsg->curr_avg_dev.at(9) = avgVec.x;
+  //     feedbackMsg->curr_avg_dev.at(10) = avgVec.y;
+  //     feedbackMsg->curr_avg_dev.at(11) = avgVec.z;
 
-      // send the feedback
-      goal_handle->publish_feedback(feedbackMsg);
+  //     // send the feedback
+  //     goal_handle->publish_feedback(feedbackMsg);
 
-      // if we are in the first few samples, skip this entirely
-      if(calSamples > 20){
-        // check for convergence with the all_of algorithm and bail out if we are there
-        if(std::all_of(feedbackMsg->curr_avg_dev.cbegin(), feedbackMsg->curr_avg_dev.cend(),
-          [](float i){ return std::fabs(i) < 1e-10; })){
-            RCLCPP_WARN(get_logger(), "Mag cal has converged");
-            break;
-          }
-      }
+  //     // if we are in the first few samples, skip this entirely
+  //     if(calSamples > 20){
+  //       // check for convergence with the all_of algorithm and bail out if we are there
+  //       if(std::all_of(feedbackMsg->curr_avg_dev.cbegin(), feedbackMsg->curr_avg_dev.cend(),
+  //         [](float i){ return std::fabs(i) < 1e-10; })){
+  //           RCLCPP_WARN(get_logger(), "Mag cal has converged");
+  //           break;
+  //         }
+  //     }
 
-      // wait a bit
-      loopRate.sleep();
-    }
+  //     // wait a bit
+  //     loopRate.sleep();
+  //   }
 
-    //if we exited normally and are not cancelling
-    if(!goal_handle->is_canceling()){
-      // turn HSI mode to off to stop sampling
-      // turn HSI output to enabled
-      magControl.hsiMode = vn::protocol::uart::HsiMode::HSIMODE_OFF;
-      magControl.hsiOutput = vn::protocol::uart::HsiOutput::HSIOUTPUT_USEONBOARD;
-      vs_->writeMagnetometerCalibrationControl(magControl);
+  //   //if we exited normally and are not cancelling
+  //   if(!goal_handle->is_canceling()){
+  //     // turn HSI mode to off to stop sampling
+  //     // turn HSI output to enabled
+  //     magControl.hsiMode = vn::protocol::uart::HsiMode::HSIMODE_OFF;
+  //     magControl.hsiOutput = vn::protocol::uart::HsiOutput::HSIOUTPUT_USEONBOARD;
+  //     vs_->writeMagnetometerCalibrationControl(magControl);
 
-      // write the settings (new config) to NVmemory
-      vs_->writeSettings();
-    }
+  //     // write the settings (new config) to NVmemory
+  //     vs_->writeSettings();
+  //   }
 
-    // reconfigure IMU but do not save
-    // attempt reconfiguration of the device
-    // configure_sensor(); // ONLY FOR GDB DEBUGGING! THE BLOCK BELOW WILL HAVE NO EFFECT IF THIS IS LEFT
-    try{
-      // TODO Figure out why this will fail when called a second time
-      configure_sensor();
-    } catch(const std::exception & e){
-      RCLCPP_FATAL_STREAM(get_logger(), "Failed to reset IMU to configuration, DRIVER MUST BE RESTARTED\n ERROR: " << e.what());
-    } catch (...){
-      RCLCPP_FATAL(get_logger(), "Failed to reset IMU to configuration, DRIVER MUST BE RESTARTED\n ERROR: unknown");
-    }
+  //   // reconfigure IMU but do not save
+  //   // attempt reconfiguration of the device
+  //   // configure_sensor(); // ONLY FOR GDB DEBUGGING! THE BLOCK BELOW WILL HAVE NO EFFECT IF THIS IS LEFT
+  //   try{
+  //     // TODO Figure out why this will fail when called a second time
+  //     configure_sensor();
+  //   } catch(const std::exception & e){
+  //     RCLCPP_FATAL_STREAM(get_logger(), "Failed to reset IMU to configuration, DRIVER MUST BE RESTARTED\n ERROR: " << e.what());
+  //   } catch (...){
+  //     RCLCPP_FATAL(get_logger(), "Failed to reset IMU to configuration, DRIVER MUST BE RESTARTED\n ERROR: unknown");
+  //   }
 
-    // Setup final deviation vector
-    for(size_t i = 0; i < 9; i++){
-      result->avg_dev.at(i) = avgMat.e[i];
-    }
-    result->avg_dev.at(9) = avgVec.x;
-    result->avg_dev.at(10) = avgVec.y;
-    result->avg_dev.at(11) = avgVec.z;
+  //   // Setup final deviation vector
+  //   for(size_t i = 0; i < 9; i++){
+  //     result->avg_dev.at(i) = avgMat.e[i];
+  //   }
+  //   result->avg_dev.at(9) = avgVec.x;
+  //   result->avg_dev.at(10) = avgVec.y;
+  //   result->avg_dev.at(11) = avgVec.z;
 
-    // setup final calibration vector
-    for(size_t i = 0; i < 9; i++){
-      result->calib.at(i) = lastComp.c.e[i];
-    }
-    result->calib.at(9) = lastComp.b.x;
-    result->calib.at(10) = lastComp.b.y;
-    result->calib.at(11) = lastComp.b.z;
+  //   // setup final calibration vector
+  //   for(size_t i = 0; i < 9; i++){
+  //     result->calib.at(i) = lastComp.c.e[i];
+  //   }
+  //   result->calib.at(9) = lastComp.b.x;
+  //   result->calib.at(10) = lastComp.b.y;
+  //   result->calib.at(11) = lastComp.b.z;
 
-    // if we stopped due to a cancellation
-    if(goal_handle->is_canceling()){
-      // stooping for cancellation
-      goal_handle->canceled(result);
-    } else {
-      // we did it
-      goal_handle->succeed(result);
-    }
-  }
+  //   // if we stopped due to a cancellation
+  //   if(goal_handle->is_canceling()){
+  //     // stooping for cancellation
+  //     goal_handle->canceled(result);
+  //   } else {
+  //     // we did it
+  //     goal_handle->succeed(result);
+  //   }
+  // }
 
   /**
    * Callback to take twist message and pass it to VN as velocity aiding 
    *
    * \param msg Shared pointer to ROS2 geometry_msgs/Twist message containing velocity information
    */
-  void vel_aiding_cb(const geometry_msgs::msg::Twist::SharedPtr msg)
+  void Vectornav::vel_aiding_cb(const geometry_msgs::msg::Twist::SharedPtr msg)
   {
     // Take a ROS Twist message, and use it to send a velocity aiding message to the VectorNav
     const auto waitForReply = false;
@@ -512,7 +489,7 @@ private:
    *             the device for the requested baud rate.
    * \return     true: OK, false: FAILURE
    */
-  bool connect(const std::string port, const int baud)
+  bool Vectornav::connect(const std::string port, const int baud)
   {
     // Check if there's an existing instance of the sensor
     // and clean it up if there is so we can start fresh
@@ -590,7 +567,7 @@ private:
     RCLCPP_INFO(get_logger(), "Serial Number : %d", sn);
     RCLCPP_INFO(get_logger(), "User Tag : \"%s\"", ut.c_str());
 
-    return configure_sensor();
+    return Vectornav::configure_sensor();
   }
 
   /**
@@ -598,7 +575,7 @@ private:
    * 
    * \return true for OK configuration, false for an error
   */
-  bool configure_sensor(){
+  bool Vectornav::configure_sensor(){
     // TODO(Dereck): Move writeUserTag to Service Call?
     // 5.2.1
     // vs_->writeUserTag("");
@@ -718,7 +695,7 @@ private:
    * \return  adjusted ROS time
    */
 
-  rclcpp::Time getTimeStamp(vn::sensors::CompositeData & data)
+  rclcpp::Time Vectornav::getTimeStamp(vn::sensors::CompositeData & data)
   {
     const rclcpp::Time t = now();
     if (!data.hasTimeStartup() || !adjustROSTimeStamp_) {
@@ -740,7 +717,7 @@ private:
     return (adjustedTime);
   }
 
-  static void ErrorPacketReceivedHandler(
+  void Vectornav::ErrorPacketReceivedHandler(
     void * nodeptr, vn::protocol::uart::Packet & errorPacket, size_t packetStartRunningIndex)
   {
     // Get handle to the vectornav class
@@ -752,7 +729,7 @@ private:
     // TODO(Dereck): Display error text
   }
 
-  static void AsyncPacketReceivedHandler(
+  void Vectornav::AsyncPacketReceivedHandler(
     void * nodeptr, vn::protocol::uart::Packet & asyncPacket, size_t packetStartRunningIndex)
   {
     // Get handle to the vectornav class
@@ -797,8 +774,9 @@ private:
    * \param asyncPacket Async Binary Packet
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseCommonGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+  void Vectornav::parseCommonGroup(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields,
+    const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::CommonGroup();
@@ -899,8 +877,9 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseTimeGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+  void Vectornav::parseTimeGroup(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields,
+    const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::TimeGroup();
@@ -961,8 +940,9 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseImuGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+  void Vectornav::parseImuGroup(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields,
+    const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::ImuGroup();
@@ -1032,8 +1012,9 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseGpsGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+  void Vectornav::parseGpsGroup(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields,
+    const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::GpsGroup();
@@ -1113,8 +1094,9 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseAttitudeGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+  void Vectornav::parseAttitudeGroup(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields,
+    const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::AttitudeGroup();
@@ -1171,8 +1153,9 @@ private:
    * \param compositeData Async Binary Packet CompositeData
    * \param msg Vectornav CompositeData ROS Message
    */
-  static void parseInsGroup(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+  void Vectornav::parseInsGroup(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields,
+    const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::InsGroup();
@@ -1243,8 +1226,9 @@ private:
    *
    * TODO(Dereck): VNCXX is missing some read functions
    */
-  static void parseGps2Group(
-    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields, const rclcpp::Time & timestamp)
+  void Vectornav::parseGps2Group(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields,
+    const rclcpp::Time & timestamp)
   {
     // Message to Send
     auto msg = vectornav_msgs::msg::GpsGroup();
@@ -1328,7 +1312,7 @@ private:
   //
 
   /// Convert from vn::math::vec3f to geometry_msgs::msgs::Vector3
-  static inline geometry_msgs::msg::Vector3 toMsg(const vn::math::vec3f & rhs)
+  geometry_msgs::msg::Vector3 Vectornav::toMsg(const vn::math::vec3f & rhs)
   {
     geometry_msgs::msg::Vector3 lhs;
     lhs.x = rhs[0];
@@ -1338,7 +1322,7 @@ private:
   }
 
   /// Convert from vn::math::vec4f to geometry_msgs::msgs::Quaternion
-  static inline geometry_msgs::msg::Quaternion toMsg(const vn::math::vec4f & rhs)
+  geometry_msgs::msg::Quaternion Vectornav::toMsg(const vn::math::vec4f & rhs)
   {
     geometry_msgs::msg::Quaternion lhs;
     lhs.x = rhs[0];
@@ -1349,7 +1333,7 @@ private:
   }
 
   /// Convert from vn::math::vec3d to geometry_msgs::msgs::Point
-  static inline geometry_msgs::msg::Point toMsg(const vn::math::vec3d & rhs)
+  geometry_msgs::msg::Point Vectornav::toMsg(const vn::math::vec3d & rhs)
   {
     geometry_msgs::msg::Point lhs;
     lhs.x = rhs[0];
@@ -1359,7 +1343,7 @@ private:
   }
 
   /// Convert from vn::protocol::uart::TimeUTC to vectornav_msgs::msg::TimeUTC
-  static inline vectornav_msgs::msg::TimeUTC toMsg(const vn::protocol::uart::TimeUtc & rhs)
+  vectornav_msgs::msg::TimeUTC Vectornav::toMsg(const vn::protocol::uart::TimeUtc & rhs)
   {
     vectornav_msgs::msg::TimeUTC lhs;
     lhs.year = rhs.year;
@@ -1373,7 +1357,7 @@ private:
   }
 
   /// Convert from vn::protocol::uart::TimeUTC to vectornav_msgs::msg::TimeUTC
-  static inline vectornav_msgs::msg::DOP toMsg(const vn::protocol::uart::GnssDop & rhs)
+  vectornav_msgs::msg::DOP Vectornav::toMsg(const vn::protocol::uart::GnssDop & rhs)
   {
     vectornav_msgs::msg::DOP lhs;
     lhs.g = rhs.gDop;
@@ -1387,7 +1371,7 @@ private:
   }
 
   /// Convert from vn::protocol::uart::VpeStatus to vectornav_msgs::msg::VpeStatus
-  static inline vectornav_msgs::msg::VpeStatus toMsg(const vn::protocol::uart::VpeStatus & rhs)
+  vectornav_msgs::msg::VpeStatus Vectornav::toMsg(const vn::protocol::uart::VpeStatus & rhs)
   {
     vectornav_msgs::msg::VpeStatus lhs;
     lhs.attitude_quality = rhs.attitudeQuality;
@@ -1403,7 +1387,7 @@ private:
   }
 
   /// Convert from vn::math::mat3f to std::array<float, 9>
-  static inline std::array<float, 9> toMsg(const vn::math::mat3f & rhs)
+  std::array<float, 9> Vectornav::toMsg(const vn::math::mat3f & rhs)
   {
     std::array<float, 9> lhs;
     lhs[0] = rhs(0, 0);
@@ -1419,7 +1403,7 @@ private:
   }
 
   /// Convert from vn::math::mat3f to vectornav_msgs::msg::TimeStatus
-  static inline vectornav_msgs::msg::TimeStatus toMsg(const uint8_t rhs)
+  vectornav_msgs::msg::TimeStatus Vectornav::toMsg(const uint8_t rhs)
   {
     vectornav_msgs::msg::TimeStatus lhs;
     lhs.time_ok = rhs & 0x01;
@@ -1430,7 +1414,7 @@ private:
 
   /// Convert from vn::protocol::uart::InsStatus to vectornav_msgs::msg::InsStatus
   // TODO(Dereck): vncxx uses an enum to hold a bitfeild, this is likely undefined behavior
-  static inline vectornav_msgs::msg::InsStatus toMsg(const vn::protocol::uart::InsStatus & rhs)
+  vectornav_msgs::msg::InsStatus Vectornav::toMsg(const vn::protocol::uart::InsStatus & rhs)
   {
     vectornav_msgs::msg::InsStatus lhs;
     lhs.mode = rhs & 0x0003;
@@ -1443,54 +1427,5 @@ private:
     lhs.gps_compass = rhs & 0x0200;
     return lhs;
   }
-
-  /// Count the number of set bits in a number
-  template <typename T>
-  static uint countSetBits(T n)
-  {
-    T count = 0;
-    while (n != 0) {
-      n = n & (n - 1);
-      count++;
-    }
-    return count;
-  }
-
-  //
-  // Member Variables
-  //
-
-  /// VectorNav Sensor Handle
-  std::shared_ptr<vn::sensors::VnSensor> vs_;
-
-  /// Reconnection Timer
-  rclcpp::TimerBase::SharedPtr reconnect_timer_;
-
-  /// Publishers
-  rclcpp::Publisher<vectornav_msgs::msg::CommonGroup>::SharedPtr pub_common_;
-  rclcpp::Publisher<vectornav_msgs::msg::TimeGroup>::SharedPtr pub_time_;
-  rclcpp::Publisher<vectornav_msgs::msg::ImuGroup>::SharedPtr pub_imu_;
-  rclcpp::Publisher<vectornav_msgs::msg::GpsGroup>::SharedPtr pub_gps_;
-  rclcpp::Publisher<vectornav_msgs::msg::AttitudeGroup>::SharedPtr pub_attitude_;
-  rclcpp::Publisher<vectornav_msgs::msg::InsGroup>::SharedPtr pub_ins_;
-  rclcpp::Publisher<vectornav_msgs::msg::GpsGroup>::SharedPtr pub_gps2_;
-
-  // Subscriptions
-  rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_vel_aiding_;
-
-  /// Action servers for calibration
-  rclcpp_action::Server<vectornav_msgs::action::MagCal>::SharedPtr server_mag_cal_;
-  std::thread action_thread_;
-
-  /// ROS header time stamp adjustments
-  double averageTimeDifference_{0};
-  bool adjustROSTimeStamp_{false};
-};
-
-int main(int argc, char * argv[])
-{
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<Vectornav>());
-  rclcpp::shutdown();
-  return 0;
 }
+RCLCPP_COMPONENTS_REGISTER_NODE(vectornav::Vectornav)
