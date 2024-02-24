@@ -22,6 +22,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
+#include "std_srvs/srv/empty.hpp"
 
 // VectorNav libvncxx
 #include "vn/util.h"
@@ -157,6 +158,10 @@ Vectornav::Vectornav(const rclcpp::NodeOptions &options) : Node("vectornav", opt
     sub_vel_aiding_ = this->create_subscription<geometry_msgs::msg::Twist>(
       "vectornav/velocity_aiding", 1, std::bind(&Vectornav::vel_aiding_cb, this, _1));
 
+    // Connect to the sensor, keep above server and service creation to make sure
+    // they aren't called before sensor is initialized
+    connect(port, baud);
+
     // magnetic cal action
     // server_mag_cal_ = rclcpp_action::create_server<MagCal>(
     //   this, "vectornav/mag_cal",
@@ -165,13 +170,15 @@ Vectornav::Vectornav(const rclcpp::NodeOptions &options) : Node("vectornav", opt
     //   std::bind(&Vectornav::handle_cal_accept, this, _1)
     // );
 
+    // Tare service initialization
+    service_tare_ = create_service<std_srvs::srv::Empty>(
+      "vectornav/tare", 
+      std::bind(&Vectornav::handle_tare_request, this, _1, _2, _3));
+
     if (!optimize_serial_communication(port)) {
       RCLCPP_WARN(get_logger(), "time of message delivery may be compromised!");
     }
-
-    // Connect to the sensor
-    connect(port, baud);
-
+    
     // Monitor Connection
     if (reconnect_ms > 0ms) {
       RCLCPP_INFO(get_logger(), "Reconnect Timeout : %ld", reconnect_ms.count());
@@ -478,6 +485,27 @@ Vectornav::~Vectornav()
       static_cast<float>(msg->linear.x), static_cast<float>(msg->linear.y),
       static_cast<float>(msg->linear.z)};
     vs_->writeVelocityCompensationMeasurement(velocity, waitForReply);
+  }
+
+  void handle_tare_request(
+    const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+    std::shared_ptr<std_srvs::srv::Empty::Response> response) {
+    RCLCPP_INFO(get_logger(), "Recieved tare request");
+
+    // Shouldn't happen as connect runs before this, but just in case someone might change
+    // it in the future
+    if (!vs_) {
+      RCLCPP_ERROR(get_logger(), "Tare requested before sensor has been initialized");
+    }
+
+    try {
+      vs_->tare();
+    } catch (const std::exception & e) {
+      RCLCPP_ERROR_STREAM(get_logger(), "Failed to tare. error: " << e.what());
+    } catch (...) {
+      RCLCPP_ERROR(get_logger(), "Failed to perform tare. error: unknown");
+    }
   }
 
   /**

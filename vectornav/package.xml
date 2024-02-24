@@ -16,9 +16,10 @@
   <depend>sensor_msgs</depend>
   <depend>vectornav_msgs</depend>
   <depend>tf2_geometry_msgs</depend>
+  <depend>std_srvs</depend>
 
   <!-- TODO: .msg Hex Constant Support Required -->
-  <depend version_gte="1.2.0">rosidl_adapter</depend> 
+  <depend version_gte="1.2.0">rosidl_adapter</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
