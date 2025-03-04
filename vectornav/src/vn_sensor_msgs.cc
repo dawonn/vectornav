@@ -94,38 +94,24 @@ VnSensorMsgs::VnSensorMsgs(const rclcpp::NodeOptions & options) : Node("vn_senso
   use_enu = get_parameter("use_enu").as_bool();
 }
 
-static void convert_to_enu(
-  const vectornav_msgs::msg::CommonGroup::SharedPtr msg_in, sensor_msgs::msg::Imu & msg_out,
-  const bool & use_compensated_measurements = true)
+
+static void convert_vec_frd_to_rfu(const geometry_msgs::msg::Vector3 & vec_frd, geometry_msgs::msg::Vector3 & vec_rfu)
 {
-  // NED to ENU conversion
   // swap x and y and negate z
-  if (use_compensated_measurements) {
-    msg_out.angular_velocity.x = msg_in->angularrate.y;
-    msg_out.angular_velocity.y = msg_in->angularrate.x;
-    msg_out.angular_velocity.z = -msg_in->angularrate.z;
+  vec_rfu.x = vec_frd.y;
+  vec_rfu.y = vec_frd.x;
+  vec_rfu.z = -vec_frd.z;
+}
 
-    msg_out.linear_acceleration.x = msg_in->accel.y;
-    msg_out.linear_acceleration.y = msg_in->accel.x;
-    msg_out.linear_acceleration.z = -msg_in->accel.z;
-  } else {
-    msg_out.angular_velocity.x = msg_in->imu_rate.y;
-    msg_out.angular_velocity.y = msg_in->imu_rate.x;
-    msg_out.angular_velocity.z = -msg_in->imu_rate.z;
-
-    msg_out.linear_acceleration.x = msg_in->imu_accel.y;
-    msg_out.linear_acceleration.y = msg_in->imu_accel.x;
-    msg_out.linear_acceleration.z = -msg_in->imu_accel.z;
-  }
+static void convert_to_enu(const geometry_msgs::msg::Quaternion & q_msg_frd2ned, geometry_msgs::msg::Quaternion & q_msg_rfu2enu)
+{
+  // convert from FRD_TO_NED to RFU_TO_ENU attitude
   static const tf2::Quaternion q_ned2enu(tf2::Vector3(1, 1, 0).normalized(), M_PI);
-  static const tf2::Quaternion q_flu2frd(tf2::Vector3(1, 0, 0), M_PI);
+  static const tf2::Quaternion q_rfu2frd(tf2::Vector3(1, 1, 0).normalized(), M_PI);
   tf2::Quaternion q_frd2ned;
-  tf2::fromMsg(msg_in->quaternion, q_frd2ned);
-  tf2::Quaternion q_flu2enu = q_ned2enu * q_frd2ned * q_flu2frd;
-  msg_out.orientation.w = q_flu2enu.w();
-  msg_out.orientation.x = q_flu2enu.x();
-  msg_out.orientation.y = q_flu2enu.y();
-  msg_out.orientation.z = q_flu2enu.z();
+  tf2::fromMsg(q_msg_frd2ned, q_frd2ned);
+  tf2::Quaternion q_rfu2enu = q_ned2enu * q_frd2ned * q_rfu2frd;
+  q_msg_rfu2enu = tf2::toMsg(q_rfu2enu);
 }
 
 /** Convert VN common group data to ROS2 standard message types
@@ -193,16 +179,13 @@ void VnSensorMsgs::sub_vn_common(const vectornav_msgs::msg::CommonGroup::SharedP
     msg.header = msg_in->header;
 
     if (use_enu) {
-      convert_to_enu(msg_in, msg);
+      convert_vec_frd_to_rfu(msg_in->angularrate, msg.angular_velocity);
+      convert_vec_frd_to_rfu(msg_in->accel, msg.linear_acceleration);
+      convert_to_enu(msg_in->quaternion, msg.orientation);
     } else {
       msg.angular_velocity = msg_in->angularrate;
       msg.linear_acceleration = msg_in->accel;
-
-      // Quaternion ENU -> NED
-      tf2::Quaternion q, q_ned2enu;
-      fromMsg(msg_in->quaternion, q);
-      q_ned2enu.setRPY(M_PI, 0.0, -M_PI / 2);
-      msg.orientation = toMsg(q_ned2enu * q);
+      msg.orientation = msg_in->quaternion;
     }
 
     fill_covariance_from_param("orientation_covariance", msg.orientation_covariance);
@@ -219,7 +202,9 @@ void VnSensorMsgs::sub_vn_common(const vectornav_msgs::msg::CommonGroup::SharedP
     msg.header = msg_in->header;
 
     if (use_enu) {
-      convert_to_enu(msg_in, msg, false);
+      convert_vec_frd_to_rfu(msg_in->imu_rate, msg.angular_velocity);
+      convert_vec_frd_to_rfu(msg_in->imu_accel, msg.linear_acceleration);
+      convert_to_enu(msg_in->quaternion, msg.orientation);
     } else {
       msg.angular_velocity = msg_in->imu_rate;
       msg.linear_acceleration = msg_in->imu_accel;
@@ -236,7 +221,11 @@ void VnSensorMsgs::sub_vn_common(const vectornav_msgs::msg::CommonGroup::SharedP
   {
     sensor_msgs::msg::MagneticField msg;
     msg.header = msg_in->header;
-    msg.magnetic_field = msg_in->magpres_mag;
+    if (use_enu) {
+      convert_vec_frd_to_rfu(msg_in->magpres_mag, msg.magnetic_field);
+    } else {
+      msg.magnetic_field = msg_in->magpres_mag;
+    }
 
     fill_covariance_from_param("magnetic_covariance", msg.magnetic_field_covariance);
 
@@ -294,8 +283,13 @@ void VnSensorMsgs::sub_vn_common(const vectornav_msgs::msg::CommonGroup::SharedP
   {
     geometry_msgs::msg::TwistWithCovarianceStamped msg;
     msg.header = msg_in->header;
-    msg.twist.twist.linear = ins_velbody_;
-    msg.twist.twist.angular = msg_in->angularrate;
+    if (use_enu) {
+      convert_vec_frd_to_rfu(ins_velbody_, msg.twist.twist.linear);
+      convert_vec_frd_to_rfu(msg_in->angularrate, msg.twist.twist.angular);
+    } else {
+      msg.twist.twist.linear = ins_velbody_;
+      msg.twist.twist.angular = msg_in->angularrate;
+    }
 
     /// TODO(Dereck): Velocity Covariance
 
@@ -309,20 +303,21 @@ void VnSensorMsgs::sub_vn_common(const vectornav_msgs::msg::CommonGroup::SharedP
     msg.header.frame_id = "earth";
     msg.pose.pose.position = ins_posecef_;
 
+    // Converts Quaternion to ECEF
+    tf2::Quaternion q_frd2ned, q_ned2ecef;
+    tf2::fromMsg(msg_in->quaternion, q_frd2ned);
+    auto latitude = deg2rad(msg_in->position.x);
+    auto longitude = deg2rad(msg_in->position.y);
+    q_ned2ecef = tf2::Quaternion(tf2::Vector3(0, 0, 1), longitude)
+                  * tf2::Quaternion(tf2::Vector3(0, 1, 0), -M_PI/2 - latitude);
+
     if (use_enu) {
-      msg.pose.pose.orientation = msg_in->quaternion;
-      msg.pose.pose.orientation.z = -msg_in->quaternion.z;
+      static const tf2::Quaternion q_rfu2frd(tf2::Vector3(1, 1, 0).normalized(), M_PI);
+      tf2::Quaternion q_rfu2ecef =q_ned2ecef * q_frd2ned * q_rfu2frd;
+      msg.pose.pose.orientation = tf2::toMsg(q_rfu2ecef);
     } else {
-      // Converts Quaternion in ENU to ECEF
-      tf2::Quaternion q, q_enu2ecef;
-
-      auto latitude = deg2rad(msg_in->position.x);
-      auto longitude = deg2rad(msg_in->position.y);
-      q_enu2ecef.setRPY(0.0, latitude, longitude);
-
-      fromMsg(msg_in->quaternion, q);
-
-      msg.pose.pose.orientation = toMsg(q_enu2ecef * q);
+      tf2::Quaternion q_frd2ecef =q_ned2ecef * q_frd2ned;
+      msg.pose.pose.orientation = tf2::toMsg(q_frd2ecef);
     }
 
     /// TODO(Dereck): Pose Covariance

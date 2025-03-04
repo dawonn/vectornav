@@ -61,7 +61,7 @@ vectornav:
 
 vn_sensor_msgs:
   ros__parameters:
-    use_enu: true
+    use_enu: true  # this will convert from Forward-Right-Down body axes in NED to Right-Forward-Up body axes in ENU
     orientation_covariance: [0.01,  0.0,   0.0,
                             0.0,   0.01,  0.0,
                             0.0,   0.0,   0.01]
