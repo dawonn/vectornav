@@ -30,7 +30,8 @@
 using namespace std::chrono_literals;
 using namespace std::placeholders;
 
-// Assure that the serial port is set to async low latency in order to reduce delays and package pilup.
+// Assure that the serial port is set to async low latency in order
+// to reduce delays and package pilup.
 // These changes will stay effective until the device is unplugged
 
 namespace vectornav
@@ -253,7 +254,8 @@ rclcpp_action::GoalResponse Vectornav::handle_cal_goal(
   return rclcpp_action::GoalResponse::REJECT;
 }
 
-rclcpp_action::CancelResponse Vectornav::handle_cal_cancel(const std::shared_ptr<MagCalGH> goal_handle)
+rclcpp_action::CancelResponse Vectornav::handle_cal_cancel(
+  const std::shared_ptr<MagCalGH> goal_handle)
 {
   RCLCPP_INFO(get_logger(), "Recieved request to stop magnetic calibration");
 
@@ -417,7 +419,7 @@ void Vectornav::execute_cal(const std::shared_ptr<MagCalGH> goal_handle)
     loopRate.sleep();
   }
 
-  //if we exited normally and are not cancelling
+  // if we exited normally and are not cancelling
   if (!goal_handle->is_canceling()) {
     // turn HSI mode to off to stop sampling
     // turn HSI output to enabled
@@ -431,9 +433,11 @@ void Vectornav::execute_cal(const std::shared_ptr<MagCalGH> goal_handle)
 
   // reconfigure IMU but do not save
   // attempt reconfiguration of the device
-  // configure_sensor(); // ONLY FOR GDB DEBUGGING! THE BLOCK BELOW WILL HAVE NO EFFECT IF THIS IS LEFT
+  // re-instate the following line ONLY FOR GDB DEBUGGING!
+  // THE BLOCK BELOW WILL HAVE NO EFFECT IF THIS IS LEFT
+  // configure_sensor();
   try {
-    // TODO Figure out why this will fail when called a second time
+    // TODO(Unknown) Figure out why this will fail when called a second time
     configure_sensor();
   } catch (const std::exception & e) {
     RCLCPP_FATAL_STREAM(

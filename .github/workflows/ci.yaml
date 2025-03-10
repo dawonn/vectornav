@@ -1,0 +1,68 @@
+#
+# continuous integration workflow
+#
+name: build repo
+
+on:
+  push:
+    branches: [ros2]
+  pull_request:
+    branches: [ros2]
+  workflow_dispatch:
+    branches: [ros2]
+
+jobs:
+  build_on_jammy:
+    name: build_jammy_${{ matrix.distro }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [humble, iron]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: src/${{ github.event.repository.name }}
+          fetch-depth: 0
+      - uses: ros-tooling/setup-ros@0.7.4
+        with:
+          required-ros-distributions: ${{ matrix.distro }}
+      - uses: ros-tooling/action-ros-ci@0.3.11
+        with:
+          target-ros2-distro: ${{ matrix.distro }}
+          colcon-defaults: |
+            {
+              "build": {
+                "cmake-args": [
+                    "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
+                ]
+              }
+            }
+  build_on_noble:
+    name: build_noble_${{ matrix.distro }}
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:noble
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [jazzy, rolling]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: src/${{ github.event.repository.name }}
+          fetch-depth: 0
+      - uses: ros-tooling/setup-ros@0.7.4
+        with:
+          required-ros-distributions: ${{ matrix.distro }}
+      - uses: ros-tooling/action-ros-ci@0.3.11
+        with:
+          target-ros2-distro: ${{ matrix.distro }}
+          colcon-defaults: |
+            {
+              "build": {
+                "cmake-args": [
+                    "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
+                ]
+              }
+            }

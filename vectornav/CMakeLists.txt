@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 project(vectornav)
 
 # Default to C99
@@ -73,9 +73,25 @@ install(DIRECTORY
 )
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-  list(APPEND AMENT_LINT_AUTO_EXCLUDE ament_cmake_copyright)
+  find_package(ament_cmake REQUIRED)
+#  find_package(ament_cmake_copyright REQUIRED)
+  find_package(ament_cmake_cppcheck REQUIRED)
+  find_package(ament_cmake_cpplint REQUIRED)
+  find_package(ament_cmake_clang_format REQUIRED)
+  find_package(ament_cmake_flake8 REQUIRED)
+  find_package(ament_cmake_lint_cmake REQUIRED)
+  find_package(ament_cmake_pep257 REQUIRED)
+  find_package(ament_cmake_xmllint REQUIRED)
+
+#   ament_copyright()
+  ament_cppcheck(LANGUAGE c++)
+  ament_cpplint(FILTERS "-build/include,-runtime/indentation_namespace")
+  ament_clang_format(CONFIG_FILE .clang-format)
+  ament_flake8()
+  ament_lint_cmake()
+  ament_pep257()
+  ament_xmllint()
+
 endif()
 
 ament_export_dependencies(rosidl_default_runtime)

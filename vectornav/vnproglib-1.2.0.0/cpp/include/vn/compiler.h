@@ -26,9 +26,9 @@
 // #endif
 //
 #if (defined(_MSC_VER) && _MSC_VER > 1500) || (__cplusplus >= 201103L)
-	#define VN_SUPPORTS_SWAP 1
+#define VN_SUPPORTS_SWAP 1
 #else
-	#define VN_SUPPORTS_SWAP 0
+#define VN_SUPPORTS_SWAP 0
 #endif
 
 // The VN_SUPPORTS_INITIALIZER_LIST define indicates if the compiler supports
@@ -45,9 +45,9 @@
 // #endif
 //
 #if (defined(_MSC_VER) && _MSC_VER <= 1600) || (__cplusplus < 201103L)
-	#define VN_SUPPORTS_INITIALIZER_LIST 0
+#define VN_SUPPORTS_INITIALIZER_LIST 0
 #else
-	#define VN_SUPPORTS_INITIALIZER_LIST 1
+#define VN_SUPPORTS_INITIALIZER_LIST 1
 #endif
 
 // The VN_SUPPORTS_CSTR_STRING_CONCATENATE define indictes if the compiler supports
@@ -62,18 +62,18 @@
 // #endif
 //
 #if (defined(_MSC_VER) && _MSC_VER <= 1600)
-	#define VN_SUPPORTS_CSTR_STRING_CONCATENATE	0
+#define VN_SUPPORTS_CSTR_STRING_CONCATENATE 0
 #else
-	#define VN_SUPPORTS_CSTR_STRING_CONCATENATE	1
+#define VN_SUPPORTS_CSTR_STRING_CONCATENATE 1
 #endif
 
 // Determine if the secure CRT and SCL are available.
 #if defined(_MSC_VER)
-	#define VN_HAVE_SECURE_CRT 1
-	#define VN_HAVE_SECURE_SCL 1
+#define VN_HAVE_SECURE_CRT 1
+#define VN_HAVE_SECURE_SCL 1
 #else
-	#define VN_HAVE_SECURE_CRT 0
-	#define VN_HAVE_SECURE_SCL 0
+#define VN_HAVE_SECURE_CRT 0
+#define VN_HAVE_SECURE_SCL 0
 #endif
 
 #endif

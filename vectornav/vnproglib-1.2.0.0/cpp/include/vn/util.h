@@ -1,13 +1,17 @@
 #ifndef _VNPROTOCOL_UART_UTIL_H_
 #define _VNPROTOCOL_UART_UTIL_H_
 
-#include <string>
 #include <sstream>
+#include <string>
+
 #include "types.h"
 
-namespace vn {
-namespace protocol {
-namespace uart {
+namespace vn
+{
+namespace protocol
+{
+namespace uart
+{
 
 // Utility functions.
 
@@ -23,7 +27,7 @@ std::string str(AsciiAsync val);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, AsciiAsync e);
+std::ostream & operator<<(std::ostream & out, AsciiAsync e);
 
 /// \brief Converts a SensorError enum into a string.
 ///
@@ -43,7 +47,7 @@ std::string str(BootloaderError val);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, SensorError e);
+std::ostream & operator<<(std::ostream & out, SensorError e);
 
 /// \brief Converts a SyncInMode enum into a string.
 ///
@@ -153,7 +157,6 @@ std::string str(GpsRate val);
 /// \return The converted value.
 std::string str(AntPower val);
 
-
 /// \brief Converts a VpeEnable enum into a string.
 ///
 /// \param[in] val The VpeEnable enum value to convert to string.
@@ -220,7 +223,7 @@ std::string str(FoamInit val);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, SyncInMode e);
+std::ostream & operator<<(std::ostream & out, SyncInMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// SyncInEdge enums.
@@ -228,7 +231,7 @@ std::ostream& operator<<(std::ostream& out, SyncInMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, SyncInEdge e);
+std::ostream & operator<<(std::ostream & out, SyncInEdge e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// SyncOutMode enums.
@@ -236,7 +239,7 @@ std::ostream& operator<<(std::ostream& out, SyncInEdge e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, SyncOutMode e);
+std::ostream & operator<<(std::ostream & out, SyncOutMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// SyncOutPolarity enums.
@@ -244,7 +247,7 @@ std::ostream& operator<<(std::ostream& out, SyncOutMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, SyncOutPolarity e);
+std::ostream & operator<<(std::ostream & out, SyncOutPolarity e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// CountMode enums.
@@ -252,7 +255,7 @@ std::ostream& operator<<(std::ostream& out, SyncOutPolarity e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, CountMode e);
+std::ostream & operator<<(std::ostream & out, CountMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// StatusMode enums.
@@ -260,7 +263,7 @@ std::ostream& operator<<(std::ostream& out, CountMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, StatusMode e);
+std::ostream & operator<<(std::ostream & out, StatusMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// ChecksumMode enums.
@@ -268,7 +271,7 @@ std::ostream& operator<<(std::ostream& out, StatusMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, ChecksumMode e);
+std::ostream & operator<<(std::ostream & out, ChecksumMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// ErrorMode enums.
@@ -276,7 +279,7 @@ std::ostream& operator<<(std::ostream& out, ChecksumMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, ErrorMode e);
+std::ostream & operator<<(std::ostream & out, ErrorMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// FilterMode enums.
@@ -284,7 +287,7 @@ std::ostream& operator<<(std::ostream& out, ErrorMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, FilterMode e);
+std::ostream & operator<<(std::ostream & out, FilterMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// IntegrationFrame enums.
@@ -292,7 +295,7 @@ std::ostream& operator<<(std::ostream& out, FilterMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, IntegrationFrame e);
+std::ostream & operator<<(std::ostream & out, IntegrationFrame e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// CompensationMode enums.
@@ -300,7 +303,7 @@ std::ostream& operator<<(std::ostream& out, IntegrationFrame e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, CompensationMode e);
+std::ostream & operator<<(std::ostream & out, CompensationMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// AccCompensationMode enums.
@@ -308,7 +311,7 @@ std::ostream& operator<<(std::ostream& out, CompensationMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, AccCompensationMode e);
+std::ostream & operator<<(std::ostream & out, AccCompensationMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// EarthRateCorrection enums.
@@ -316,7 +319,7 @@ std::ostream& operator<<(std::ostream& out, AccCompensationMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, EarthRateCorrection e);
+std::ostream & operator<<(std::ostream & out, EarthRateCorrection e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// GpsFix enums.
@@ -324,7 +327,7 @@ std::ostream& operator<<(std::ostream& out, EarthRateCorrection e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, GpsFix e);
+std::ostream & operator<<(std::ostream & out, GpsFix e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// GpsMode enums.
@@ -332,7 +335,7 @@ std::ostream& operator<<(std::ostream& out, GpsFix e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, GpsMode e);
+std::ostream & operator<<(std::ostream & out, GpsMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// PpsSource enums.
@@ -340,7 +343,7 @@ std::ostream& operator<<(std::ostream& out, GpsMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, PpsSource e);
+std::ostream & operator<<(std::ostream & out, PpsSource e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// GpsRate enums.
@@ -348,7 +351,7 @@ std::ostream& operator<<(std::ostream& out, PpsSource e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, GpsRate e);
+std::ostream & operator<<(std::ostream & out, GpsRate e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// AntPower enums.
@@ -356,7 +359,7 @@ std::ostream& operator<<(std::ostream& out, GpsRate e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, AntPower e);
+std::ostream & operator<<(std::ostream & out, AntPower e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// VpeEnable enums.
@@ -364,7 +367,7 @@ std::ostream& operator<<(std::ostream& out, AntPower e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, VpeEnable e);
+std::ostream & operator<<(std::ostream & out, VpeEnable e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// HeadingMode enums.
@@ -372,7 +375,7 @@ std::ostream& operator<<(std::ostream& out, VpeEnable e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, HeadingMode e);
+std::ostream & operator<<(std::ostream & out, HeadingMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// VpeMode enums.
@@ -380,7 +383,7 @@ std::ostream& operator<<(std::ostream& out, HeadingMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, VpeMode e);
+std::ostream & operator<<(std::ostream & out, VpeMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// Scenario enums.
@@ -388,7 +391,7 @@ std::ostream& operator<<(std::ostream& out, VpeMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, Scenario e);
+std::ostream & operator<<(std::ostream & out, Scenario e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// HsiMode enums.
@@ -396,7 +399,7 @@ std::ostream& operator<<(std::ostream& out, Scenario e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, HsiMode e);
+std::ostream & operator<<(std::ostream & out, HsiMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// HsiOutput enums.
@@ -404,7 +407,7 @@ std::ostream& operator<<(std::ostream& out, HsiMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, HsiOutput e);
+std::ostream & operator<<(std::ostream & out, HsiOutput e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// VelocityCompensationMode enums.
@@ -412,7 +415,7 @@ std::ostream& operator<<(std::ostream& out, HsiOutput e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, VelocityCompensationMode e);
+std::ostream & operator<<(std::ostream & out, VelocityCompensationMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// MagneticMode enums.
@@ -420,7 +423,7 @@ std::ostream& operator<<(std::ostream& out, VelocityCompensationMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, MagneticMode e);
+std::ostream & operator<<(std::ostream & out, MagneticMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// ExternalSensorMode enums.
@@ -428,7 +431,7 @@ std::ostream& operator<<(std::ostream& out, MagneticMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, ExternalSensorMode e);
+std::ostream & operator<<(std::ostream & out, ExternalSensorMode e);
 
 /// \brief Overloads the ostream << operator for easy usage in displaying
 /// FoamInit enums.
@@ -436,10 +439,10 @@ std::ostream& operator<<(std::ostream& out, ExternalSensorMode e);
 /// \param[in] out The ostream being output to.
 /// \param[in] e The enum to output to ostream.
 /// \return Reference to the current ostream.
-std::ostream& operator<<(std::ostream& out, FoamInit e);
+std::ostream & operator<<(std::ostream & out, FoamInit e);
 
-}
-}
-}
+}  // namespace uart
+}  // namespace protocol
+}  // namespace vn
 
 #endif

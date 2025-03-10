@@ -5,8 +5,10 @@
 
 #include "export.h"
 
-namespace vn {
-namespace util {
+namespace vn
+{
+namespace util
+{
 
 /// \brief Identifies a derived class as being unable to be copied and prevents
 ///     copy attempts.
@@ -20,26 +22,22 @@ namespace util {
 /// \endcode
 class vn_proglib_DLLEXPORT NoCopy
 {
-
 protected:
+  /// \brief Allows construction of derived objects.
+  NoCopy() {}
 
-	/// \brief Allows construction of derived objects.
-	NoCopy() { }
-
-	/// \brief Allows destruction of derived objects.
-	~NoCopy() { }
+  /// \brief Allows destruction of derived objects.
+  ~NoCopy() {}
 
 private:
+  /// \brief Prevent copying of derived objects.
+  NoCopy(const NoCopy &);
 
-	/// \brief Prevent copying of derived objects.
-	NoCopy(const NoCopy&);
-
-	/// \brief Prevent assignment copying of derived objects.
-	NoCopy& operator=(const NoCopy&);
-
+  /// \brief Prevent assignment copying of derived objects.
+  NoCopy & operator=(const NoCopy &);
 };
 
-}
-}
+}  // namespace util
+}  // namespace vn
 
 #endif

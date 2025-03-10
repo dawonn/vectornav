@@ -2,11 +2,13 @@
 #define _VN_MATH_CONVERSIONS_H_
 
 #include "export.h"
-#include "vector.h"
 #include "matrix.h"
+#include "vector.h"
 
-namespace vn {
-namespace math {
+namespace vn
+{
+namespace math
+{
 
 /// \defgroup angle_convertors Angle Convertors
 /// \brief Methods useful for angle conversions.
@@ -28,13 +30,12 @@ double rad2deg(double angleInRads);
 ///
 /// \param[in] anglesInRads The vector of angles in radians.
 /// \return The converted angles.
-template<size_t dim>
+template <size_t dim>
 vec<dim, float> rad2deg(vec<dim> anglesInRads)
 {
-	for (size_t i = 0; i < dim; i++)
-		anglesInRads[i] = rad2deg(anglesInRads[i]);
+  for (size_t i = 0; i < dim; i++) anglesInRads[i] = rad2deg(anglesInRads[i]);
 
-	return anglesInRads;
+  return anglesInRads;
 }
 
 /// \brief Converts an angle in degrees to radians.
@@ -55,13 +56,12 @@ double vn_proglib_DLLEXPORT deg2rad(double angleInDegs);
 /// \return The converted angles.
 //template<size_t dim>
 //vec<dim, float> vn_proglib_DLLEXPORT deg2rad(vec<dim> anglesInDegs)
-template<size_t dim>
+template <size_t dim>
 vec<dim, float> deg2rad(vec<dim> anglesInDegs)
 {
-	for (size_t i = 0; i < dim; i++)
-		anglesInDegs[i] = deg2rad(anglesInDegs[i]);
+  for (size_t i = 0; i < dim; i++) anglesInDegs[i] = deg2rad(anglesInDegs[i]);
 
-	return anglesInDegs;
+  return anglesInDegs;
 }
 
 /// \}
@@ -264,7 +264,7 @@ vec3f vn_proglib_DLLEXPORT yprInDegs2omegaPhiKappaInRads(vec3f yprDegs);
 /// \return The omega, phi, kappa representation radians.
 vec3f vn_proglib_DLLEXPORT yprInRads2omegaPhiKappaInRads(vec3f yprRads);
 
-}
-}
+}  // namespace math
+}  // namespace vn
 
 #endif

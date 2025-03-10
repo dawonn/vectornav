@@ -2,23 +2,16 @@
 
 using namespace std;
 
-namespace vn {
-namespace math {
-
-PositionD::PositionD(PositionType type, vec3d pos) :
-	_underlyingType(type),
-	_data(pos)
-{ }
-
-PositionD PositionD::fromLla(vec3d lla)
+namespace vn
 {
-	return PositionD(POS_LLA, lla);
-}
-
-PositionD PositionD::fromEcef(vec3d ecef)
+namespace math
 {
-	return PositionD(POS_ECEF, ecef);
-}
 
-}
-}
+PositionD::PositionD(PositionType type, vec3d pos) : _underlyingType(type), _data(pos) {}
+
+PositionD PositionD::fromLla(vec3d lla) { return PositionD(POS_LLA, lla); }
+
+PositionD PositionD::fromEcef(vec3d ecef) { return PositionD(POS_ECEF, ecef); }
+
+}  // namespace math
+}  // namespace vn

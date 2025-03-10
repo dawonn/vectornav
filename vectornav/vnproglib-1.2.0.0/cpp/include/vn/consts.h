@@ -6,8 +6,10 @@
 #ifndef _VN_MATH_CONSTS_H_
 #define _VN_MATH_CONSTS_H_
 
-namespace vn {
-namespace math {
+namespace vn
+{
+namespace math
+{
 
 /// \defgroup pi_constants PI Constants
 /// \brief Convenient PI constants.
@@ -42,7 +44,7 @@ static const double PIHd = 1.570796326794896619;
 
 /// \}
 
-}
-}
+}  // namespace math
+}  // namespace vn
 
 #endif

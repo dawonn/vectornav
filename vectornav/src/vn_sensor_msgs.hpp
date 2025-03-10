@@ -7,8 +7,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-#ifndef VECTORNAV__VN_SENSOR_MSGS_HPP_
-#define VECTORNAV__VN_SENSOR_MSGS_HPP_
+#ifndef VN_SENSOR_MSGS_HPP_
+#define VN_SENSOR_MSGS_HPP_
 #include <chrono>
 #include <functional>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
@@ -35,7 +35,7 @@ namespace vectornav
 class VnSensorMsgs : public rclcpp::Node
 {
 public:
-  VnSensorMsgs(const rclcpp::NodeOptions & options);
+  explicit VnSensorMsgs(const rclcpp::NodeOptions & options);
 
 private:
   void sub_vn_common(const vectornav_msgs::msg::CommonGroup::SharedPtr msg_in) const;
@@ -47,7 +47,7 @@ private:
   void sub_vn_gps2(const vectornav_msgs::msg::GpsGroup::SharedPtr msg_in) const;
   void fill_covariance_from_param(std::string param_name, std::array<double, 9> & array) const;
   /// Convert from DEG to RAD
-inline static double deg2rad(double in) { return in * M_PI / 180.0; }
+  inline static double deg2rad(double in) { return in * M_PI / 180.0; }
 
   //
   // Member Variables
@@ -103,4 +103,4 @@ inline static double deg2rad(double in) { return in * M_PI / 180.0; }
   geometry_msgs::msg::Point ins_posecef_;
 };
 }  // namespace vectornav
-#endif  // VECTORNAV__VN_SENSOR_MSGS_HPP_
+#endif  // VN_SENSOR_MSGS_HPP_

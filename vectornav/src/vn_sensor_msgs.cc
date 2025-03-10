@@ -90,7 +90,7 @@ VnSensorMsgs::VnSensorMsgs(const rclcpp::NodeOptions & options) : Node("vn_senso
   sub_vn_gps2_ = this->create_subscription<vectornav_msgs::msg::GpsGroup>(
     "vectornav/raw/gps2", 10, sub_vn_gps2_cb);
 
-  //enu frame option
+  // enu frame option
   use_enu = get_parameter("use_enu").as_bool();
 }
 
@@ -405,7 +405,6 @@ void VnSensorMsgs::fill_covariance_from_param(
         length);
   }
 }
-}
-
+}  // namespace vectornav
 
 RCLCPP_COMPONENTS_REGISTER_NODE(vectornav::VnSensorMsgs)
