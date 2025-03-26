@@ -699,7 +699,7 @@ bool Vectornav::configure_sensor()
           this->get_parameter("gpsCompassBaseline", gpsCompassBaseline);
 
           std::vector<double> gpsCompassBaselineUncertainty;
-          this->get_parameter("gpsCompassBaseline", gpsCompassBaselineUncertainty);
+          this->get_parameter("gpsCompassBaselineUncertainty", gpsCompassBaselineUncertainty);
 
           RCLCPP_INFO(
             get_logger(), "Setting GPS Baseline to: (%f, %f, %f)" \
