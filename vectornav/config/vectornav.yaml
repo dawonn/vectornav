@@ -24,6 +24,16 @@ vectornav:
     serialChecksum: 1                # CHECKSUMMODE_CHECKSUM
     spiChecksum: 0                   # CHECKSUMMODE_OFF
     errorMode: 1                     # ERRORMODE_SEND
+
+    # Offset from INS to Antenna A in body-frame
+    # VN-300 User Guide 2.3.4
+    gpsAntennaOffset: [0.0, 0.0, 0.0]
+
+    # Baseline between Antenna A and Antenna B in body frame
+    # VN-300 User Guide 2.3.5
+    gpsCompassBaseline: [1.0, 0.0, 0.0]
+    gpsCompassBaselineUncertainty: [0.025, 0.025, 0.025]
+    
     # Binary output register 1
     BO1:
       asyncMode: 3                   # ASYNCMODE_BOTH

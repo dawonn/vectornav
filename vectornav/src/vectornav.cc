@@ -88,6 +88,12 @@ Vectornav::Vectornav(const rclcpp::NodeOptions & options) : Node("vectornav", op
   declare_parameter<int>("spiChecksum", vn::protocol::uart::ChecksumMode::CHECKSUMMODE_OFF);
   declare_parameter<int>("errorMode", vn::protocol::uart::ErrorMode::ERRORMODE_SEND);
 
+  // GPS Antenna and Baseline Configuration 
+  // 3.7.2
+  declare_parameter("gpsAntennaOffset", rclcpp::PARAMETER_DOUBLE_ARRAY);
+  declare_parameter("gpsCompassBaseline", rclcpp::PARAMETER_DOUBLE_ARRAY);
+  declare_parameter("gpsCompassBaselineUncertainty", rclcpp::PARAMETER_DOUBLE_ARRAY);
+
   // Binary Output Register 1
   // 5.2.11
   declare_parameter<int>("BO1.asyncMode", vn::protocol::uart::AsyncMode::ASYNCMODE_BOTH);
@@ -669,6 +675,15 @@ bool Vectornav::configure_sensor()
       RCLCPP_INFO(
         get_logger(), "GPS Offset     : (%f, %f, %f)", gps_offset[0], gps_offset[1], gps_offset[2]);
 
+      std::vector<double> gpsAntennaOffset;
+      this->get_parameter("gpsAntennaOffset", gpsAntennaOffset);
+
+      RCLCPP_INFO(
+        get_logger(), "Setting GPS Offset to: (%f, %f, %f)", gpsAntennaOffset[0], gpsAntennaOffset[1], gpsAntennaOffset[2] 
+      );
+
+      vs_->writeGpsAntennaOffset(vn::math::vec3f(gpsAntennaOffset[0], gpsAntennaOffset[1], gpsAntennaOffset[2]), true);
+
       // GPS Compass Baseline
       // 8.2.3
       // According to dawonn, readGpsCompassBaseline is likely only available
@@ -679,7 +694,27 @@ bool Vectornav::configure_sensor()
           get_logger(), "GPS Baseline     : (%f, %f, %f), (%f, %f, %f)", gps_baseline.position[0],
           gps_baseline.position[1], gps_baseline.position[2], gps_baseline.uncertainty[0],
           gps_baseline.uncertainty[1], gps_baseline.uncertainty[2]);
+
+          std::vector<double> gpsCompassBaseline;
+          this->get_parameter("gpsCompassBaseline", gpsCompassBaseline);
+
+          std::vector<double> gpsCompassBaselineUncertainty;
+          this->get_parameter("gpsCompassBaseline", gpsCompassBaselineUncertainty);
+
+          RCLCPP_INFO(
+            get_logger(), "Setting GPS Baseline to: (%f, %f, %f)" \
+                            "\n\tWith Uncertainty: (%f, %f, %f)",
+              gpsCompassBaseline[0], gpsCompassBaseline[1], gpsCompassBaseline[2], 
+              gpsCompassBaselineUncertainty[0], gpsCompassBaselineUncertainty[1], gpsCompassBaselineUncertainty[2]
+          );
+
+        vs_->writeGpsCompassBaseline(
+          vn::math::vec3f(gpsCompassBaseline[0], gpsCompassBaseline[1], gpsCompassBaseline[2]),
+          vn::math::vec3f(gpsCompassBaselineUncertainty[0], gpsCompassBaselineUncertainty[1], gpsCompassBaselineUncertainty[2]),
+           true);
       }
+
+      vs_->writeSettings();
     } catch (const vn::sensors::sensor_error & e) {
       RCLCPP_WARN(get_logger(), "GPS initialization error");
     }
