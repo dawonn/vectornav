@@ -157,6 +157,7 @@ Vectornav::Vectornav(const rclcpp::NodeOptions & options) : Node("vectornav", op
     this->create_publisher<vectornav_msgs::msg::AttitudeGroup>("vectornav/raw/attitude", 10);
   pub_ins_ = this->create_publisher<vectornav_msgs::msg::InsGroup>("vectornav/raw/ins", 10);
   pub_gps2_ = this->create_publisher<vectornav_msgs::msg::GpsGroup>("vectornav/raw/gps2", 10);
+  pub_IMU_ = this->create_publisher<vectornav_msgs::msg::Imu>("vectornav/IMU", 10);
 
   sub_vel_aiding_ = this->create_subscription<geometry_msgs::msg::Twist>(
     "vectornav/velocity_aiding", 1, std::bind(&Vectornav::vel_aiding_cb, this, _1));
@@ -770,6 +771,12 @@ void Vectornav::AsyncPacketReceivedHandler(
 
   if (asyncPacket.groups() & vn::protocol::uart::BinaryGroup::BINARYGROUP_GPS2)
     parseGps2Group(node, cd, asyncPacket.groupField(i++), timestamp);
+
+
+    if ( (asyncPacket.groups() & vn::protocol::uart::BinaryGroup::BINARYGROUP_COMMON) &&
+         (asyncPacket.groups() & vn::protocol::uart::BinaryGroup::BINARYGROUP_ATTITUDE)
+   )
+    parseCommonAndIMU(node, cd, asyncPacket.groupField(i++), timestamp);
 }
 
 /** Copy Common Group fields in binary packet to a CompositeData message
@@ -1307,6 +1314,49 @@ void Vectornav::parseGps2Group(
   // Publish
   node->pub_gps2_->publish(msg);
 }
+
+/** Reads CompositeData and publish CommonGroup and Attitude to get acceleration and linear_acceleration
+ * in the same message
+   *
+   * \param compositeData Async Binary Packet CompositeData
+   * \param msg Vectornav CompositeData ROS Message
+   * 
+   */
+  void Vectornav::parseCommonAndIMU(
+    Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields,
+    const rclcpp::Time & timestamp)
+  {
+    // Message to Send
+    auto msg = vectornav_msgs::msg::Imu();
+  
+    // Header
+    msg.header.stamp = timestamp;
+    msg.header.frame_id = node->get_parameter("frame_id").as_string();
+
+     
+
+    if (compositeData.hasQuaternion()) {
+      msg.orientation = toMsg(compositeData.quaternion());
+    }
+
+    if (compositeData.hasAngularRate()) {
+      msg.angular_velocity = toMsg(compositeData.angularRate());
+    }
+ 
+    if (compositeData.hasAcceleration()) {
+      msg.acceleration = toMsg(compositeData.acceleration());
+    }
+
+    if (compositeData.hasAccelerationLinearBody()) {
+      msg.linear_acceleration = toMsg(compositeData.accelerationLinearBody());
+    }
+
+  
+    // Publish
+    node->pub_IMU_->publish(msg);
+}
+
+
 
 //
 // Helper Functions

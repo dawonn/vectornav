@@ -29,6 +29,7 @@
 #include <vectornav_msgs/msg/imu_group.hpp>
 #include <vectornav_msgs/msg/ins_group.hpp>
 #include <vectornav_msgs/msg/time_group.hpp>
+#include <vectornav_msgs/msg/imu.hpp>
 
 namespace vectornav
 {
@@ -88,6 +89,10 @@ inline static double deg2rad(double in) { return in * M_PI / 180.0; }
 
   /// Default linear_acceleration Covariance
   const std::vector<double> linear_acceleration_covariance_ = {
+    0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000};
+
+  /// Default acceleration Covariance
+  const std::vector<double> acceleration_covariance_ = {
     0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000};
 
   /// Default magnetic field Covariance

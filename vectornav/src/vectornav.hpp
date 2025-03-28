@@ -26,6 +26,8 @@
 #include "vectornav_msgs/action/mag_cal.hpp"
 #include <geometry_msgs/msg/twist.hpp>
 
+#include <vectornav_msgs/msg/imu.hpp>
+
 // VectorNav libvncxx
 #include "vn/compositedata.h"
 #include "vn/sensors.h"
@@ -86,6 +88,10 @@ namespace vectornav {
     static void parseGps2Group(
       Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields,
   const rclcpp::Time & timestamp);
+
+    static void parseCommonAndIMU(
+      Vectornav * node, vn::sensors::CompositeData & compositeData, uint16_t groupFields,
+  const rclcpp::Time & timestamp);
     //
     // Helper Functions
     //
@@ -129,6 +135,7 @@ namespace vectornav {
     rclcpp::Publisher<vectornav_msgs::msg::AttitudeGroup>::SharedPtr pub_attitude_;
     rclcpp::Publisher<vectornav_msgs::msg::InsGroup>::SharedPtr pub_ins_;
     rclcpp::Publisher<vectornav_msgs::msg::GpsGroup>::SharedPtr pub_gps2_;
+    rclcpp::Publisher<vectornav_msgs::msg::Imu>::SharedPtr pub_IMU_;
 
     /// ROS header time stamp adjustments
     double averageTimeDifference_{0};
