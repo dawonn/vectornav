@@ -12,7 +12,7 @@ exposed as ROS2 parameters that can be modified from a launch file.
 
 Build
 
-1. git clone https://github.com/dawonn/vectornav.git -b ros2
+1. git clone https://github.com/Voyant-Photonics/vectornav.git -b ros2
 2. cd vectornav 
 3. colcon build
 
