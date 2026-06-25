@@ -27,6 +27,7 @@
 #include <geometry_msgs/msg/twist.hpp>
 
 #include <vectornav_msgs/msg/imu.hpp>
+#include <std_msgs/msg/u_int32_multi_array.hpp>
 
 // VectorNav libvncxx
 #include "vn/compositedata.h"
@@ -136,6 +137,7 @@ namespace vectornav {
     rclcpp::Publisher<vectornav_msgs::msg::InsGroup>::SharedPtr pub_ins_;
     rclcpp::Publisher<vectornav_msgs::msg::GpsGroup>::SharedPtr pub_gps2_;
     rclcpp::Publisher<vectornav_msgs::msg::Imu>::SharedPtr pub_IMU_;
+    rclcpp::Publisher<std_msgs::msg::UInt32MultiArray>::SharedPtr pub_sync_status_;
 
     /// ROS header time stamp adjustments
     double averageTimeDifference_{0};

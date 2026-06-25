@@ -158,6 +158,7 @@ Vectornav::Vectornav(const rclcpp::NodeOptions & options) : Node("vectornav", op
   pub_ins_ = this->create_publisher<vectornav_msgs::msg::InsGroup>("vectornav/raw/ins", 10);
   pub_gps2_ = this->create_publisher<vectornav_msgs::msg::GpsGroup>("vectornav/raw/gps2", 10);
   pub_IMU_ = this->create_publisher<vectornav_msgs::msg::Imu>("vectornav/IMU", 10);
+  pub_sync_status_ = this->create_publisher<std_msgs::msg::UInt32MultiArray>("vectornav/sync_status", 10);
 
   sub_vel_aiding_ = this->create_subscription<geometry_msgs::msg::Twist>(
     "vectornav/velocity_aiding", 1, std::bind(&Vectornav::vel_aiding_cb, this, _1));
@@ -609,6 +610,20 @@ bool Vectornav::configure_sensor()
     static_cast<uint16_t>(get_parameter("syncOutSkipFactor").as_int()),
     static_cast<uint32_t>(get_parameter("syncOutPulseWidth_ns").as_int())};
   vs_->writeSynchronizationControl(configSync);
+
+  try {
+    auto syncStatus = vs_->readSynchronizationStatus();
+    RCLCPP_INFO(
+      get_logger(),
+      "Sync Status: syncInCount=%u syncInTime=%u syncOutCount=%u",
+      syncStatus.syncInCount, syncStatus.syncInTime, syncStatus.syncOutCount);
+
+    std_msgs::msg::UInt32MultiArray syncStatusMsg;
+    syncStatusMsg.data = {syncStatus.syncInCount, syncStatus.syncInTime, syncStatus.syncOutCount};
+    pub_sync_status_->publish(syncStatusMsg);
+  } catch (const std::exception & e) {
+    RCLCPP_WARN(get_logger(), "Failed to read synchronization status: %s", e.what());
+  }
 
   // Communication Protocol Control
   // 5.2.10
